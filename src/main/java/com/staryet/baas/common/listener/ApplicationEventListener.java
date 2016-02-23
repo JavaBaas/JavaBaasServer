@@ -20,7 +20,7 @@ public class ApplicationEventListener implements ApplicationListener<Application
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
         //系统启动成功
         ready = true;
-        log.info("JavaBaas 系统启动成功");
+        log.info("JavaBaasServer started.");
     }
 
     public static boolean isReady() {
