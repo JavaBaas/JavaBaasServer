@@ -190,16 +190,17 @@ public class MongoProperties {
                     options = MongoClientOptions.builder().build();
                 }
                 List<MongoCredential> credentials = null;
+                String host = this.host == null ? "localhost" : this.host;
+                int port = determinePort(environment);
                 if (hasCustomCredentials()) {
                     String database = this.authenticationDatabase == null ? getMongoClientDatabase()
                             : this.authenticationDatabase;
                     credentials = Arrays.asList(MongoCredential.createScramSha1Credential(
                             this.username, database, this.password));
+                    return new MongoClient(Arrays.asList(new ServerAddress(host, port)),
+                            credentials, options);
                 }
-                String host = this.host == null ? "localhost" : this.host;
-                int port = determinePort(environment);
-                return new MongoClient(Arrays.asList(new ServerAddress(host, port)),
-                        credentials, options);
+                return new MongoClient(Arrays.asList(new ServerAddress(host, port)), options);
             }
             // The options and credentials are in the URI
             return new MongoClient(new MongoClientURI(this.uri, builder(options)));
