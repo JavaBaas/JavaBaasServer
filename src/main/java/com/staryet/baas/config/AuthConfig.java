@@ -2,6 +2,7 @@ package com.staryet.baas.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
 /**
  * Created by Codi on 15/12/17.
@@ -11,8 +12,13 @@ import org.springframework.context.annotation.Configuration;
 public class AuthConfig {
 
     public static final long DEFAULT_TIMEOUT = 600000;
+    public static final String DEFAULT_USERNAME = "admin";
+    public static final String DEFAULT_PASSWORD = "admin";
 
     private String key;
+    private String username;
+    private String password;
+
     private long timeout;
 
     public String getKey() {
@@ -37,5 +43,29 @@ public class AuthConfig {
 
     public void setTimeout(long timeout) {
         this.timeout = timeout;
+    }
+
+    public String getUsername() {
+        if (StringUtils.isEmpty(username)) {
+            return DEFAULT_USERNAME;
+        } else {
+            return username;
+        }
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        if (StringUtils.isEmpty(password)) {
+            return DEFAULT_PASSWORD;
+        } else {
+            return password;
+        }
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

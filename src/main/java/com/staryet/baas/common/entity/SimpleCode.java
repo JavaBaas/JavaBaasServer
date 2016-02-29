@@ -17,6 +17,10 @@ public enum SimpleCode {
     AUTH_ERROR(12, "授权信息验证失败"),
     AUTH_NEED_ADMIN_SIGN(13, "缺少超级权限"),
     AUTH_NEED_MASTER_SIGN(14, "缺少管理权限"),
+    //1xx 管理端相关
+    CONSOLE_USER_ERROR(101, "用户名密码错误"),
+    CONSOLE_NOT_LOGIN(102, "未登录"),
+    CONSOLE_SESSIONTOKEN_ERROR(103, "SessionToken无效"),
     //10xx 应用相关
     APP_NOT_FOUND(1001, "应用不存在"),
     APP_ALREADY_EXIST(1002, "应用名已存在"),
