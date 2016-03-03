@@ -31,16 +31,11 @@ public class ConsoleController {
     public SimpleResult adminKey(HttpServletRequest request) {
         SimpleResult result = SimpleResult.success();
         Cookie[] cookies = request.getCookies();
-        String sessionToken = null;
-        String username = null;
-        for (Cookie cookie : cookies) {
-            if ("JB-sessionToken".equals(cookie.getName())) {
-                sessionToken = cookie.getValue();
-            }
-            if ("JB-username".equals(cookie.getName())) {
-                username = cookie.getValue();
-            }
+        if (cookies == null) {
+            throw new SimpleError(SimpleCode.CONSOLE_NOT_LOGIN);
         }
+        String sessionToken = getCookieValue(cookies, "JB-sessionToken");
+        String username = getCookieValue(cookies, "JB-username");
         if (StringUtils.isEmpty(sessionToken) || StringUtils.isEmpty(username)) {
             throw new SimpleError(SimpleCode.CONSOLE_NOT_LOGIN);
         } else {
@@ -65,9 +60,25 @@ public class ConsoleController {
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
     @ResponseBody
-    public SimpleResult logout(@RequestParam String username) {
-        consoleService.removeSessionToken(username);
+    public SimpleResult logout(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            throw new SimpleError(SimpleCode.CONSOLE_NOT_LOGIN);
+        }
+        String username = getCookieValue(cookies, "JB-username");
+        if (username != null) {
+            consoleService.removeSessionToken(username);
+        }
         return SimpleResult.success();
+    }
+
+    private String getCookieValue(Cookie[] cookies, String key) {
+        for (Cookie cookie : cookies) {
+            if (key.equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 
 }
