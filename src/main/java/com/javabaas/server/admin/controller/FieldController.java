@@ -1,8 +1,8 @@
 package com.javabaas.server.admin.controller;
 
 import com.javabaas.server.admin.entity.Field;
-import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.admin.service.FieldService;
+import com.javabaas.server.common.entity.SimpleResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +40,24 @@ public class FieldController {
                                @PathVariable String name,
                                @RequestBody Field field) {
         fieldService.update(appId, clazzName, name, field);
+        return SimpleResult.success();
+    }
+
+    @RequestMapping(value = "/{clazzName}/field/{name}/security", method = RequestMethod.PUT)
+    public SimpleResult security(@RequestHeader(value = "JB-AppId") String appId,
+                                 @PathVariable String clazzName,
+                                 @PathVariable String name,
+                                 @RequestParam boolean security) {
+        fieldService.setSecurity(appId, clazzName, name, security);
+        return SimpleResult.success();
+    }
+
+    @RequestMapping(value = "/{clazzName}/field/{name}/required", method = RequestMethod.PUT)
+    public SimpleResult required(@RequestHeader(value = "JB-AppId") String appId,
+                                 @PathVariable String clazzName,
+                                 @PathVariable String name,
+                                 @RequestParam boolean required) {
+        fieldService.setRequired(appId, clazzName, name, required);
         return SimpleResult.success();
     }
 

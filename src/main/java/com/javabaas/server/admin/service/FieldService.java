@@ -80,6 +80,22 @@ public class FieldService {
         log.info("App:" + appId + " Class:" + clazzName + " Field:" + fieldName + " 字段已更新 " + jsonUtil.writeValueAsString(exist));
     }
 
+    public void setRequired(String appId, String clazzName, String fieldName, boolean required) {
+        Field exist = get(appId, clazzName, fieldName);
+        exist.setRequired(required);
+        fieldRepository.save(exist);
+        deleteFieldsCache(appId, clazzName);
+        log.info("App:" + appId + " Class:" + clazzName + " Field:" + fieldName + " 字段已更新 " + jsonUtil.writeValueAsString(exist));
+    }
+
+    public void setSecurity(String appId, String clazzName, String fieldName, boolean security) {
+        Field exist = get(appId, clazzName, fieldName);
+        exist.setSecurity(security);
+        fieldRepository.save(exist);
+        deleteFieldsCache(appId, clazzName);
+        log.info("App:" + appId + " Class:" + clazzName + " Field:" + fieldName + " 字段已更新 " + jsonUtil.writeValueAsString(exist));
+    }
+
     public void delete(String appId, String clazzName, String name) {
         Field field = get(appId, clazzName, name);
         if (field.isInternal()) {
