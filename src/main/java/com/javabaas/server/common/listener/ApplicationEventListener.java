@@ -1,5 +1,6 @@
 package com.javabaas.server.common.listener;
 
+import com.javabaas.server.config.AuthConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ public class ApplicationEventListener implements ApplicationListener<Application
     public static boolean error;
     private static boolean ready;
     private Log log = LogFactory.getLog(getClass());
+    @Autowired
+    private AuthConfig authConfig;
 
     @Autowired
     private RedisConnectionFactory redisConnectionFactory;
@@ -56,6 +59,8 @@ public class ApplicationEventListener implements ApplicationListener<Application
         }
         if (!error) {
             log.info("JavaBaasServer started.");
+            log.info("Key: " + authConfig.getKey());
+            log.info("Timeout: " + authConfig.getTimeout());
         } else {
             log.error("JavaBaasServer failed to start!");
         }
