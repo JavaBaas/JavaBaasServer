@@ -4,6 +4,7 @@ import com.javabaas.server.admin.entity.App;
 import com.javabaas.server.admin.entity.Field;
 import com.javabaas.server.admin.entity.FieldType;
 import com.javabaas.server.admin.service.AppService;
+import com.javabaas.server.admin.service.FieldService;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.object.entity.BaasObject;
@@ -11,16 +12,14 @@ import com.javabaas.server.object.service.ObjectService;
 import com.javabaas.server.user.entity.BaasAuth;
 import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.user.service.UserService;
-import com.javabaas.server.admin.service.FieldService;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 import java.util.Map;
@@ -30,9 +29,8 @@ import static org.hamcrest.Matchers.*;
 /**
  * 测试用户系统
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = Main.class)
-@WebIntegrationTest("server.port:9000")
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Main.class,webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class UserTests {
 
     @Autowired

@@ -1,21 +1,21 @@
 package com.javabaas.server.object.service;
 
 import com.javabaas.server.admin.entity.*;
-import com.javabaas.server.common.entity.SimpleError;
-import com.javabaas.server.object.dao.impl.mongo.MongoDao;
-import com.javabaas.server.object.entity.*;
-import com.javabaas.server.object.entity.error.FieldRequiredError;
-import com.javabaas.server.object.entity.error.FieldTypeError;
-import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.admin.service.ClazzService;
 import com.javabaas.server.admin.service.FieldService;
 import com.javabaas.server.admin.service.StatService;
 import com.javabaas.server.common.entity.SimpleCode;
+import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.file.entity.BaasFile;
 import com.javabaas.server.file.service.FileService;
 import com.javabaas.server.hook.service.HookService;
 import com.javabaas.server.object.dao.IDao;
+import com.javabaas.server.object.dao.impl.mongo.MongoDao;
+import com.javabaas.server.object.entity.*;
+import com.javabaas.server.object.entity.error.FieldRequiredError;
+import com.javabaas.server.object.entity.error.FieldTypeError;
+import com.javabaas.server.user.entity.BaasUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -158,7 +158,8 @@ public class ObjectService {
         hookService.afterUpdate(appId, className, object, currentUser);
     }
 
-    public void increment(String appId, String plat, String className, String id, BaasObject object, BaasUser currentUser, boolean isMaster) {
+    public void increment(String appId, String plat, String className, String id, BaasObject object, BaasUser currentUser, boolean
+            isMaster) {
         //查询已经存在的对象
         BaasObject exist = getObject(appId, className, id, isMaster);
         if (exist == null) {
@@ -205,7 +206,8 @@ public class ObjectService {
         return get(appId, plat, className, id, null, null, true);
     }
 
-    public BaasObject get(String appId, String plat, String className, String id, BaasInclude include, BaasUser currentUser, boolean isMaster) {
+    public BaasObject get(String appId, String plat, String className, String id, BaasInclude include, BaasUser currentUser, boolean
+            isMaster) {
         //判断id是否合法
         if (!isValidId(id)) {
             throw new SimpleError(SimpleCode.OBJECT_ID_ERROR);
@@ -225,6 +227,8 @@ public class ObjectService {
                                  int limit, int skip, BaasUser currentUser, boolean isMaster) {
         //上限不得超过1000
         limit = limit > 1000 ? 1000 : limit;
+        //limit必须为正数
+        if (limit <= 0) limit = 100;
         //验证表级ACL
         verifyClazzAccess(appId, ClazzAclMethod.FIND, className, currentUser, isMaster);
         //查询条件
@@ -239,7 +243,7 @@ public class ObjectService {
         if (resultMap == null) {
             return result;
         }
-        resultMap.values().forEach(result::add);
+        result.addAll(resultMap.values());
         //处理包含数据
         if (result.size() > 0 && include != null && include.getSubs().size() > 0) {
             //获取包含数据
@@ -256,7 +260,8 @@ public class ObjectService {
         }
     }
 
-    private boolean handleSub(String appId, BaasUser user, boolean isMaster, String field, Map<String, Object> parent, Map<String, Object> query) {
+    private boolean handleSub(String appId, BaasUser user, boolean isMaster, String field, Map<String, Object> parent, Map<String,
+            Object> query) {
         boolean flag = false;
         boolean sub = false;
         Set<Map.Entry<String, Object>> entries = query.entrySet();
@@ -293,7 +298,8 @@ public class ObjectService {
         if (StringUtils.isEmpty(searchClass) || !(searchClass instanceof String)) {
             throw new SimpleError(SimpleCode.OBJECT_SUB_QUERY_EMPTY_SEARCH_CLASS);
         }
-        Map<String, BaasObject> subs = getObjects(appId, (String) searchClass, new BaasQuery((Map) where), null, 1000, null, user, isMaster);
+        Map<String, BaasObject> subs = getObjects(appId, (String) searchClass, new BaasQuery((Map) where), null, 1000, null, user,
+                isMaster);
         if (subs != null) {
             //用查询结果$in替换$sub
             BaasList list = new BaasList();
@@ -358,7 +364,8 @@ public class ObjectService {
                 //查询对应的对象列表
                 List<String> objectIds = ids.getIds(className);
                 //被关联的对象
-                Map<String, BaasObject> subObjects = getObjects(appId, className, new BaasQuery("_id", new BaasObject("$in", objectIds)), user, isMaster);
+                Map<String, BaasObject> subObjects = getObjects(appId, className, new BaasQuery("_id", new BaasObject("$in", objectIds)),
+                        user, isMaster);
                 if (subObjects != null && subObjects.size() > 0) {
                     //添加到对应对象
                     for (BaasObject o : objects) {
@@ -401,7 +408,8 @@ public class ObjectService {
         return getObjects(appId, className, query, null, null, null, user, isMaster);
     }
 
-    private Map<String, BaasObject> getObjects(String appId, String className, BaasQuery query, BaasSort sort, Integer limit, Integer skip, BaasUser user, boolean isMaster) {
+    private Map<String, BaasObject> getObjects(String appId, String className, BaasQuery query, BaasSort sort, Integer limit, Integer
+            skip, BaasUser user, boolean isMaster) {
         //排序条件
         if (sort == null) {
             //默认排序为更新时间倒序
