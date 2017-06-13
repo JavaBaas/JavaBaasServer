@@ -1,10 +1,10 @@
 package com.javabaas.server;
 
 import com.javabaas.server.admin.entity.App;
-import com.javabaas.server.file.entity.FileStoragePlatform;
 import com.javabaas.server.admin.service.AppService;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.file.entity.BaasFile;
+import com.javabaas.server.file.entity.FileStoragePlatform;
 import com.javabaas.server.file.service.FileService;
 import org.junit.After;
 import org.junit.Assert;
@@ -12,9 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,9 +23,8 @@ import static org.hamcrest.Matchers.*;
 /**
  * Created by Staryet on 15/8/11.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = Main.class)
-@WebIntegrationTest("server.port:9000")
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Main.class,webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class FileTests {
 
     @Autowired

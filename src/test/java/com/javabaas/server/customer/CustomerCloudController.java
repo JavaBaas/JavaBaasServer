@@ -1,7 +1,7 @@
 package com.javabaas.server.customer;
 
-import com.javabaas.server.cloud.entity.CloudResponse;
 import com.javabaas.server.cloud.entity.CloudRequest;
+import com.javabaas.server.cloud.entity.CloudResponse;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

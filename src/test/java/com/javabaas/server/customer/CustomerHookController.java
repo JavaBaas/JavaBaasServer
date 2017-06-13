@@ -1,7 +1,7 @@
 package com.javabaas.server.customer;
 
-import com.javabaas.server.hook.entity.HookResponse;
 import com.javabaas.server.hook.entity.HookRequest;
+import com.javabaas.server.hook.entity.HookResponse;
 import com.javabaas.server.hook.entity.HookResponseCode;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.service.ObjectService;

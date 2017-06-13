@@ -12,11 +12,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.boot.context.embedded.LocalServerPort;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.client.RootUriTemplateHandler;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.support.HttpRequestWrapper;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -29,9 +30,8 @@ import static org.hamcrest.Matchers.equalTo;
 /**
  * Created by Staryet on 15/9/22.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = Main.class)
-@WebIntegrationTest("server.port:9000")
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Main.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AuthTests {
 
     private App app;
@@ -41,6 +41,10 @@ public class AuthTests {
     private ClazzService clazzService;
     @Autowired
     private AuthConfig authConfig;
+    @Autowired
+    private RestTemplate restTemplate;
+    @LocalServerPort
+    private String port;
 
     @Before
     public void before() {
@@ -50,7 +54,6 @@ public class AuthTests {
         //创建用于测试的类
         Clazz book = new Clazz("Book");
         clazzService.insert(app.getId(), book);
-
     }
 
     @After
@@ -61,19 +64,19 @@ public class AuthTests {
     @Test
     public void testAdmin() {
         //测试无权限时拒绝访问
-        testNoAdminAuthUrl("http://127.0.0.1:9000/api/admin/app");
-        testNoMasterAuthUrl("http://127.0.0.1:9000/api/master/clazz");
-        testNoMasterAuthUrl("http://127.0.0.1:9000/api/master/clazz/Book/field");
-        testNoUserAuthUrl("http://127.0.0.1:9000/api/object/Book");
+        testNoAdminAuthUrl("/api/admin/app");
+        testNoMasterAuthUrl("/api/master/clazz");
+        testNoMasterAuthUrl("/api/master/clazz/Book/field");
+        testNoUserAuthUrl("/api/object/Book");
         //测试超级权限
         RestTemplate rest = getAdminRest();
-        rest.getForObject("http://127.0.0.1:9000/api/admin/app", String.class);
+        rest.getForObject("/api/admin/app", String.class);
         //测试管理权限
         rest = getMasterRest(app);
-        rest.getForObject("http://127.0.0.1:9000/api/master/clazz/Book", String.class);
+        rest.getForObject("/api/master/clazz/Book", String.class);
         //测试普通权限
         rest = getUserRest(app);
-        rest.getForObject("http://127.0.0.1:9000/api/object/Book", String.class);
+        rest.getForObject("/api/object/Book", String.class);
     }
 
     /**
@@ -82,7 +85,7 @@ public class AuthTests {
      * @param url
      */
     private void testNoAdminAuthUrl(String url) {
-        RestTemplate rest = getRest();
+        RestTemplate rest = getDefaultRest();
         try {
             rest.getForObject(url, String.class);
             Assert.fail();
@@ -114,7 +117,7 @@ public class AuthTests {
      * @param url
      */
     private void testNoUserAuthUrl(String url) {
-        RestTemplate rest = getRest();
+        RestTemplate rest = getDefaultRest();
         try {
             rest.getForObject(url, String.class);
             Assert.fail();
@@ -128,8 +131,7 @@ public class AuthTests {
         return DigestUtils.md5DigestAsHex((key + ":" + timestamp).getBytes());
     }
 
-    public RestTemplate getRest() {
-        RestTemplate rest = new RestTemplate();
+    public RestTemplate getDefaultRest() {
         ClientHttpRequestInterceptor i = (httpRequest, bytes, clientHttpRequestExecution) -> {
             HttpRequestWrapper requestWrapper = new HttpRequestWrapper(httpRequest);
             long timestamp = new Date().getTime();
@@ -138,12 +140,16 @@ public class AuthTests {
             requestWrapper.getHeaders().add("JB-Plat", "cloud");
             return clientHttpRequestExecution.execute(httpRequest, bytes);
         };
-        rest.setInterceptors(Collections.singletonList(i));
-        return rest;
+        getRest().setInterceptors(Collections.singletonList(i));
+        return restTemplate;
+    }
+
+    public RestTemplate getRest() {
+        restTemplate.setUriTemplateHandler(new RootUriTemplateHandler("http://127.0.0.1:" + port));
+        return restTemplate;
     }
 
     public RestTemplate getAdminRest() {
-        RestTemplate rest = new RestTemplate();
         ClientHttpRequestInterceptor i = (httpRequest, bytes, clientHttpRequestExecution) -> {
             HttpRequestWrapper requestWrapper = new HttpRequestWrapper(httpRequest);
             long timestamp = new Date().getTime();
@@ -155,12 +161,11 @@ public class AuthTests {
             requestWrapper.getHeaders().add("JB-Plat", "cloud");
             return clientHttpRequestExecution.execute(httpRequest, bytes);
         };
-        rest.setInterceptors(Collections.singletonList(i));
-        return rest;
+        getRest().setInterceptors(Collections.singletonList(i));
+        return restTemplate;
     }
 
     public RestTemplate getMasterRest(App app) {
-        RestTemplate rest = new RestTemplate();
         ClientHttpRequestInterceptor i = (httpRequest, bytes, clientHttpRequestExecution) -> {
             HttpRequestWrapper requestWrapper = new HttpRequestWrapper(httpRequest);
             long timestamp = new Date().getTime();
@@ -173,12 +178,11 @@ public class AuthTests {
             requestWrapper.getHeaders().add("JB-MasterSign", getSign(app.getMasterKey(), timestampStr));
             return clientHttpRequestExecution.execute(httpRequest, bytes);
         };
-        rest.setInterceptors(Collections.singletonList(i));
-        return rest;
+        getRest().setInterceptors(Collections.singletonList(i));
+        return restTemplate;
     }
 
     public RestTemplate getUserRest(App app) {
-        RestTemplate rest = new RestTemplate();
         ClientHttpRequestInterceptor i = (httpRequest, bytes, clientHttpRequestExecution) -> {
             HttpRequestWrapper requestWrapper = new HttpRequestWrapper(httpRequest);
             long timestamp = new Date().getTime();
@@ -191,8 +195,8 @@ public class AuthTests {
             requestWrapper.getHeaders().add("JB-Sign", getSign(app.getKey(), timestampStr));
             return clientHttpRequestExecution.execute(httpRequest, bytes);
         };
-        rest.setInterceptors(Collections.singletonList(i));
-        return rest;
+        getRest().setInterceptors(Collections.singletonList(i));
+        return restTemplate;
     }
 
 }

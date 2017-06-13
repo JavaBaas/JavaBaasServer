@@ -3,6 +3,8 @@ package com.javabaas.server;
 import com.javabaas.server.admin.entity.App;
 import com.javabaas.server.admin.repository.ClazzRepository;
 import com.javabaas.server.admin.service.AppService;
+import com.javabaas.server.admin.service.ClazzService;
+import com.javabaas.server.admin.service.FieldService;
 import com.javabaas.server.cloud.entity.CloudSetting;
 import com.javabaas.server.cloud.service.CloudService;
 import com.javabaas.server.common.entity.SimpleCode;
@@ -11,17 +13,15 @@ import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.object.service.ObjectService;
 import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.user.service.UserService;
-import com.javabaas.server.admin.service.ClazzService;
-import com.javabaas.server.admin.service.FieldService;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.boot.context.embedded.LocalServerPort;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,9 +33,8 @@ import static org.hamcrest.Matchers.equalTo;
 /**
  * Created by Staryet on 15/8/11.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = Main.class)
-@WebIntegrationTest("server.port:9000")
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Main.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CloudTests {
 
     @Autowired
@@ -52,6 +51,8 @@ public class CloudTests {
     private FieldService fieldService;
     @Autowired
     private ClazzRepository clazzRepository;
+    @LocalServerPort
+    private String port;
 
     private App app;
     private App appNotDeployed;
@@ -70,7 +71,7 @@ public class CloudTests {
         app = appService.get(app.getId());
         //部署云代码
         CloudSetting cloudSetting = new CloudSetting();
-        cloudSetting.setCustomerHost("http://127.0.0.1:9000/customer/");
+        cloudSetting.setCustomerHost("http://127.0.0.1:" + port + "/customer/");
         List<String> cloudFunctions = new ArrayList<>();
         cloudFunctions.add("function1");
         cloudFunctions.add("function2");
