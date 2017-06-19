@@ -1,6 +1,5 @@
 package com.javabaas.server.admin.entity;
 
-import com.javabaas.server.push.entity.PushAccount;
 import com.javabaas.server.cloud.entity.CloudSetting;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,7 +14,7 @@ public class App {
     private String key;
     private String masterKey;
     private CloudSetting cloudSetting;
-    private PushAccount pushAccount;
+    private AppAccounts appAccounts;
 
     public String getId() {
         return id;
@@ -57,11 +56,11 @@ public class App {
         this.cloudSetting = cloudSetting;
     }
 
-    public PushAccount getPushAccount() {
-        return pushAccount;
+    public AppAccounts getAppAccounts() {
+        return appAccounts;
     }
 
-    public void setPushAccount(PushAccount pushAccount) {
-        this.pushAccount = pushAccount;
+    public void setAppAccounts(AppAccounts appAccounts) {
+        this.appAccounts = appAccounts;
     }
 }

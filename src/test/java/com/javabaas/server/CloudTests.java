@@ -59,12 +59,14 @@ public class CloudTests {
 
     @Before
     public void before() {
+        appService.deleteByAppName("appNotDeployed");
         //未部署的应用
         appNotDeployed = new App();
         appNotDeployed.setName("appNotDeployed");
         appService.insert(appNotDeployed);
         appNotDeployed = appService.get(appNotDeployed.getId());
         //用于测试的应用
+        appService.deleteByAppName("AppCloud");
         app = new App();
         app.setName("AppCloud");
         appService.insert(app);

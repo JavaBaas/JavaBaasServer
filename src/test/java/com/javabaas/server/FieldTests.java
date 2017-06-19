@@ -39,6 +39,7 @@ public class FieldTests {
 
     @Before
     public void before() {
+        appService.deleteByAppName("FieldTestApp");
         app = new App();
         app.setName("FieldTestApp");
         appService.insert(app);

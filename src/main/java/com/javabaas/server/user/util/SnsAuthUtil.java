@@ -1,9 +1,15 @@
 package com.javabaas.server.user.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.javabaas.server.admin.entity.Account;
+import com.javabaas.server.admin.entity.AccountType;
+import com.javabaas.server.admin.entity.App;
+import com.javabaas.server.admin.service.AppService;
+import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
-import com.javabaas.server.user.entity.BaasAuth;
 import com.javabaas.server.common.util.JSONUtil;
+import com.javabaas.server.user.entity.BaasAuth;
+import com.javabaas.server.user.entity.BaasSnsType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,15 +32,19 @@ public class SnsAuthUtil {
     private RestTemplate rest;
     @Autowired
     private JSONUtil jsonUtil;
+    @Autowired
+    private AppService appService;
 
-    public boolean verifyAuthData(String platform, BaasAuth auth) {
-        switch (platform) {
-            case "qq":
+    public boolean verifyAuthData(String appId, BaasSnsType snsType, BaasAuth auth) {
+        switch (snsType) {
+            case QQ:
                 return verifyQq(auth);
-            case "weibo":
+            case WEIBO:
                 return verifyWeibo(auth);
-            case "weixin":
+            case WEIXIN:
                 return verifyWeixin(auth);
+            case WEBAPP:
+                return verifyWebApp(appId, auth);
         }
         return false;
     }
@@ -104,6 +114,52 @@ public class SnsAuthUtil {
             log.error(t, t);
             return false;
         }
+    }
+
+    private boolean verifyWebApp(String appId, BaasAuth auth) {
+        App app = appService.get(appId);
+        Account account = app.getAppAccounts().getAccount(AccountType.WEBAPP);
+        if (account == null) {
+            throw new SimpleError(SimpleCode.APP_WEBAPP_ACCOUNT_ERROR);
+        }
+
+        try {
+            //小程序唯一标识
+            String waAppid = account.getKey();
+            //小程序的 app secret
+            String waSecret = account.getSecret();
+            String grant_type = "authorization_code";
+
+            //////////////// 1、向微信服务器 使用登录凭证 code 获取 session_key 和 openid ////////////////
+            //请求参数
+            String params = "appid=" + waAppid + "&secret=" + waSecret + "&js_code=" + auth.getCode() + "&grant_type=" + grant_type;
+            //发送请求
+            String resultStr = rest.getForObject("https://api.weixin.qq.com/sns/jscode2session?{params}", String.class, params);
+            //解析相应内容
+            Map<String, String> resultObject = jsonUtil.readValue(resultStr, new TypeReference<HashMap<String, String>>() {
+            });
+
+            //获取会话密钥（session_key）
+            String session_key = resultObject.get("session_key");
+
+            //////////////// 2、对encryptedData加密数据进行AES解密 ////////////////
+
+            String result = AesCbcUtil.decrypt(auth.getEncryptedData(), session_key, auth.getIV(), "UTF-8");
+            if (null != result && result.length() > 0) {
+                Map<String, String> userInfoObject = jsonUtil.readValue(result, new TypeReference<HashMap<String, String>>() {
+                });
+                auth.setOpenId(userInfoObject.get("openId"));
+                String unionId = userInfoObject.get("unionId");
+                if (!StringUtils.isEmpty(unionId)) {
+                    auth.setUnionId(unionId);
+                }
+                return true;
+            }
+        } catch (Exception e) {
+            log.error("小程序鉴权失败!");
+            log.error(e, e);
+        }
+        return false;
     }
 
     private void errorLog(String platform, BaasAuth auth, String result, String message) {

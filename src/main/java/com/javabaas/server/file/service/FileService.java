@@ -1,14 +1,14 @@
 package com.javabaas.server.file.service;
 
+import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
+import com.javabaas.server.file.entity.BaasFile;
 import com.javabaas.server.file.entity.FileStoragePlatform;
+import com.javabaas.server.file.handler.IFileHandler;
 import com.javabaas.server.file.handler.impl.QiniuFileHandler;
 import com.javabaas.server.file.handler.impl.TestFileHandler;
-import com.javabaas.server.object.service.ObjectService;
-import com.javabaas.server.common.entity.SimpleCode;
-import com.javabaas.server.file.entity.BaasFile;
-import com.javabaas.server.file.handler.IFileHandler;
 import com.javabaas.server.object.entity.BaasObject;
+import com.javabaas.server.object.service.ObjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

@@ -19,7 +19,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
@@ -46,6 +45,7 @@ public class AclTests {
 
     @Before
     public void before() {
+        appService.deleteByAppName("AclTestApp");
         app = new App();
         app.setName("AclTestApp");
         appService.insert(app);

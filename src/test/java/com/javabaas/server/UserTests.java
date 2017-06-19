@@ -10,6 +10,7 @@ import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.service.ObjectService;
 import com.javabaas.server.user.entity.BaasAuth;
+import com.javabaas.server.user.entity.BaasSnsType;
 import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.user.service.UserService;
 import org.junit.After;
@@ -46,6 +47,7 @@ public class UserTests {
 
     @Before
     public void before() {
+        appService.deleteByAppName("UserTestApp");
         app = new App();
         app.setName("UserTestApp");
         appService.insert(app);
@@ -175,7 +177,7 @@ public class UserTests {
         auth.put("uid", "1929295515");
         //绑定微博
         BaasUser user1 = userService.get(app.getId(), "admin", "u1", null, true);
-        userService.bindingSns(app.getId(), "admin", user1.getId(), "weibo", auth, user1, false);
+        userService.bindingSns(app.getId(), "admin", user1.getId(), BaasSnsType.WEIBO, auth, user1, false);
         //验证是否绑定成功
         user1 = userService.get(app.getId(), "admin", "u1", null, true);
         BaasObject user1Auth = user1.getAuth();
@@ -183,15 +185,15 @@ public class UserTests {
         Assert.assertThat(weiboAuth.getUid(), equalTo("1929295515"));
 
         //使用第三方授权信息登录
-        user1 = userService.loginWithSns(app.getId(), "admin", "weibo", weiboAuth);
+        user1 = userService.loginWithSns(app.getId(), "admin", BaasSnsType.WEIBO, weiboAuth);
         Assert.assertThat(user1.getUsername(), equalTo("u1"));
         //再次登录测试
-        user1 = userService.loginWithSns(app.getId(), "admin", "weibo", weiboAuth);
+        user1 = userService.loginWithSns(app.getId(), "admin", BaasSnsType.WEIBO, weiboAuth);
         Assert.assertThat(user1.getUsername(), equalTo("u1"));
 
         //验证禁止重复绑定
         try {
-            userService.bindingSns(app.getId(), "admin", user1.getId(), "weibo", auth, user1, false);
+            userService.bindingSns(app.getId(), "admin", user1.getId(), BaasSnsType.WEIBO, auth, user1, false);
             Assert.fail();
         } catch (SimpleError error) {
             Assert.assertThat(error.getCode(), equalTo(SimpleCode.USER_AUTH_EXIST.getCode()));

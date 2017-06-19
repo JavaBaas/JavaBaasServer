@@ -1,7 +1,5 @@
 package com.javabaas.server.push.controller;
 
-import com.javabaas.server.push.entity.PushAccount;
-import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.object.entity.BaasQuery;
@@ -43,21 +41,6 @@ public class PushController {
         return SimpleResult.success();
     }
 
-    /**
-     * 设置推送账号信息
-     *
-     * @param appId   应用id
-     * @param account 推送账号信息
-     * @return 结果
-     * @throws SimpleError
-     */
-    @RequestMapping(value = "/setPushAccount", method = RequestMethod.PUT)
-    @ResponseBody
-    public SimpleResult setPushAccount(@RequestHeader(value = "JB-AppId") String appId,
-                                       @RequestHeader(value = "JB-Plat") String plat,
-                                       @Valid @RequestBody PushAccount account) {
-        pushService.setPushAccount(appId, account);
-        return SimpleResult.success();
-    }
+
 
 }

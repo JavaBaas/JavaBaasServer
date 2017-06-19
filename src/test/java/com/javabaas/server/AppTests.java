@@ -53,6 +53,7 @@ public class AppTests {
 
     @Before
     public void before() {
+        appService.deleteByAppName("AppTest1");
         app = new App();
         app.setName("AppTest1");
         appService.insert(app);
@@ -82,6 +83,7 @@ public class AppTests {
     }
 
     public void testDelete() {
+        appService.deleteByAppName("AppForDelete");
         App appForDelete = new App();
         appForDelete.setName("AppForDelete");
         appService.insert(appForDelete);
@@ -139,6 +141,7 @@ public class AppTests {
 
     @Test
     public void testImport() {
+        appService.deleteByAppName("AppTest2");
         AppExport appExport = appService.export(app.getId());
         appExport.setName("AppTest2");
         App app2 = appService.importData(appExport);

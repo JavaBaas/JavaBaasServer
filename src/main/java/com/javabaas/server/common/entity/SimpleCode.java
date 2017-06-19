@@ -25,6 +25,9 @@ public enum SimpleCode {
     APP_NOT_FOUND(1001, "应用不存在"),
     APP_ALREADY_EXIST(1002, "应用名已存在"),
     APP_NAME_ERROR(1003, "应用名称错误"),
+    APP_ACCOUNT_ERROR(1004, "应用账号配置错误"),
+    APP_WEBAPP_ACCOUNT_ERROR(1005, "应用小程序账号配置错误"),
+    APP_PUSH_ACCOUNT_ERROR(1006, "应用推送账号配置错误"),
     //11xx 类相关
     CLAZZ_NOT_FOUND(1101, "类不存在"),
     CLAZZ_ALREADY_EXIST(1102, "类已经存在"),
@@ -49,6 +52,7 @@ public enum SimpleCode {
     USER_AUTH_EXIST(1309, "第三方用户帐号已经被其他用户绑定 禁止重复绑定"),
     USER_SESSION_TOKEN_ERROR(1310, "SessionToken已失效"),
     USER_INVALID_USERNAME(1311, "用户名非法 用户名只能包含数字字母 _ @ ."),
+    USER_AUTH_PLATFORM_MISSING(1312, "第三方登录平台错误"),
     //2XXX 对象存储相关
     OBJECT_FIELD_TYPE_ERROR(2001, "字段类型错误"),
     OBJECT_FIELD_REQUIRED(2002, "字段不能为空"),
@@ -76,8 +80,7 @@ public enum SimpleCode {
     //5xxx 钩子相关
     HOOK_INTERCEPTION(5001, "钩子中断"),
     //6xxx 推送相关
-    PUSH_ERROR(6001, "推送失败"),
-    PUSH_ACCOUNT_EMPTY(6002, "当前应用未设置推送账号信息");
+    PUSH_ERROR(6001, "推送失败");
 
     private int code;
     private String message;

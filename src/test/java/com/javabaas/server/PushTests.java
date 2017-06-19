@@ -27,6 +27,7 @@ public class PushTests {
 
     @Before
     public void before() {
+        appService.deleteByAppName("PushTestApp");
         app = new App();
         app.setName("PushTestApp");
         appService.insert(app);

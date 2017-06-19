@@ -48,6 +48,7 @@ public class AuthTests {
 
     @Before
     public void before() {
+        appService.deleteByAppName("AuthTestApp");
         app = new App();
         app.setName("AuthTestApp");
         appService.insert(app);

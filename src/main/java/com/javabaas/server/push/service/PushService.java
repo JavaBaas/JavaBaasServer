@@ -1,15 +1,14 @@
 package com.javabaas.server.push.service;
 
 import com.javabaas.server.admin.service.AppService;
+import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.service.ObjectService;
 import com.javabaas.server.push.entity.Push;
-import com.javabaas.server.push.entity.PushAccount;
 import com.javabaas.server.push.entity.PushLog;
 import com.javabaas.server.push.handler.IPushHandler;
 import com.javabaas.server.push.handler.impl.JPushHandler;
 import com.javabaas.server.user.service.InstallationService;
-import com.javabaas.server.object.entity.BaasObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,19 +65,5 @@ public class PushService {
                 + " badge:" + pushLog.getBadge()
                 + " sound:" + pushLog.getSound()
                 + " where:" + pushLog.getWhere());
-    }
-
-    /**
-     * 查询推送账号信息
-     *
-     * @param appId 应用id
-     * @return 推送账号信息
-     */
-    public PushAccount getPushAccount(String appId) {
-        return appService.get(appId).getPushAccount();
-    }
-
-    public void setPushAccount(String appId, PushAccount pushAccount) {
-        appService.setPushAccount(appId, pushAccount);
     }
 }

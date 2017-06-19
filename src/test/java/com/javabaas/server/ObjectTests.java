@@ -48,6 +48,7 @@ public class ObjectTests {
 
     @Before
     public void before() {
+        appService.deleteByAppName("ObjectTestApp");
         app = new App();
         app.setName("ObjectTestApp");
         appService.insert(app);
