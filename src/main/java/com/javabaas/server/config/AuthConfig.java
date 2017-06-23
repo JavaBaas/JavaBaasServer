@@ -11,14 +11,16 @@ import org.springframework.util.StringUtils;
 @ConfigurationProperties(prefix = "baas.auth")
 public class AuthConfig {
 
-    public static final long DEFAULT_TIMEOUT = 600000;
-    public static final String DEFAULT_ADMIN_KEY = "JavaBaas";
-    public static final String DEFAULT_USERNAME = "admin";
-    public static final String DEFAULT_PASSWORD = "admin";
+    private static final long DEFAULT_TIMEOUT = 600000;
+    private static final String DEFAULT_ADMIN_KEY = "JavaBaas";
+    private static final String DEFAULT_USERNAME = "admin";
+    private static final String DEFAULT_PASSWORD = "admin";
+    private static final boolean DEFAULT_ENABLE = true;
 
     private String key;
     private String username;
     private String password;
+    private Boolean enable;
 
     private long timeout;
 
@@ -68,5 +70,17 @@ public class AuthConfig {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Boolean getEnable() {
+        if (enable == null) {
+            return DEFAULT_ENABLE;
+        } else {
+            return enable;
+        }
+    }
+
+    public void setEnable(Boolean enable) {
+        this.enable = enable;
     }
 }
