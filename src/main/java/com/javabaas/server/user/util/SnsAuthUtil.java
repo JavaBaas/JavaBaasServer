@@ -52,6 +52,9 @@ public class SnsAuthUtil {
     private boolean verifyWeibo(BaasAuth auth) {
         //请求新浪授权服务器以验证授权是否有效
         try {
+            if (StringUtils.isEmpty(auth.getUid()) || StringUtils.isEmpty(auth.getAccessToken())) {
+                throw new SimpleError(SimpleCode.USER_AUTH_ERROR);
+            }
             String resultStr = rest.postForObject("https://api.weibo.com/oauth2/get_token_info?access_token={accessToken}", null, String.class, auth.getAccessToken());
             if (StringUtils.isEmpty(resultStr)) {
                 //返回信息为空 鉴权失败
@@ -76,6 +79,9 @@ public class SnsAuthUtil {
     }
 
     private boolean verifyWeixin(BaasAuth auth) {
+        if (StringUtils.isEmpty(auth.getOpenId()) && StringUtils.isEmpty(auth.getUnionId()) || StringUtils.isEmpty(auth.getAccessToken())) {
+            throw new SimpleError(SimpleCode.USER_AUTH_ERROR);
+        }
         //请求微信授权服务器验证授权是否有效
         String resultStr = rest.getForObject("https://api.weixin.qq.com/sns/auth?access_token={access_token}&openid={openid}", String.class, auth.getAccessToken(), auth.getUid());
         if (StringUtils.isEmpty(resultStr)) {
@@ -90,6 +96,9 @@ public class SnsAuthUtil {
     }
 
     private boolean verifyQq(BaasAuth auth) {
+        if (StringUtils.isEmpty(auth.getOpenId()) && StringUtils.isEmpty(auth.getUnionId()) || StringUtils.isEmpty(auth.getAccessToken())) {
+            throw new SimpleError(SimpleCode.USER_AUTH_ERROR);
+        }
         //请求qq授权服务器验证授权是否有效
         try {
             String resultStr = rest.getForObject("https://graph.qq.com/oauth2.0/me?access_token={access_token}", String.class, auth.getAccessToken());
@@ -117,6 +126,9 @@ public class SnsAuthUtil {
     }
 
     private boolean verifyWebApp(String appId, BaasAuth auth) {
+        if (StringUtils.isEmpty(auth.getEncryptedData()) || StringUtils.isEmpty(auth.getCode()) || StringUtils.isEmpty(auth.getIV())) {
+            throw new SimpleError(SimpleCode.USER_AUTH_ERROR);
+        }
         App app = appService.get(appId);
         Account account = app.getAppAccounts().getAccount(AccountType.WEBAPP);
         if (account == null) {
@@ -132,9 +144,9 @@ public class SnsAuthUtil {
 
             //////////////// 1、向微信服务器 使用登录凭证 code 获取 session_key 和 openid ////////////////
             //请求参数
-            String params = "appid=" + waAppid + "&secret=" + waSecret + "&js_code=" + auth.getCode() + "&grant_type=" + grant_type;
+            String param = "appid=" + waAppid + "&secret=" + waSecret + "&js_code=" + auth.getCode() + "&grant_type=" + grant_type;
             //发送请求
-            String resultStr = rest.getForObject("https://api.weixin.qq.com/sns/jscode2session?{params}", String.class, params);
+            String resultStr = rest.getForObject("https://api.weixin.qq.com/sns/jscode2session?" + param, String.class);
             //解析相应内容
             Map<String, String> resultObject = jsonUtil.readValue(resultStr, new TypeReference<HashMap<String, String>>() {
             });
@@ -146,10 +158,10 @@ public class SnsAuthUtil {
 
             String result = AesCbcUtil.decrypt(auth.getEncryptedData(), session_key, auth.getIV(), "UTF-8");
             if (null != result && result.length() > 0) {
-                Map<String, String> userInfoObject = jsonUtil.readValue(result, new TypeReference<HashMap<String, String>>() {
+                Map<String, Object> userInfoObject = jsonUtil.readValue(result, new TypeReference<HashMap<String, Object>>() {
                 });
-                auth.setOpenId(userInfoObject.get("openId"));
-                String unionId = userInfoObject.get("unionId");
+                auth.setOpenId((String) userInfoObject.get("openId"));
+                String unionId = (String) userInfoObject.get("unionId");
                 if (!StringUtils.isEmpty(unionId)) {
                     auth.setUnionId(unionId);
                 }

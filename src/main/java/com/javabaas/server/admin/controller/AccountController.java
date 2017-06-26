@@ -28,7 +28,7 @@ public class AccountController {
      * @return 结果
      * @throws SimpleError
      */
-    @RequestMapping(value = "/setAccount", method = RequestMethod.PUT)
+    @RequestMapping(value = "/setAccount/{type}", method = RequestMethod.PUT)
     @ResponseBody
     public SimpleResult setAccount(@RequestHeader(value = "JB-AppId") String appId,
                                        @PathVariable int type,

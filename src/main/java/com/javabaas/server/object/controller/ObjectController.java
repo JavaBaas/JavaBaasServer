@@ -66,8 +66,8 @@ public class ObjectController {
         //存储对象
         String id = objectService.insert(appId, plat, name, object, currentUser, isMaster).getId();
         SimpleResult result = SimpleResult.success();
-        result.putData("id", id);
         result.putData("_id", id);
+        result.putData("id", id);
         return result;
     }
 

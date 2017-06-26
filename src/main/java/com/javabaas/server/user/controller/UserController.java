@@ -80,10 +80,6 @@ public class UserController {
         boolean isMaster = masterService.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         BaasAuth auth = jsonUtil.readValue(authData, BaasAuth.class);
-        if (StringUtils.isEmpty(auth.getUid()) || StringUtils.isEmpty(auth.getAccessToken())) {
-            //授权信息不足
-            throw new SimpleError(SimpleCode.USER_AUTH_ERROR);
-        }
         userService.bindingSns(appId, plat, id, baasSnsType, auth, currentUser, isMaster);
         return SimpleResult.success();
     }
@@ -176,10 +172,6 @@ public class UserController {
             throw new SimpleError(SimpleCode.USER_AUTH_PLATFORM_MISSING);
         }
         BaasAuth auth = jsonUtil.readValue(authData, BaasAuth.class);
-        if (StringUtils.isEmpty(auth.getUid()) || StringUtils.isEmpty(auth.getAccessToken())) {
-            //授权信息不足
-            throw new SimpleError(SimpleCode.USER_AUTH_ERROR);
-        }
         return userService.loginWithSns(appId, plat, baasSnsType, auth);
     }
 

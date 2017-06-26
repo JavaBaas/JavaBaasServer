@@ -126,10 +126,11 @@ public class UserService {
         if (user == null) {
             throw new SimpleError(SimpleCode.USER_NOT_EXIST);
         }
-        //更新accessToken
         BaasObject authNow = user.getAuth();
         //填充授权信息
-        authNow.put(snsType.getValue(), auth);
+//        authNow.put(snsType.getValue(), auth);
+
+        updateAuth(snsType, authNow, auth);
         BaasUser userNew = new BaasUser();
         userNew.setAuth(authNow);
         objectService.update(appId, plat, UserService.USER_CLASS_NAME, user.getId(), userNew, null, true);
