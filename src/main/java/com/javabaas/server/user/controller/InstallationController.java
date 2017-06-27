@@ -39,7 +39,6 @@ public class InstallationController {
         String id = installationService.register(appId, plat, installation);
         SimpleResult result = SimpleResult.success();
         result.putData("_id", id);
-        result.putData("id", id);
         return result;
     }
 

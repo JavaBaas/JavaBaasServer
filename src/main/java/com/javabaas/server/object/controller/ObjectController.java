@@ -67,7 +67,6 @@ public class ObjectController {
         String id = objectService.insert(appId, plat, name, object, currentUser, isMaster).getId();
         SimpleResult result = SimpleResult.success();
         result.putData("_id", id);
-        result.putData("id", id);
         return result;
     }
 
