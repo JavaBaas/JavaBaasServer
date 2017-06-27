@@ -1,7 +1,7 @@
 package com.javabaas.server.common.interceptor;
 
-import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.entity.SimpleCode;
+import com.javabaas.server.common.entity.SimpleError;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;

@@ -7,6 +7,7 @@ import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.common.service.MasterService;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.user.entity.BaasAuth;
+import com.javabaas.server.user.entity.BaasSnsType;
 import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class UserController {
      * @param appId    应用id
      * @param authData 社交平台信息
      * @param id       用户id
-     * @param platform 社交平台名称
+     * @param platform 社交平台名称 对应BaasSnsType.getCode
      * @return 请求结果
      * @throws SimpleError
      */
@@ -70,16 +71,16 @@ public class UserController {
                                    @RequestHeader(value = "JB-Plat") String plat,
                                    @RequestBody String authData,
                                    @PathVariable String id,
-                                   @PathVariable String platform) {
+                                   @PathVariable int platform) {
+        BaasSnsType baasSnsType = BaasSnsType.getType(platform);
+        if (baasSnsType == null) {
+            throw new SimpleError(SimpleCode.USER_AUTH_PLATFORM_MISSING);
+        }
         //处理权限
         boolean isMaster = masterService.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         BaasAuth auth = jsonUtil.readValue(authData, BaasAuth.class);
-        if (StringUtils.isEmpty(auth.getUid()) || StringUtils.isEmpty(auth.getAccessToken())) {
-            //授权信息不足
-            throw new SimpleError(SimpleCode.USER_AUTH_ERROR);
-        }
-        userService.bindingSns(appId, plat, id, platform, auth, currentUser, isMaster);
+        userService.bindingSns(appId, plat, id, baasSnsType, auth, currentUser, isMaster);
         return SimpleResult.success();
     }
 
@@ -165,13 +166,13 @@ public class UserController {
     public BaasUser loginWithSns(@RequestHeader(value = "JB-AppId") String appId,
                                  @RequestHeader(value = "JB-Plat") String plat,
                                  @RequestBody String authData,
-                                 @PathVariable String platform) {
-        BaasAuth auth = jsonUtil.readValue(authData, BaasAuth.class);
-        if (StringUtils.isEmpty(auth.getUid()) || StringUtils.isEmpty(auth.getAccessToken())) {
-            //授权信息不足
-            throw new SimpleError(SimpleCode.USER_AUTH_ERROR);
+                                 @PathVariable int platform) {
+        BaasSnsType baasSnsType = BaasSnsType.getType(platform);
+        if (baasSnsType == null) {
+            throw new SimpleError(SimpleCode.USER_AUTH_PLATFORM_MISSING);
         }
-        return userService.loginWithSns(appId, plat, platform, auth);
+        BaasAuth auth = jsonUtil.readValue(authData, BaasAuth.class);
+        return userService.loginWithSns(appId, plat, baasSnsType, auth);
     }
 
     /**

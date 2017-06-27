@@ -1,7 +1,7 @@
 package com.javabaas.server.push.entity;
 
-import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.entity.BaasObject;
+import com.javabaas.server.object.entity.BaasQuery;
 
 import java.util.Map;
 

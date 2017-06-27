@@ -38,8 +38,8 @@ public class InstallationController {
         BaasInstallation installation = objectMapper.readValue(body, BaasInstallation.class);
         String id = installationService.register(appId, plat, installation);
         SimpleResult result = SimpleResult.success();
-        result.putData("id", id);
         result.putData("_id", id);
+        result.putData("id", id);
         return result;
     }
 

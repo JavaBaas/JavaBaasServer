@@ -7,6 +7,7 @@ import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.service.ObjectService;
 import com.javabaas.server.user.entity.BaasAuth;
+import com.javabaas.server.user.entity.BaasSnsType;
 import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.user.util.SnsAuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -112,24 +112,25 @@ public class UserService {
      * 使用第三方平台登录信息进行登录
      *
      * @param appId    应用id
-     * @param platform 名称
+     * @param snsType  第三方登录信息
      * @param auth     授权信息
      * @return 用户信息
      */
-    public BaasUser loginWithSns(String appId, String plat, String platform, BaasAuth auth) {
+    public BaasUser loginWithSns(String appId, String plat, BaasSnsType snsType, BaasAuth auth) {
         //验证授权信息
-        if (!authUtil.verifyAuthData(platform, auth)) {
+        if (!authUtil.verifyAuthData(appId, snsType, auth)) {
             //授权无效
             throw new SimpleError(SimpleCode.USER_AUTH_REJECT);
         }
-        BaasUser user = getUserByAuth(appId, plat, platform, auth.getUid());
+        BaasUser user = getUserByAuth(appId, plat, snsType, auth);
         if (user == null) {
             throw new SimpleError(SimpleCode.USER_NOT_EXIST);
         }
-        //更新accessToken
         BaasObject authNow = user.getAuth();
         //填充授权信息
-        authNow.put(platform, auth);
+//        authNow.put(snsType.getValue(), auth);
+
+        updateAuth(snsType, authNow, auth);
         BaasUser userNew = new BaasUser();
         userNew.setAuth(authNow);
         objectService.update(appId, plat, UserService.USER_CLASS_NAME, user.getId(), userNew, null, true);
@@ -205,7 +206,7 @@ public class UserService {
         return user;
     }
 
-    public void bindingSns(String appId, String plat, String id, String platform, BaasAuth auth, BaasUser currentUser, boolean isMaster) {
+    public void bindingSns(String appId, String plat, String id, BaasSnsType snsType, BaasAuth auth, BaasUser currentUser, boolean isMaster) {
         if (!isMaster) {
             //非管理权限
             if (currentUser == null || !currentUser.getId().equals(id)) {
@@ -214,12 +215,12 @@ public class UserService {
             }
         }
         //验证授权信息是否有效
-        if (!authUtil.verifyAuthData(platform, auth)) {
+        if (!authUtil.verifyAuthData(appId, snsType, auth)) {
             //授权无效
             throw new SimpleError(SimpleCode.USER_AUTH_REJECT);
         } else {
             //验证是否已经绑定现有用户
-            BaasUser exist = getUserByAuth(appId, plat, platform, auth.getUid());
+            BaasUser exist = getUserByAuth(appId, plat, snsType, auth);
             if (exist != null) {
                 //该第三方用户信息已经被其他用户绑定,禁止重复绑定
                 throw new SimpleError(SimpleCode.USER_AUTH_EXIST);
@@ -232,13 +233,39 @@ public class UserService {
                 //当前授权信息为空 创建新的授权信息
                 authNow = new BaasObject();
             }
-            //填充授权信息
-            authNow.put(platform, auth);
+            //更新授权信息
+            updateAuth(snsType, authNow, auth);
             BaasUser userNew = new BaasUser();
             userNew.setAuth(authNow);
             objectService.update(appId, plat, UserService.USER_CLASS_NAME, id, userNew, null, true);
             //更新成功 清除用户缓存
             deleteUserCache(appId, userNow.getSessionToken());
+        }
+    }
+
+    private void updateAuth(BaasSnsType snsType, BaasObject authNow, BaasAuth auth) {
+        switch (snsType) {
+            case WEIBO:
+                authNow.put(snsType.getValue(), auth);
+                break;
+            case QQ:
+            case WEIXIN:
+            case WEBAPP:
+                Map<String, Object> map = authNow.get(snsType.getValue()) == null ? new HashMap<>() : (Map<String, Object>) authNow.get(snsType.getValue());
+                if (!StringUtils.isEmpty(auth.getUnionId())) {
+                    map.put("unionId", auth.getUnionId());
+                }
+                Set<String> set = new HashSet<>();
+                if (map.get("openId") != null) {
+                    ArrayList<String> array = (ArrayList<String>) map.get("openId");
+                    set = new HashSet<>(array);
+                }
+                set.add(auth.getOpenId());
+                map.put("openId", set);
+                authNow.put(snsType.getValue(), map);
+                break;
+            default:
+                return;
         }
     }
 
@@ -306,9 +333,24 @@ public class UserService {
         }
     }
 
-    private BaasUser getUserByAuth(String appId, String plat, String platform, String uid) {
+    private BaasUser getUserByAuth(String appId, String plat, BaasSnsType snsType, BaasAuth auth) {
         BaasQuery query = new BaasQuery();
-        query.put("auth." + platform + ".uid", uid);
+        switch(snsType) {
+            case WEIBO:
+                query.put("auth." + snsType.getValue() + ".uid", auth.getUid());
+                break;
+            case QQ:
+            case WEIXIN:
+            case WEBAPP:
+                if (StringUtils.isEmpty(auth.getUnionId())) {
+                    query.put("auth." + snsType.getValue() + ".openId", auth.getOpenId());
+                } else {
+                    query.put("auth." + snsType.getValue() + ".unionId", auth.getUnionId());
+                }
+                break;
+            default:
+                return null;
+        }
         List<BaasObject> users = objectService.list(appId, plat, USER_CLASS_NAME, query, null, null, 1, 0, null, true);
         if (users.size() == 0) {
             return null;

@@ -1,7 +1,7 @@
 package com.javabaas.server.hook.entity;
 
-import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.object.entity.BaasObject;
+import com.javabaas.server.user.entity.BaasUser;
 
 /**
  * Created by Staryet on 15/9/24.

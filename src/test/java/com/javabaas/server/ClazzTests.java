@@ -40,6 +40,7 @@ public class ClazzTests {
 
     @Before
     public void before() {
+        appService.deleteByAppName("ClazzTest");
         app = new App();
         app.setName("ClazzTest");
         appService.insert(app);

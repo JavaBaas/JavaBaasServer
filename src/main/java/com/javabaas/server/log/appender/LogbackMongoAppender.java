@@ -2,10 +2,10 @@ package com.javabaas.server.log.appender;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
 import com.javabaas.server.common.listener.ApplicationEventListener;
 import com.javabaas.server.log.service.MongoConnection;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
 
 /**
  * MongoDb日志记录器

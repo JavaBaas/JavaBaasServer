@@ -1,8 +1,8 @@
 package com.javabaas.server.object.dao;
 
+import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.entity.BaasSort;
-import com.javabaas.server.object.entity.BaasObject;
 
 import java.util.List;
 

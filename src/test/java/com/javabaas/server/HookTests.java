@@ -57,6 +57,7 @@ public class HookTests {
 
     @Before
     public void before() {
+        appService.deleteByAppName("AppHook");
         app = new App();
         app.setName("AppHook");
         appService.insert(app);

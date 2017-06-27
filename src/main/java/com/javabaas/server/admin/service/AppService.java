@@ -1,22 +1,18 @@
 package com.javabaas.server.admin.service;
 
-import com.javabaas.server.admin.entity.App;
-import com.javabaas.server.admin.entity.Field;
-import com.javabaas.server.admin.repository.AppRepository;
-import com.javabaas.server.common.entity.SimpleError;
-import com.javabaas.server.object.dao.impl.mongo.MongoDao;
-import com.javabaas.server.push.entity.PushAccount;
-import com.javabaas.server.user.service.UserService;
-import com.javabaas.server.admin.entity.Clazz;
-import com.javabaas.server.admin.entity.FieldType;
+import com.javabaas.server.admin.entity.*;
 import com.javabaas.server.admin.entity.dto.AppExport;
 import com.javabaas.server.admin.entity.dto.ClazzExport;
+import com.javabaas.server.admin.repository.AppRepository;
 import com.javabaas.server.cloud.entity.CloudSetting;
 import com.javabaas.server.common.entity.SimpleCode;
+import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.file.service.FileService;
+import com.javabaas.server.object.dao.impl.mongo.MongoDao;
 import com.javabaas.server.push.service.PushService;
 import com.javabaas.server.user.service.InstallationService;
+import com.javabaas.server.user.service.UserService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
@@ -80,6 +76,13 @@ public class AppService {
         return app;
     }
 
+    public void deleteByAppName(String name) {
+        App app = appRepository.findByName(name);
+        if (app != null) {
+            delete(app.getId());
+        }
+    }
+
     public void delete(String id) {
         //删除包含的类
         clazzService.deleteAll(id);
@@ -112,9 +115,12 @@ public class AppService {
         deleteCache(id);
     }
 
-    public void setPushAccount(String id, PushAccount pushAccount) {
+    public void setAccount(String id, AccountType accountType, Account account) {
         App app = get(id);
-        app.setPushAccount(pushAccount);
+        if (app.getAppAccounts() == null) {
+            app.setAppAccounts(new AppAccounts());
+        }
+        app.getAppAccounts().setAccount(accountType, account);
         appRepository.save(app);
         //清除缓存信息
         deleteCache(id);

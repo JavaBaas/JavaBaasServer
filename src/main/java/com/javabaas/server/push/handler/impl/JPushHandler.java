@@ -11,12 +11,13 @@ import cn.jpush.api.push.model.audience.AudienceTarget;
 import cn.jpush.api.push.model.notification.AndroidNotification;
 import cn.jpush.api.push.model.notification.IosNotification;
 import cn.jpush.api.push.model.notification.Notification;
+import com.javabaas.server.admin.entity.Account;
+import com.javabaas.server.admin.entity.AccountType;
+import com.javabaas.server.admin.service.AccountService;
+import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.push.entity.Push;
-import com.javabaas.server.push.entity.PushAccount;
 import com.javabaas.server.push.handler.IPushHandler;
-import com.javabaas.server.common.entity.SimpleCode;
-import com.javabaas.server.push.service.PushService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class JPushHandler implements IPushHandler {
     private Map<String, JPushClient> clients = new Hashtable<>();
 
     @Autowired
-    private PushService pushService;
+    private AccountService accountService;
 
     @Override
     public void pushSingle(String appId, String id, Push push) {
@@ -110,9 +111,9 @@ public class JPushHandler implements IPushHandler {
         JPushClient client = clients.get(appId);
         if (client == null) {
             //获取推送所使用的账号
-            PushAccount pushAccount = pushService.getPushAccount(appId);
+            Account pushAccount = accountService.getAccount(appId, AccountType.PUSH);
             if (pushAccount == null || StringUtils.isEmpty(pushAccount.getKey()) || StringUtils.isEmpty(pushAccount.getSecret())) {
-                throw new SimpleError(SimpleCode.PUSH_ACCOUNT_EMPTY);
+                throw new SimpleError(SimpleCode.APP_PUSH_ACCOUNT_ERROR);
             }
             client = new JPushClient(pushAccount.getSecret(), pushAccount.getKey());
             clients.put(appId, client);

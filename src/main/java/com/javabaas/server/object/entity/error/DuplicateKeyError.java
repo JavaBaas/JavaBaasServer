@@ -1,7 +1,7 @@
 package com.javabaas.server.object.entity.error;
 
-import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.entity.SimpleCode;
+import com.javabaas.server.common.entity.SimpleError;
 
 /**
  * 字段类型错误

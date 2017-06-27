@@ -1,7 +1,7 @@
 package com.javabaas.server.admin.service;
 
-import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.entity.SimpleCode;
+import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.config.AuthConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
