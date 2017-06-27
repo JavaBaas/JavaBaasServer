@@ -176,6 +176,32 @@ public class UserController {
     }
 
     /**
+     * 手机验证码注册登录
+     */
+    @RequestMapping(value = "/loginWithPhone", method = RequestMethod.POST)
+    @ResponseBody
+    public BaasUser loginWithPhone(@RequestHeader(value = "JB-AppId") String appId,
+                                   @RequestHeader(value = "JB-Plat") String plat,
+                                   @RequestBody String body) {
+        return null;
+    }
+
+    /**
+     * 获取注册登录短信验证码
+     *
+     * @param phoneNumber 手机号码
+     * @return 请求结果
+     */
+    @RequestMapping(value = "/getSmsCode/{phoneNumber}", method = RequestMethod.GET)
+    @ResponseBody
+    public SimpleResult getSmsCode(@RequestHeader(value = "JB-AppId") String appId,
+                                   @RequestHeader(value = "JB-Plat") String plat,
+                                   @PathVariable String phoneNumber) {
+        userService.getSmsCode(appId, plat, phoneNumber);
+        return SimpleResult.success();
+    }
+
+    /**
      * 重置sessionToken
      *
      * @param appId 应用id

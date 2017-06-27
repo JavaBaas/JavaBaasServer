@@ -7,6 +7,7 @@ import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.service.ObjectService;
 import com.javabaas.server.user.entity.BaasAuth;
+import com.javabaas.server.user.entity.BaasPhoneRegister;
 import com.javabaas.server.user.entity.BaasSnsType;
 import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.user.util.SnsAuthUtil;
@@ -395,6 +396,22 @@ public class UserService {
             deleteUserCache(appId, sessionToken);
             objectService.delete(appId, plat, USER_CLASS_NAME, users.get(0).getString("id"), null, true);
         }
+    }
+
+    public BaasUser loginWithPhone(String appId, String plat, String platform, BaasPhoneRegister register) {
+        //TODO
+        return null;
+    }
+
+    /**
+     * 获取短信验证码
+     * 验证码会与手机号对应
+     * 缓存在Redis中
+     *
+     * @param phoneNumber 手机号
+     */
+    public void getSmsCode(String appId, String plat, String phoneNumber) {
+        //TODO
     }
 
     private String getSessionToken() {
