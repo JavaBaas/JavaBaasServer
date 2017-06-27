@@ -40,8 +40,12 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o)
             throws Exception {
+        String appId = httpServletRequest.getHeader("JB-AppId");
+        if (StringUtils.isEmpty(appId)) {
+            //授权信息不足
+            throw new SimpleError(SimpleCode.AUTH_LESS);
+        }
         if (authConfig.getEnable()) {
-            String appId = httpServletRequest.getHeader("JB-AppId");
             String masterSign = httpServletRequest.getHeader("JB-MasterSign");
             String sign = httpServletRequest.getHeader("JB-Sign");
             String timestampStr = httpServletRequest.getHeader("JB-Timestamp");
