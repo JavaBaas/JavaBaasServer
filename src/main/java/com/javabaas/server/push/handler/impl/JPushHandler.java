@@ -1,8 +1,9 @@
 package com.javabaas.server.push.handler.impl;
 
+import cn.jiguang.common.resp.APIConnectionException;
+import cn.jiguang.common.resp.APIRequestException;
 import cn.jpush.api.JPushClient;
-import cn.jpush.api.common.APIConnectionException;
-import cn.jpush.api.common.APIRequestException;
+import cn.jpush.api.push.model.Message;
 import cn.jpush.api.push.model.Options;
 import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
@@ -17,6 +18,8 @@ import com.javabaas.server.admin.service.AccountService;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.push.entity.Push;
+import com.javabaas.server.push.entity.PushMessage;
+import com.javabaas.server.push.entity.PushNotification;
 import com.javabaas.server.push.handler.IPushHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,27 +86,44 @@ public class JPushHandler implements IPushHandler {
         builder.setOptions(Options.newBuilder()
                 .setApnsProduction(true)
                 .build());
+
         //推送信息内容
-        IosNotification.Builder iosBuilder = IosNotification.newBuilder();
-        iosBuilder.setAlert(push.getAlert());
-        if (push.getBadge() != null) {
-            iosBuilder.setBadge(push.getBadge());
+        PushNotification notification = push.getNotification();
+        if (notification != null) {
+            IosNotification.Builder iosBuilder = IosNotification.newBuilder();
+            iosBuilder.setAlert(notification.getAlert());
+            if (notification.getBadge() != 0) {
+                iosBuilder.setBadge(notification.getBadge());
+            }
+            if (push.getNotification().getSound() != null) {
+                iosBuilder.setSound(notification.getSound());
+            }
+            AndroidNotification.Builder androidBuilder = AndroidNotification.newBuilder();
+            androidBuilder.setAlert(notification.getAlert());
+            androidBuilder.setTitle(notification.getTitle());
+            if (notification.getExtras() != null) {
+                //自定义消息
+                iosBuilder.addExtras(notification.getExtras());
+                androidBuilder.addExtras(notification.getExtras());
+            }
+            builder.setNotification(Notification.newBuilder()
+                    .addPlatformNotification(iosBuilder.build())
+                    .addPlatformNotification(androidBuilder.build())
+                    .build());
+
         }
-        if (push.getSound() != null) {
-            iosBuilder.setSound(push.getSound());
+        //透传消息
+        PushMessage message = push.getMessage();
+        if (message != null) {
+            Message.Builder messageBuilder = Message.newBuilder();
+            messageBuilder.setTitle(message.getTitle());
+            messageBuilder.setContentType(message.getContentType());
+            messageBuilder.setMsgContent(message.getMsgContent());
+            if (message.getExtras() != null) {
+                messageBuilder.addExtras(message.getExtras());
+            }
+            builder.setMessage(messageBuilder.build());
         }
-        AndroidNotification.Builder androidBuilder = AndroidNotification.newBuilder();
-        androidBuilder.setAlert(push.getAlert());
-        androidBuilder.setTitle(push.getTitle());
-        if (push.getParams() != null) {
-            //自定义消息
-            iosBuilder.addExtras(push.getParams());
-            androidBuilder.addExtras(push.getParams());
-        }
-        builder.setNotification(Notification.newBuilder()
-                .addPlatformNotification(iosBuilder.build())
-                .addPlatformNotification(androidBuilder.build())
-                .build());
         return builder;
     }
 

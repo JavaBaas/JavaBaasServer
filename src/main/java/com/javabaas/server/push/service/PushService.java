@@ -48,22 +48,26 @@ public class PushService {
             pushHandler.pushMulti(appId, ids, push);
         }
         //记录推送日志
-        PushLog pushLog = new PushLog();
-        pushLog.setTitle(push.getTitle());
-        pushLog.setAlert(push.getAlert());
-        if (push.getBadge() != null) {
-            pushLog.setBadge(push.getBadge());
+        if (push.getNotification() != null) {
+            PushLog pushLog = new PushLog();
+            pushLog.setTitle(push.getNotification().getTitle());
+            pushLog.setAlert(push.getNotification().getAlert());
+            if (push.getNotification().getBadge() != 0) {
+                pushLog.setBadge(push.getNotification().getBadge());
+            }
+            pushLog.setSound(push.getNotification().getSound());
+            pushLog.setWhere(query);
+            pushLog.setPushTime(new Date().getTime());
+            pushLog = new PushLog(objectService.insert(appId, plat, PUSH_LOG_CLASS_NAME, pushLog, null, true));
+            logger.debug("App:" + appId
+                    + " 推送成功 id:" + pushLog.getId()
+                    + " title:" + pushLog.getTitle()
+                    + " alert:" + pushLog.getAlert()
+                    + " badge:" + pushLog.getBadge()
+                    + " sound:" + pushLog.getSound()
+                    + " where:" + pushLog.getWhere());
+        } else if (push.getMessage() != null) {
+            //TODO 加透传日志
         }
-        pushLog.setSound(push.getSound());
-        pushLog.setWhere(query);
-        pushLog.setPushTime(new Date().getTime());
-        pushLog = new PushLog(objectService.insert(appId, plat, PUSH_LOG_CLASS_NAME, pushLog, null, true));
-        logger.debug("App:" + appId
-                + " 推送成功 id:" + pushLog.getId()
-                + " title:" + pushLog.getTitle()
-                + " alert:" + pushLog.getAlert()
-                + " badge:" + pushLog.getBadge()
-                + " sound:" + pushLog.getSound()
-                + " where:" + pushLog.getWhere());
     }
 }
