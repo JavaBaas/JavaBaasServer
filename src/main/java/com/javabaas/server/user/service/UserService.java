@@ -112,9 +112,9 @@ public class UserService {
     /**
      * 使用第三方平台登录信息进行登录
      *
-     * @param appId    应用id
-     * @param snsType  第三方登录信息
-     * @param auth     授权信息
+     * @param appId   应用id
+     * @param snsType 第三方登录信息
+     * @param auth    授权信息
      * @return 用户信息
      */
     public BaasUser loginWithSns(String appId, String plat, BaasSnsType snsType, BaasAuth auth) {
@@ -207,7 +207,8 @@ public class UserService {
         return user;
     }
 
-    public void bindingSns(String appId, String plat, String id, BaasSnsType snsType, BaasAuth auth, BaasUser currentUser, boolean isMaster) {
+    public void bindingSns(String appId, String plat, String id, BaasSnsType snsType, BaasAuth auth, BaasUser currentUser, boolean
+            isMaster) {
         if (!isMaster) {
             //非管理权限
             if (currentUser == null || !currentUser.getId().equals(id)) {
@@ -252,7 +253,8 @@ public class UserService {
             case QQ:
             case WEIXIN:
             case WEBAPP:
-                Map<String, Object> map = authNow.get(snsType.getValue()) == null ? new HashMap<>() : (Map<String, Object>) authNow.get(snsType.getValue());
+                Map<String, Object> map = authNow.get(snsType.getValue()) == null ? new HashMap<>() : (Map<String, Object>) authNow.get
+                        (snsType.getValue());
                 if (!StringUtils.isEmpty(auth.getUnionId())) {
                     map.put("unionId", auth.getUnionId());
                 }
@@ -336,7 +338,7 @@ public class UserService {
 
     private BaasUser getUserByAuth(String appId, String plat, BaasSnsType snsType, BaasAuth auth) {
         BaasQuery query = new BaasQuery();
-        switch(snsType) {
+        switch (snsType) {
             case WEIBO:
                 query.put("auth." + snsType.getValue() + ".uid", auth.getUid());
                 break;
@@ -412,6 +414,7 @@ public class UserService {
      */
     public void getSmsCode(String appId, String plat, String phoneNumber) {
         //TODO
+        //生成短信验证码并缓存
     }
 
     private String getSessionToken() {

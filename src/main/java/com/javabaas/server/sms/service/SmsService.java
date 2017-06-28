@@ -2,9 +2,15 @@ package com.javabaas.server.sms.service;
 
 import com.javabaas.server.sms.entity.SmsSendResult;
 import com.javabaas.server.sms.handler.ISmsHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 短信服务
@@ -13,10 +19,81 @@ import java.util.Map;
 @Service
 public class SmsService {
 
+    private static String SMS_CODE_NAME = "_SMS_CODE";
+    private static int TRY_LIMIT = 5;
     private ISmsHandler smsHandler;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+    //短信验证码模版id
+    private String smsCodeTemplateId;
+    //签名
+    private String signName;
 
-    public SmsSendResult sendSms(String phoneNumber, String signName, String templateCode, Map<String, String> params) {
-        return smsHandler.sendSms(phoneNumber, signName, templateCode, params);
+    public ISmsHandler getSmsHandler() {
+        return smsHandler;
+    }
+
+    public void setSmsHandler(ISmsHandler smsHandler) {
+        this.smsHandler = smsHandler;
+    }
+
+    public SmsSendResult sendSms(String phoneNumber, String signName, String templateId, Map<String, String> params) {
+        return smsHandler.sendSms(phoneNumber, signName, templateId, params);
+    }
+
+    /**
+     * 发送手机验证码
+     *
+     * @param phoneNumber 电话号码
+     * @param ttl         失效时间(秒)
+     */
+    public SmsSendResult sendSmsCode(String appId, String phoneNumber, long ttl) {
+        //生成六位随机数字验证码
+        String code = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
+        //记录验证码
+        ValueOperations<String, String> ops = redisTemplate.opsForValue();
+        ops.set(getKey(appId, phoneNumber), code, ttl, TimeUnit.SECONDS);
+        //发送短信
+        Map<String, String> params = new HashMap<>();
+        //短信验证码参数固定为code
+        params.put("code", code);
+        return sendSms(phoneNumber, signName, smsCodeTemplateId, params);
+    }
+
+    /**
+     * 验证手机验证码
+     *
+     * @param phoneNumber 电话号码
+     * @param code        验证码
+     */
+    public boolean verifySmsCode(String appId, String phoneNumber, String code) {
+        //获取已缓存的手机验证码
+        String key = getKey(appId, phoneNumber);
+        ValueOperations<String, String> ops = redisTemplate.opsForValue();
+        String rightCode = ops.get(key);
+        if (StringUtils.isEmpty(rightCode)) {
+            //验证码不存在
+            return false;
+        } else {
+            //验证码存在
+            if (code.equals(rightCode)) {
+                //验证成功 删除缓存中的验证码
+                redisTemplate.delete(key);
+                return true;
+            } else {
+                //尝试次数限制
+                Long times = ops.increment(key + "_times", 1);
+                if (times > TRY_LIMIT) {
+                    //超过尝试次数限制 删除缓存中的验证码
+                    redisTemplate.delete(key);
+                }
+                return false;
+            }
+        }
+    }
+
+    private String getKey(String appId, String phoneNumber) {
+        return "App_" + appId + SMS_CODE_NAME + "_" + phoneNumber;
     }
 
 }

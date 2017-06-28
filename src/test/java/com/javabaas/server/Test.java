@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,21 +14,27 @@ import java.util.Set;
 public class Test {
 
 
+    private static final String SMS_CODE_NAME = "123123123123";
     private static ObjectMapper objectMapper;
 
     private Map root;
 
     public static void main(String... strings) throws IOException {
-//        new Test().test();
-
-
+        new Test().test();
     }
 
     public void test() throws IOException {
-        System.out.println("aaa".split(";")[0]);
-//        objectMapper = new ObjectMapper();
-//        root = objectMapper.readValue("{\"c\":{\"$sub\":{\"where\":{\"d\":{\"$sub\":{\"where\":{\"name\":\"d\"},\"searchClass\":\"D\"}},\"e\":{\"$sub\":{\"where\":{\"name\":\"e\"},\"searchClass\":\"E\"}}},\"searchClass\":\"C\"}}}", Map.class);
-//        handleSub("", null, root);
+        Date d1 = new Date();
+        String appId = "123123123";
+        String phoneNumber = "!23sxfsaf123";
+        for (int i = 0; i < 100000000; i++) {
+//            String app = "App_" + appId + SMS_CODE_NAME + "_" + phoneNumber+i;
+            String app = "App_" + appId + SMS_CODE_NAME + "_" + phoneNumber + i;
+        }
+        Date d2 = new Date();
+        long time = d2.getTime() - d1.getTime();
+        System.out.println(time);
+
     }
 
     private boolean handleSub(String field, Map<String, Object> parent, Map<String, Object> query) {

@@ -13,8 +13,8 @@ public class SmsSendResult {
         this.message = message;
     }
 
-    public static SmsSendResult ok() {
-        return new SmsSendResult(SmsSendResultCode.OK.getCode(), SmsSendResultCode.OK.getMessage());
+    public static SmsSendResult success() {
+        return new SmsSendResult(SmsSendResultCode.SUCCESS.getCode(), SmsSendResultCode.SUCCESS.getMessage());
     }
 
     public static SmsSendResult error(SmsSendResultCode code) {
