@@ -56,7 +56,7 @@ public class SmsTests {
     public void testSendSms() {
         Map<String, String> params = new HashMap<>();
         params.put("test", "test");
-        smsService.sendSms(PHONE_NUMBER, "sign", "1", params);
+        smsService.sendSms(app.getId(), PHONE_NUMBER, "sign", "1", params);
         String sms = mockSmsHandler.getSms(PHONE_NUMBER);
         Assert.assertThat(sms, equalTo("test"));
     }

@@ -1,5 +1,6 @@
 package com.javabaas.server.sms.service;
 
+import com.javabaas.server.config.SmsConfig;
 import com.javabaas.server.sms.entity.SmsSendResult;
 import com.javabaas.server.sms.handler.ISmsHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +20,14 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class SmsService {
 
-    private static String SMS_CODE_NAME = "_SMS_CODE";
-    private static int TRY_LIMIT = 5;
+    private static final String SMS_CODE_NAME = "_SMS_CODE";
     private ISmsHandler smsHandler;
     @Autowired
+    private SmsConfig smsConfig;
+    @Autowired
     private StringRedisTemplate redisTemplate;
-    //短信验证码模版id
-    private String smsCodeTemplateId;
-    //签名
-    private String signName;
+    @Autowired
+    private SmsRateLimiter rateLimiter;
 
     public ISmsHandler getSmsHandler() {
         return smsHandler;
@@ -37,7 +37,10 @@ public class SmsService {
         this.smsHandler = smsHandler;
     }
 
-    public SmsSendResult sendSms(String phoneNumber, String signName, String templateId, Map<String, String> params) {
+    public SmsSendResult sendSms(String appId, String phoneNumber, String signName, String templateId, Map<String, String> params) {
+        //请求频率限制
+        rateLimiter.rate(appId, phoneNumber, signName, templateId, params);
+        //发送
         return smsHandler.sendSms(phoneNumber, signName, templateId, params);
     }
 
@@ -57,7 +60,7 @@ public class SmsService {
         Map<String, String> params = new HashMap<>();
         //短信验证码参数固定为code
         params.put("code", code);
-        return sendSms(phoneNumber, signName, smsCodeTemplateId, params);
+        return sendSms(appId, phoneNumber, smsConfig.getSignName(), smsConfig.getSmsCodeTemplateId(), params);
     }
 
     /**
@@ -83,7 +86,7 @@ public class SmsService {
             } else {
                 //尝试次数限制
                 Long times = ops.increment(key + "_times", 1);
-                if (times > TRY_LIMIT) {
+                if (times > smsConfig.getTryErrorLimit()) {
                     //超过尝试次数限制 删除缓存中的验证码
                     redisTemplate.delete(key);
                 }

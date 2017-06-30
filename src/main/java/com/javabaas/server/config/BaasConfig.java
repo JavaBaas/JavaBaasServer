@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "baas")
 public class BaasConfig {
 
-    public static final String DEFAULT_HOST = "http://127.0.0.1:8080/";
+    private static final String DEFAULT_HOST = "http://127.0.0.1:8080/";
 
     private String host;
     @Autowired

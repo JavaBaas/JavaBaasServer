@@ -17,7 +17,7 @@ public enum SimpleCode {
     AUTH_ERROR(12, "授权信息验证失败"),
     AUTH_NEED_ADMIN_SIGN(13, "缺少超级权限"),
     AUTH_NEED_MASTER_SIGN(14, "缺少管理权限"),
-    AUTH_REPLAY_ATTACK(15,"拒绝重放攻击"),
+    AUTH_REPLAY_ATTACK(15, "拒绝重放攻击"),
     //1xx 管理端相关
     CONSOLE_USER_ERROR(101, "用户名密码错误"),
     CONSOLE_NOT_LOGIN(102, "未登录"),
@@ -81,7 +81,9 @@ public enum SimpleCode {
     //5xxx 钩子相关
     HOOK_INTERCEPTION(5001, "钩子中断"),
     //6xxx 推送相关
-    PUSH_ERROR(6001, "推送失败");
+    PUSH_ERROR(6001, "推送失败"),
+    //7xxx 短信相关
+    SMS_RATE_LIMET(7001, "短信发送频率超过限制");
 
     private int code;
     private String message;
