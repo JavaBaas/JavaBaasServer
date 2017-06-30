@@ -1,16 +1,21 @@
 package com.javabaas.server.sms.service;
 
 import com.javabaas.server.config.SmsConfig;
+import com.javabaas.server.object.entity.BaasObject;
+import com.javabaas.server.object.service.ObjectService;
+import com.javabaas.server.sms.entity.SmsLog;
 import com.javabaas.server.sms.entity.SmsSendResult;
+import com.javabaas.server.sms.entity.SmsSendResultCode;
+import com.javabaas.server.sms.entity.SmsSendState;
 import com.javabaas.server.sms.handler.ISmsHandler;
+import com.javabaas.server.sms.handler.impl.MockSmsHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -20,8 +25,12 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class SmsService {
 
+    public static final String SMS_LOG_CLASS_NAME = "_SmsLog";
     private static final String SMS_CODE_NAME = "_SMS_CODE";
+    @Resource(type = MockSmsHandler.class)
     private ISmsHandler smsHandler;
+    @Autowired
+    private ObjectService objectService;
     @Autowired
     private SmsConfig smsConfig;
     @Autowired
@@ -37,11 +46,31 @@ public class SmsService {
         this.smsHandler = smsHandler;
     }
 
-    public SmsSendResult sendSms(String appId, String phoneNumber, String signName, String templateId, Map<String, String> params) {
+    public SmsSendResult sendSms(String appId, String plat, String phoneNumber, String templateId, BaasObject params) {
         //请求频率限制
-        rateLimiter.rate(appId, phoneNumber, signName, templateId, params);
+        rateLimiter.rate(appId, phoneNumber, templateId, params);
+        //获取短信签名
+        String signName = smsConfig.getSignName();
+        //记录发送日志
+        SmsLog smsLog = new SmsLog();
+        smsLog.setPhoneNumber(phoneNumber);
+        smsLog.setSignName(signName);
+        smsLog.setTemplateId(templateId);
+        smsLog.setParams(params);
+        smsLog.setState(SmsSendState.WAIT.getCode());
+        smsLog = new SmsLog(objectService.insert(appId, plat, SMS_LOG_CLASS_NAME, smsLog, null, true));
         //发送
-        return smsHandler.sendSms(phoneNumber, signName, templateId, params);
+        SmsSendResult smsSendResult = smsHandler.sendSms(smsLog.getId(), phoneNumber, signName, templateId, params);
+        if (smsSendResult.getCode() == SmsSendResultCode.SUCCESS.getCode()) {
+            //发送成功
+            smsLog.setState(SmsSendState.SUCCESS.getCode());
+            objectService.update(appId, plat, SMS_LOG_CLASS_NAME, smsLog.getId(), smsLog, null, true);
+        } else {
+            //发送失败
+            smsLog.setState(SmsSendState.FAIL.getCode());
+            objectService.update(appId, plat, SMS_LOG_CLASS_NAME, smsLog.getId(), smsLog, null, true);
+        }
+        return smsSendResult;
     }
 
     /**
@@ -50,17 +79,17 @@ public class SmsService {
      * @param phoneNumber 电话号码
      * @param ttl         失效时间(秒)
      */
-    public SmsSendResult sendSmsCode(String appId, String phoneNumber, long ttl) {
+    public SmsSendResult sendSmsCode(String appId, String plat, String phoneNumber, long ttl) {
         //生成六位随机数字验证码
         String code = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
         //记录验证码
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
         ops.set(getKey(appId, phoneNumber), code, ttl, TimeUnit.SECONDS);
         //发送短信
-        Map<String, String> params = new HashMap<>();
+        BaasObject params = new BaasObject();
         //短信验证码参数固定为code
         params.put("code", code);
-        return sendSms(appId, phoneNumber, smsConfig.getSignName(), smsConfig.getSmsCodeTemplateId(), params);
+        return sendSms(appId, plat, phoneNumber, smsConfig.getSmsCodeTemplateId(), params);
     }
 
     /**

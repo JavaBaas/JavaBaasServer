@@ -3,13 +3,13 @@ package com.javabaas.server.sms.service;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.config.SmsConfig;
+import com.javabaas.server.object.entity.BaasObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -24,7 +24,7 @@ public class SmsRateLimiter {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    public void rate(String appId, String phoneNumber, String signName, String templateId, Map<String, String> params) {
+    public void rate(String appId, String phoneNumber, String templateId, BaasObject params) {
         sendIntervalLimit(appId, phoneNumber);
     }
 
