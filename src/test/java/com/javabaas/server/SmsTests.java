@@ -99,7 +99,7 @@ public class SmsTests {
      * 测试短信验证码错误验证次数
      */
     @Test
-    public void testSendSmsCodeTryTimes() {
+    public void testSendSmsCodeTryTimesSuccess() {
         //短信验证码错误验证 第5次有效
         SmsSendResult result = smsService.sendSmsCode(app.getId(), PHONE_NUMBER, 10);
         Assert.assertThat(result.getCode(), equalTo(SmsSendResultCode.SUCCESS.getCode()));
@@ -110,16 +110,19 @@ public class SmsTests {
         }
         boolean verifyResult = smsService.verifySmsCode(app.getId(), PHONE_NUMBER, code);
         Assert.assertThat(verifyResult, equalTo(true));
+    }
 
+    @Test
+    public void testSEndSmsCodeTryTimesFail() {
         //短信验证码错误验证 5次后失效
-        result = smsService.sendSmsCode(app.getId(), PHONE_NUMBER, 10);
+        SmsSendResult result = smsService.sendSmsCode(app.getId(), PHONE_NUMBER, 10);
         Assert.assertThat(result.getCode(), equalTo(SmsSendResultCode.SUCCESS.getCode()));
-        code = mockSmsHandler.getSms(PHONE_NUMBER);
+        String code = mockSmsHandler.getSms(PHONE_NUMBER);
         for (int i = 0; i < 6; i++) {
-            verifyResult = smsService.verifySmsCode(app.getId(), PHONE_NUMBER, "xxxx");
+            boolean verifyResult = smsService.verifySmsCode(app.getId(), PHONE_NUMBER, "xxxx");
             Assert.assertThat(verifyResult, equalTo(false));
         }
-        verifyResult = smsService.verifySmsCode(app.getId(), PHONE_NUMBER, code);
+        boolean verifyResult = smsService.verifySmsCode(app.getId(), PHONE_NUMBER, code);
         Assert.assertThat(verifyResult, equalTo(false));
     }
 

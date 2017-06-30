@@ -18,7 +18,7 @@ public class SmsConfig {
     private static final Integer DEFAULT_SEND_TIME_LIMIT = 60;
 
     private Integer tryErrorLimit; //错误尝试次数
-    private Integer sendTimeLimit;//发送时间间隔(秒)
+    private Integer sendIntervalLimit;//发送时间间隔(秒)
     private String smsCodeTemplateId; //短信验证码模版id
     private String signName; //短信签名
 
@@ -34,16 +34,16 @@ public class SmsConfig {
         this.tryErrorLimit = tryErrorLimit;
     }
 
-    public Integer getSendTimeLimit() {
-        if (sendTimeLimit == null) {
+    public Integer getSendIntervalLimit() {
+        if (sendIntervalLimit == null) {
             return DEFAULT_SEND_TIME_LIMIT;
         } else {
-            return sendTimeLimit;
+            return sendIntervalLimit;
         }
     }
 
-    public void setSendTimeLimit(Integer sendTimeLimit) {
-        this.sendTimeLimit = sendTimeLimit;
+    public void setSendIntervalLimit(Integer sendIntervalLimit) {
+        this.sendIntervalLimit = sendIntervalLimit;
     }
 
     public String getSmsCodeTemplateId() {

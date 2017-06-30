@@ -83,7 +83,8 @@ public enum SimpleCode {
     //6xxx 推送相关
     PUSH_ERROR(6001, "推送失败"),
     //7xxx 短信相关
-    SMS_RATE_LIMET(7001, "短信发送频率超过限制");
+    SMS_RATE_LIMET(7001, "短信发送频率超过限制"),
+    SMS_SEND_INTERVAL_LIMIT(7002, "禁止连续发送");
 
     private int code;
     private String message;

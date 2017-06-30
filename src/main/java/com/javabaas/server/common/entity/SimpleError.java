@@ -8,6 +8,10 @@ public class SimpleError extends RuntimeException {
     private int code;
     private String message;
 
+    public static void e(SimpleCode simpleCode) {
+        throw new SimpleError(simpleCode);
+    }
+
     public SimpleError(SimpleCode simpleCode) {
         code = simpleCode.getCode();
         message = simpleCode.getMessage();
