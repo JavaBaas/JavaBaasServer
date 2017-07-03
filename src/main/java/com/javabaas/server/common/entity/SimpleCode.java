@@ -5,6 +5,7 @@ package com.javabaas.server.common.entity;
  */
 public enum SimpleCode {
 
+    NOT_FOUND(404, "无效地址"),
     INTERNAL_ERROR(500, "服务器内部错误"),
     INTERNAL_JSON_ERROR(501, "JSON处理失败"),
     REQUEST_PARAM_ERROR(2, "传入参数错误"),
