@@ -12,7 +12,7 @@ public class SimpleResult extends HashMap<String, Object> {
     public static int SUCCESS = 0;
 
     public static SimpleResult success() {
-        return new SimpleResult(SUCCESS, "");
+        return new SimpleResult(SimpleCode.SUCCESS);
     }
 
     public static SimpleResult error(int code) {

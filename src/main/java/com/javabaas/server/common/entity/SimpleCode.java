@@ -1,10 +1,11 @@
 package com.javabaas.server.common.entity;
 
 /**
+ * 返回码
  * Created by Staryet on 15/8/24.
  */
 public enum SimpleCode {
-
+    SUCCESS(0, "成功"),
     NOT_FOUND(404, "无效地址"),
     INTERNAL_ERROR(500, "服务器内部错误"),
     INTERNAL_JSON_ERROR(501, "JSON处理失败"),
@@ -14,11 +15,12 @@ public enum SimpleCode {
     REQUEST_CONTENT_TYPE_ERROR(5, "需要 application/json 请求"),
     REQUEST_PLATFORM_ERROR(6, "请求头中JB-Plat信息错误"),
     AUTH_LESS(10, "缺少授权信息"),
-    AUTH_TIME_OUT(11, "授权信息信息失效"),
+    AUTH_TIME_OUT(11, "授权信息失效"),
     AUTH_ERROR(12, "授权信息验证失败"),
     AUTH_NEED_ADMIN_SIGN(13, "缺少超级权限"),
     AUTH_NEED_MASTER_SIGN(14, "缺少管理权限"),
     AUTH_REPLAY_ATTACK(15, "拒绝重放攻击"),
+    AUTH_APP_ID_LESS(16, "缺少JB-AppId"),
     //1xx 管理端相关
     CONSOLE_USER_ERROR(101, "用户名密码错误"),
     CONSOLE_NOT_LOGIN(102, "未登录"),
@@ -85,7 +87,9 @@ public enum SimpleCode {
     PUSH_ERROR(6001, "推送失败"),
     //7xxx 短信相关
     SMS_RATE_LIMET(7001, "短信发送频率超过限制"),
-    SMS_SEND_INTERVAL_LIMIT(7002, "禁止连续发送");
+    SMS_SEND_INTERVAL_LIMIT(7002, "禁止连续发送"),
+    SMS_HANDLER_NOT_DEFINE(7002, "短信处理器为定义"),
+    SMS_HANDLER_NOT_FOUND(7003, "短信处理器未找到");
 
     private int code;
     private String message;

@@ -11,13 +11,14 @@ public interface ISmsHandler {
     /**
      * 发送短信
      *
-     * @param id          流水号
-     * @param phoneNumber 目标电话号码
-     * @param signName    短信签名
-     * @param templateId  模版编号
-     * @param params      参数
+     * @param appId      应用
+     * @param id         流水号
+     * @param phone      目标电话号码
+     * @param signName   短信签名
+     * @param templateId 模版编号
+     * @param params     参数
      * @return 发送结果
      */
-    SmsSendResult sendSms(String id, String phoneNumber, String signName, String templateId, BaasObject params);
+    SmsSendResult sendSms(String appId, String id, String phone, String signName, String templateId, BaasObject params);
 
 }

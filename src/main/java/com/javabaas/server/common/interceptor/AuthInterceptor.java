@@ -42,8 +42,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             throws Exception {
         String appId = httpServletRequest.getHeader("JB-AppId");
         if (StringUtils.isEmpty(appId)) {
-            //授权信息不足
-            throw new SimpleError(SimpleCode.AUTH_LESS);
+            //缺少appId
+            throw new SimpleError(SimpleCode.AUTH_APP_ID_LESS);
         }
         if (authConfig.getEnable()) {
             String masterSign = httpServletRequest.getHeader("JB-MasterSign");

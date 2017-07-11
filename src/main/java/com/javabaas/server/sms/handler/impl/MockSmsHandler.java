@@ -21,18 +21,18 @@ public class MockSmsHandler implements ISmsHandler {
 
     private Map<String, String> map = new HashMap<>();
 
-    public String getSms(String phoneNumber) {
-        return map.get(phoneNumber);
+    public String getSms(String phone) {
+        return map.get(phone);
     }
 
     @Override
-    public SmsSendResult sendSms(String id, String phoneNumber, String signName, String templateId, BaasObject params) {
+    public SmsSendResult sendSms(String appId, String id, String phone, String signName, String templateId, BaasObject params) {
         StringBuilder sms = new StringBuilder();
         if (params != null) {
             params.forEach((k, v) -> sms.append(v));
         }
-        map.put(phoneNumber, sms.toString());
-        log.info("Mock短信 phoneNumber:" + phoneNumber + " sms:" + sms);
+        map.put(phone, sms.toString());
+        log.info("Mock短信 phone:" + phone + " sms:" + sms);
         return SmsSendResult.success();
     }
 

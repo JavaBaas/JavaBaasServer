@@ -2,6 +2,8 @@ package com.javabaas.server;
 
 import com.javabaas.server.admin.entity.App;
 import com.javabaas.server.admin.service.AppService;
+import com.javabaas.server.config.entity.AppConfigEnum;
+import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.sms.entity.SmsSendResult;
 import com.javabaas.server.sms.entity.SmsSendResultCode;
@@ -31,6 +33,8 @@ public class SmsTests {
     private SmsService smsService;
     @Autowired
     private MockSmsHandler mockSmsHandler;
+    @Autowired
+    private AppConfigService appConfigService;
 
     private final String PHONE_NUMBER = "13800138000";
 
@@ -38,11 +42,12 @@ public class SmsTests {
 
     @Before
     public void before() {
-        smsService.setSmsHandler(mockSmsHandler);
         appService.deleteByAppName("SmsTestApp");
         app = new App();
         app.setName("SmsTestApp");
         appService.insert(app);
+        //配置短信发送器
+        appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_HANDLER, "mockSmsHandler");
     }
 
     @After
@@ -111,7 +116,7 @@ public class SmsTests {
     }
 
     @Test
-    public void testSEndSmsCodeTryTimesFail() {
+    public void testSmsCodeTryTimesFail() {
         //短信验证码错误验证 5次后失效
         SmsSendResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10);
         Assert.assertThat(result.getCode(), equalTo(SmsSendResultCode.SUCCESS.getCode()));

@@ -8,6 +8,7 @@ import com.javabaas.server.cloud.entity.CloudSetting;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.util.JSONUtil;
+import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.file.service.FileService;
 import com.javabaas.server.object.dao.impl.mongo.MongoDao;
 import com.javabaas.server.push.service.PushService;
@@ -43,6 +44,8 @@ public class AppService {
     private ClazzService clazzService;
     @Autowired
     private FieldService fieldService;
+    @Autowired
+    private AppConfigService appConfigService;
     @Autowired
     private MongoDao dao;
     @Autowired
@@ -87,6 +90,8 @@ public class AppService {
     public void delete(String id) {
         //删除包含的类
         clazzService.deleteAll(id);
+        //删除配置
+        appConfigService.deleteConfig(id);
         //删除自己
         appRepository.delete(id);
         //删除缓存
@@ -194,9 +199,9 @@ public class AppService {
         smsLogClazz.setInternal(true);
         clazzService.insert(appId, smsLogClazz, false);
         //手机号
-        Field phoneNumberField = new Field(FieldType.STRING, "phoneNumber");
-        phoneNumberField.setInternal(true);
-        fieldService.insert(appId, SmsService.SMS_LOG_CLASS_NAME, phoneNumberField);
+        Field phoneField = new Field(FieldType.STRING, "phone");
+        phoneField.setInternal(true);
+        fieldService.insert(appId, SmsService.SMS_LOG_CLASS_NAME, phoneField);
         //短信签名
         Field signName = new Field(FieldType.STRING, "signName");
         signName.setInternal(true);

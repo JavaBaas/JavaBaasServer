@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 /**
+ * 第三方账号管理接口
  * Created by test on 2017/6/19.
  */
 @RestController
@@ -31,13 +32,13 @@ public class AccountController {
     @RequestMapping(value = "/setAccount/{type}", method = RequestMethod.PUT)
     @ResponseBody
     public SimpleResult setAccount(@RequestHeader(value = "JB-AppId") String appId,
-                                       @PathVariable int type,
-                                       @Valid @RequestBody Account account) {
+                                   @PathVariable int type,
+                                   @Valid @RequestBody Account account) {
         AccountType accountType = AccountType.getType(type);
         if (accountType == null) {
             throw new SimpleError(SimpleCode.APP_ACCOUNT_ERROR);
         }
-        accountService.setAccount(appId,accountType, account);
+        accountService.setAccount(appId, accountType, account);
         return SimpleResult.success();
     }
 }

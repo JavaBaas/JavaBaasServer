@@ -2,7 +2,8 @@ package com.javabaas.server.sms.service;
 
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
-import com.javabaas.server.config.SmsConfig;
+import com.javabaas.server.config.entity.AppConfigEnum;
+import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.object.entity.BaasObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -20,21 +21,21 @@ import java.util.concurrent.TimeUnit;
 public class SmsRateLimiter {
 
     @Autowired
-    private SmsConfig smsConfig;
+    private AppConfigService appConfigService;
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    public void rate(String appId, String phoneNumber, String templateId, BaasObject params) {
-        sendIntervalLimit(appId, phoneNumber);
+    public void rate(String appId, String phone, String templateId, BaasObject params) {
+        sendIntervalLimit(appId, phone);
     }
 
     /**
      * 两次短信请求间隔限制
      */
-    private void sendIntervalLimit(String appId, String phoneNumber) {
+    private void sendIntervalLimit(String appId, String phone) {
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
-        Integer sendInterval = smsConfig.getSendIntervalLimit();
-        String key = "App_" + appId + "_SMS_SEND_INTERVAL_LIMIT_" + phoneNumber;
+        Long sendInterval = appConfigService.getLong(appId, AppConfigEnum.SMS_SEND_INTERVAL);
+        String key = "App_" + appId + "_SMS_SEND_INTERVAL_LIMIT_" + phone;
         String exist = ops.get(key);
         if (StringUtils.isEmpty(exist)) {
             //创建记录

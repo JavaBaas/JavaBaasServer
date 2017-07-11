@@ -22,3 +22,5 @@ target
 .settings
 .classpath
 .project
+
+test.properties

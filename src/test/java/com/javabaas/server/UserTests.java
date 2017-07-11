@@ -7,12 +7,18 @@ import com.javabaas.server.admin.service.AppService;
 import com.javabaas.server.admin.service.FieldService;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
+import com.javabaas.server.common.util.JSONUtil;
+import com.javabaas.server.config.entity.AppConfigEnum;
+import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.service.ObjectService;
+import com.javabaas.server.sms.handler.impl.MockSmsHandler;
 import com.javabaas.server.user.entity.BaasAuth;
+import com.javabaas.server.user.entity.BaasPhoneRegister;
 import com.javabaas.server.user.entity.BaasSnsType;
 import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.user.service.UserService;
+import com.javabaas.server.util.MockClient;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,18 +26,22 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * 测试用户系统
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Main.class,webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(classes = Main.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class UserTests {
 
     @Autowired
@@ -42,11 +52,21 @@ public class UserTests {
     private AppService appService;
     @Autowired
     private ObjectService objectService;
-
+    @Autowired
+    private AppConfigService appConfigService;
+    @Autowired
+    private JSONUtil jsonUtil;
+    @Autowired
+    private MockSmsHandler smsHandler;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+    private MockClient mockClient;
     private App app;
 
     @Before
     public void before() {
+        mockClient = new MockClient(webApplicationContext);
+
         appService.deleteByAppName("UserTestApp");
         app = new App();
         app.setName("UserTestApp");
@@ -59,6 +79,7 @@ public class UserTests {
         user.setUsername("u1");
         user.put("nickName", "u1");
         user.setPassword("bbbbbb");
+        user.setPhone("13813813838");
         userService.register(app.getId(), "cloud", user);
 
         user = new BaasUser();
@@ -66,6 +87,10 @@ public class UserTests {
         user.put("nickName", "u2");
         user.setPassword("bbbbbb");
         userService.register(app.getId(), "cloud", user);
+
+        //配置短信发送器为测试发送器
+        appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_HANDLER, "mockSmsHandler");
+
     }
 
     @After
@@ -106,7 +131,8 @@ public class UserTests {
     @Test
     public void testGet() {
         //测试普通权限无法读取保密字段
-        List<BaasObject> users = objectService.list(app.getId(), "admin", UserService.USER_CLASS_NAME, null, null, null, 100, 0, null, false);
+        List<BaasObject> users = objectService.list(app.getId(), "admin", UserService.USER_CLASS_NAME, null, null, null, 100, 0, null,
+                false);
         Assert.assertThat(users.size(), equalTo(2));
 
         BaasUser user1 = new BaasUser(users.get(0));
@@ -217,6 +243,51 @@ public class UserTests {
         String sessionTokenNew = user1.getSessionToken();
         Assert.assertThat(sessionTokenNew, notNullValue());
         Assert.assertThat(sessionTokenNew, not(sessionToken));
+    }
+
+    /**
+     * 测试手机号注册
+     */
+    @Test
+    public void testRegisterByPhone() throws Exception {
+        //获取短信验证码
+        mockClient.user(app, HttpMethod.GET, "/api/user/getSmsCode/13800138000", null)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code", is(SimpleCode.SUCCESS.getCode())));
+        String code = smsHandler.getSms("13800138000");
+
+        //使用验证码注册
+        BaasPhoneRegister register = new BaasPhoneRegister();
+        register.setPhone("13800138000");
+        register.setCode(code);
+        mockClient.user(app, HttpMethod.POST, "/api/user/loginWithPhone", jsonUtil.writeValueAsString(register))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.phone", is("13800138000")))
+                .andExpect(jsonPath("$.username", not(empty())));
+    }
+
+    /**
+     * 测试手机号登录
+     */
+    @Test
+    public void testLoginByPhone() throws Exception {
+        //获取短信验证码
+        mockClient.user(app, HttpMethod.GET, "/api/user/getSmsCode/13813813838", null)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.code", is(SimpleCode.SUCCESS.getCode())));
+        String code = smsHandler.getSms("13813813838");
+
+        //使用验证码注册
+        BaasPhoneRegister register = new BaasPhoneRegister();
+        register.setPhone("13813813838");
+        register.setCode(code);
+        mockClient.user(app, HttpMethod.POST, "/api/user/loginWithPhone", jsonUtil.writeValueAsString(register))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.phone", is("13813813838")))
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.sessionToken", not(empty())))
+                .andExpect(jsonPath("$.username", not(empty())));
     }
 
 

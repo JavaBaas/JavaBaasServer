@@ -15,7 +15,7 @@ public class LocalSmsSendHandler implements ISmsHandler {
     private RestTemplate rest;
 
     @Override
-    public SmsSendResult sendSms(String id, String phoneNumber, String signName, String templateId, BaasObject params) {
+    public SmsSendResult sendSms(String appId, String id, String phone, String signName, String templateId, BaasObject params) {
         return null;
     }
 

@@ -16,12 +16,12 @@ public class SmsLog extends BaasObject {
         super(m);
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        put("phoneNumber", phoneNumber);
+    public void setPhone(String phone) {
+        put("phone", phone);
     }
 
-    public String getPhoneNumber() {
-        return getString("phoneNumber");
+    public String getPhone() {
+        return getString("phone");
     }
 
     public void setSignName(String signName) {

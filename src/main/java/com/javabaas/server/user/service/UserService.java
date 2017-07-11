@@ -6,11 +6,13 @@ import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.service.ObjectService;
+import com.javabaas.server.sms.service.SmsService;
 import com.javabaas.server.user.entity.BaasAuth;
 import com.javabaas.server.user.entity.BaasPhoneRegister;
 import com.javabaas.server.user.entity.BaasSnsType;
 import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.user.util.SnsAuthUtil;
+import com.javabaas.server.user.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -34,6 +36,8 @@ public class UserService {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private ObjectService objectService;
+    @Autowired
+    private SmsService smsService;
     @Autowired
     private JSONUtil jsonUtil;
     @Autowired
@@ -72,7 +76,6 @@ public class UserService {
      *
      * @param username 用户名
      * @return 用户
-     * @throws SimpleError
      */
     public BaasUser get(String appId, String plat, String username, BaasUser currentUser, boolean isMaster) {
         BaasQuery query = new BaasQuery();
@@ -129,8 +132,6 @@ public class UserService {
         }
         BaasObject authNow = user.getAuth();
         //填充授权信息
-//        authNow.put(snsType.getValue(), auth);
-
         updateAuth(snsType, authNow, auth);
         BaasUser userNew = new BaasUser();
         userNew.setAuth(authNow);
@@ -296,9 +297,6 @@ public class UserService {
         deleteUserCache(appId, userNow.getSessionToken());
     }
 
-    public String encrypt(String username, String password) {
-        return DigestUtils.md5DigestAsHex((username + "_._" + password).getBytes());
-    }
 
     /**
      * 获取当前用户
@@ -400,9 +398,36 @@ public class UserService {
         }
     }
 
-    public BaasUser loginWithPhone(String appId, String plat, String platform, BaasPhoneRegister register) {
-        //TODO
-        return null;
+    /**
+     * 使用手机号进行登录 未注册用户自动注册
+     *
+     * @param appId    应用
+     * @param plat     平台
+     * @param register 注册信息
+     * @return 用户
+     */
+    public BaasUser loginWithPhone(String appId, String plat, BaasPhoneRegister register) {
+        //判断用户是否存在
+        BaasQuery query = new BaasQuery();
+        query.put("phone", register.getPhone());
+        List<BaasObject> users = objectService.list(appId, plat, USER_CLASS_NAME, query, null, null, 1, 0, null, true);
+        if (users.size() == 0) {
+            //用户不存在 自动注册用户
+            BaasUser user = new BaasUser();
+            //自动生成用户名
+            user.setUsername("phone_" + register.getPhone());
+            //自动生成密码
+            user.setPassword(UUID.uuid());
+            //填充手机号
+            user.setPhone(register.getPhone());
+            //注册用户
+            return register(appId, plat, user);
+        } else {
+            //用户存在 返回用户信息
+            BaasUser user = new BaasUser(users.get(0));
+            user.remove("password");
+            return user;
+        }
     }
 
     /**
@@ -410,15 +435,15 @@ public class UserService {
      * 验证码会与手机号对应
      * 缓存在Redis中
      *
-     * @param phoneNumber 手机号
+     * @param phone 手机号
      */
-    public void getSmsCode(String appId, String plat, String phoneNumber) {
-        //TODO
-        //生成短信验证码并缓存
+    public void getSmsCode(String appId, String plat, String phone) {
+        //发送短信验证码
+        smsService.sendSmsCode(appId, plat, phone, 600);//短信验证码默认十分钟内有效
     }
 
     private String getSessionToken() {
-        return UUID.randomUUID().toString().replace("-", "");
+        return java.util.UUID.randomUUID().toString().replace("-", "");
     }
 
     /**
@@ -427,9 +452,18 @@ public class UserService {
      * @param name 用户名
      * @return 是否满足规则
      */
-    public boolean isNameValid(String name) {
+    private boolean isNameValid(String name) {
         String regex = "^[a-zA-Z0-9_@.]*$";
         return Pattern.matches(regex, name);
     }
 
+    /**
+     * 密码加密
+     *
+     * @param username 用户名
+     * @param password 密码
+     */
+    private String encrypt(String username, String password) {
+        return DigestUtils.md5DigestAsHex((username + "_._" + password).getBytes());
+    }
 }

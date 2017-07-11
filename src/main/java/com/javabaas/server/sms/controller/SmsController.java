@@ -6,6 +6,7 @@ import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.sms.entity.SmsSendResult;
 import com.javabaas.server.sms.service.SmsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,43 +32,43 @@ public class SmsController {
     @ResponseBody
     public SimpleResult send(@RequestHeader(value = "JB-AppId") String appId,
                              @RequestHeader(value = "JB-Plat") String plat,
-                             @RequestParam String phoneNumber,
+                             @RequestParam String phone,
                              @RequestParam String templateId,
                              @RequestParam(required = false) String params) {
         BaasObject paramsObject = StringUtils.isEmpty(params) ? null : jsonUtil.readValue(params, BaasObject.class);
-        SmsSendResult sendResult = smsService.sendSms(appId, plat, phoneNumber, templateId, paramsObject);
+        SmsSendResult sendResult = smsService.sendSms(appId, plat, phone, templateId, paramsObject);
         return SimpleResult.success().putData("sendResult", sendResult);
     }
 
     /**
      * 发送短信验证码
      *
-     * @param phoneNumber 手机号码
-     * @param ttl         失效时间
+     * @param phone 手机号码
+     * @param ttl   失效时间
      */
     @RequestMapping(value = "/smsCode", method = RequestMethod.GET)
     @ResponseBody
     public SimpleResult smsCode(@RequestHeader(value = "JB-AppId") String appId,
                                 @RequestHeader(value = "JB-Plat") String plat,
-                                @RequestParam String phoneNumber,
+                                @RequestParam String phone,
                                 @RequestParam long ttl) {
-        SmsSendResult sendResult = smsService.sendSmsCode(appId, plat, phoneNumber, ttl);
+        SmsSendResult sendResult = smsService.sendSmsCode(appId, plat, phone, ttl);
         return SimpleResult.success().putData("sendResult", sendResult);
     }
 
     /**
      * 验证短信验证码
      *
-     * @param phoneNumber 手机号码
-     * @param code        验证码
+     * @param phone 手机号码
+     * @param code  验证码
      */
     @RequestMapping(value = "/verifyCode", method = RequestMethod.GET)
     @ResponseBody
     public SimpleResult smsCode(@RequestHeader(value = "JB-AppId") String appId,
                                 @RequestHeader(value = "JB-Plat") String plat,
-                                @RequestParam String phoneNumber,
+                                @RequestParam String phone,
                                 @RequestParam String code) {
-        boolean result = smsService.verifySmsCode(appId, phoneNumber, code);
+        boolean result = smsService.verifySmsCode(appId, phone, code);
         return SimpleResult.success().putData("verifyResult", result);
     }
 
