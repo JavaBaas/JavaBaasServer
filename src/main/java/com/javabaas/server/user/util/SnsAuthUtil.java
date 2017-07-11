@@ -83,7 +83,7 @@ public class SnsAuthUtil {
             throw new SimpleError(SimpleCode.USER_AUTH_ERROR);
         }
         //请求微信授权服务器验证授权是否有效
-        String resultStr = rest.getForObject("https://api.weixin.qq.com/sns/auth?access_token={access_token}&openid={openid}", String.class, auth.getAccessToken(), auth.getUid());
+        String resultStr = rest.getForObject("https://api.weixin.qq.com/sns/auth?access_token={access_token}&openid={openid}", String.class, auth.getAccessToken(), auth.getOpenId());
         if (StringUtils.isEmpty(resultStr)) {
             //返回信息为空 鉴权失败
             errorLog("weixin", auth, resultStr, "返回信息为空");
