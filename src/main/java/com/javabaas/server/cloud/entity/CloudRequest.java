@@ -16,6 +16,7 @@ public class CloudRequest {
     private String timestamp;
     private String masterSign;
     private Map<String, String> params;
+    private String body;
 
     public String getAppId() {
         return appId;
@@ -71,5 +72,13 @@ public class CloudRequest {
 
     public void setParams(Map<String, String> params) {
         this.params = params;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 }

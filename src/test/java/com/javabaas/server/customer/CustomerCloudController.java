@@ -37,7 +37,7 @@ public class CustomerCloudController {
         response.setCode(1);
         String param1 = request.getParams().get("param1");
         String param2 = request.getParams().get("param2");
-        response.setMessage(param1 + param2);
+        response.setMessage(param1 + param2 + request.getBody());
         return response;
     }
 

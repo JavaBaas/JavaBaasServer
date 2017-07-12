@@ -98,7 +98,7 @@ public class CloudTests {
     public void testNotDeployed() {
         //测试未部署的应用
         try {
-            cloudService.cloud(appNotDeployed.getId(), "admin", "NoName", null, false, new HashMap<>());
+            cloudService.cloud(appNotDeployed.getId(), "admin", "NoName", null, false, new HashMap<>(), null);
             Assert.fail();
         } catch (SimpleError e) {
             Assert.assertThat(e.getCode(), equalTo(SimpleCode.CLOUD_NOT_DEPLOYED.getCode()));
@@ -110,7 +110,7 @@ public class CloudTests {
         cloudSetting.setCloudFunctions(cloudFunctions);
         cloudService.deploy(appNotDeployed.getId(), cloudSetting);
         try {
-            cloudService.cloud(appNotDeployed.getId(), "admin", "function1", null, false, new HashMap<>());
+            cloudService.cloud(appNotDeployed.getId(), "admin", "function1", null, false, new HashMap<>(), null);
             Assert.fail();
         } catch (SimpleError e) {
             Assert.assertThat(e.getCode(), equalTo(SimpleCode.CLOUD_NOT_DEPLOYED.getCode()));
@@ -121,34 +121,35 @@ public class CloudTests {
     public void testFunction() {
         //测试调用错误的方法名称
         try {
-            cloudService.cloud(app.getId(), "admin", "NoName", null, false, new HashMap<>());
+            cloudService.cloud(app.getId(), "admin", "NoName", null, false, new HashMap<>(), null);
             Assert.fail();
         } catch (SimpleError e) {
             Assert.assertThat(e.getCode(), equalTo(SimpleCode.CLOUD_FUNCTION_NOT_FOUND.getCode()));
         }
         //测试调用未实现的方法
         try {
-            cloudService.cloud(app.getId(), "admin", "functionNotImpl", null, false, new HashMap<>());
+            cloudService.cloud(app.getId(), "admin", "functionNotImpl", null, false, new HashMap<>(), null);
             Assert.fail();
         } catch (SimpleError e) {
             Assert.assertThat(e.getCode(), equalTo(SimpleCode.CLOUD_FUNCTION_ERROR.getCode()));
         }
         //测试方法调用
-        SimpleResult result = cloudService.cloud(app.getId(), "admin", "function1", null, false, new HashMap<>());
+        SimpleResult result = cloudService.cloud(app.getId(), "admin", "function1", null, false, new HashMap<>(), null);
         Assert.assertThat(result.getCode(), equalTo(0));
         Assert.assertThat(result.getMessage(), equalTo("success"));
         //测试用户是否传递成功
         BaasUser user = userService.get(app.getId(), "admin", "user", null, true);
-        result = cloudService.cloud(app.getId(), "admin", "function2", user, false, new HashMap<>());
+        result = cloudService.cloud(app.getId(), "admin", "function2", user, false, new HashMap<>(), null);
         Assert.assertThat(result.getCode(), equalTo(0));
         Assert.assertThat(result.getMessage(), equalTo(user.getUsername()));
         //测试参数是否传递成功
         Map<String, String> params = new HashMap<>();
         params.put("param1", "param1");
         params.put("param2", "param2");
-        result = cloudService.cloud(app.getId(), "admin", "function3", user, false, params);
+        String body = "hello world";
+        result = cloudService.cloud(app.getId(), "admin", "function3", user, false, params, body);
         Assert.assertThat(result.getCode(), equalTo(1));
-        Assert.assertThat(result.getMessage(), equalTo("param1param2"));
+        Assert.assertThat(result.getMessage(), equalTo("param1param2hello world"));
     }
 
 }

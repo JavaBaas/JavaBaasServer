@@ -31,7 +31,7 @@ public class CloudService {
     @Autowired
     private SignUtil signUtil;
 
-    public SimpleResult cloud(String appId, String plat, String functionName, BaasUser user, boolean isMaster, Map<String, String> requestParams) {
+    public SimpleResult cloud(String appId, String plat, String functionName, BaasUser user, boolean isMaster, Map<String, String> requestParams, String body) {
         //准备请求数据
         CloudRequest cloudRequest = new CloudRequest();
         //设置用户信息
@@ -45,6 +45,7 @@ public class CloudService {
         //设置请求参数
         cloudRequest.setAppId(appId);
         cloudRequest.setParams(requestParams);
+        cloudRequest.setBody(body);
         //将请求转发至业务服务器
         App app = appService.get(appId);
         if (app.getCloudSetting() == null || StringUtils.isEmpty(app.getCloudSetting().getCustomerHost())) {

@@ -33,17 +33,19 @@ public class CloudController {
     @ResponseBody
     public SimpleResult cloud(@RequestHeader(value = "JB-AppId") String appId,
                               @RequestHeader(value = "JB-Plat") String plat,
-                              @PathVariable String name) {
+                              @PathVariable String name,
+                              @RequestBody(required = false) String body) {
         //获取登录用户
         boolean isMaster = masterService.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         //整理请求参数
         Map<String, String> requestParams = new HashMap<>();
         Set<String> keys = request.getParameterMap().keySet();
+
         for (String key : keys) {
             requestParams.put(key, request.getParameter(key));
         }
-        return cloudService.cloud(appId, plat, name, currentUser, isMaster, requestParams);
+        return cloudService.cloud(appId, plat, name, currentUser, isMaster, requestParams, body);
     }
 
 }
