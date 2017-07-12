@@ -58,12 +58,19 @@ public class ApplicationEventListener implements ApplicationListener<Application
             log.error("MongoDB error!");
         }
         if (!error) {
-            log.info("JavaBaasServer started.");
-            log.info("Key: " + authConfig.getKey());
-            log.info("Timeout: " + authConfig.getTimeout());
+            //应用启动成功
+            success();
         } else {
+            //应用启动失败
             log.error("JavaBaasServer failed to start!");
         }
+    }
+
+    private void success() {
+        //显示配置信息
+        log.info("JavaBaasServer started.");
+        log.info("Key: " + authConfig.getKey());
+        log.info("Timeout: " + authConfig.getTimeout());
     }
 
     public static boolean isReady() {

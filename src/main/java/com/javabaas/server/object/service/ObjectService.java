@@ -200,7 +200,6 @@ public class ObjectService {
      * @param className 类名称
      * @param id        对象id
      * @return 对象
-     * @throws SimpleError
      */
     public BaasObject get(String appId, String plat, String className, String id) {
         return get(appId, plat, className, id, null, null, true);

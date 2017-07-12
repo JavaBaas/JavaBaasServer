@@ -1,7 +1,10 @@
 package com.javabaas.server.sms.handler.impl;
 
+import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.sms.entity.SmsSendResult;
 import com.javabaas.server.sms.handler.ISmsHandler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -14,17 +17,22 @@ import java.util.Map;
 @Component
 public class MockSmsHandler implements ISmsHandler {
 
+    private Log log = LogFactory.getLog(getClass());
+
     private Map<String, String> map = new HashMap<>();
 
-    public String getSms(String phoneNumber) {
-        return map.get(phoneNumber);
+    public String getSms(String phone) {
+        return map.get(phone);
     }
 
     @Override
-    public SmsSendResult sendSms(String phoneNumber, String signName, String templateId, Map<String, String> params) {
+    public SmsSendResult sendSms(String appId, String id, String phone, String signName, String templateId, BaasObject params) {
         StringBuilder sms = new StringBuilder();
-        params.forEach((k, v) -> sms.append(v));
-        map.put(phoneNumber, sms.toString());
+        if (params != null) {
+            params.forEach((k, v) -> sms.append(v));
+        }
+        map.put(phone, sms.toString());
+        log.info("Mock短信 phone:" + phone + " sms:" + sms);
         return SmsSendResult.success();
     }
 

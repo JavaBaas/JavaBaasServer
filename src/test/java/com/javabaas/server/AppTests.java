@@ -33,7 +33,7 @@ import static org.hamcrest.Matchers.nullValue;
  * Created by Staryet on 15/8/11.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Main.class,webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(classes = Main.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class AppTests {
 
     @Autowired
@@ -127,8 +127,8 @@ public class AppTests {
     public void testExport() {
         AppExport appExport = appService.export(app.getId());
         Assert.assertThat(appExport.getName(), equalTo("AppTest1"));
-        Assert.assertThat(appExport.getClazzs().size(), equalTo(5));
-        ClazzExport clazz1 = appExport.getClazzs().get(4);
+        Assert.assertThat(appExport.getClazzs().size(), equalTo(6));
+        ClazzExport clazz1 = appExport.getClazzs().get(appExport.getClazzs().size() - 1);
         Assert.assertThat(clazz1.getName(), equalTo("clazz1"));
         Assert.assertThat(clazz1.getFields().size(), equalTo(2));
         FieldExport field1 = clazz1.getFields().get(0);
@@ -149,8 +149,8 @@ public class AppTests {
         //验证导入结果
         appExport = appService.export(app2.getId());
         Assert.assertThat(appExport.getName(), equalTo("AppTest2"));
-        Assert.assertThat(appExport.getClazzs().size(), equalTo(5));
-        ClazzExport clazz1 = appExport.getClazzs().get(4);
+        Assert.assertThat(appExport.getClazzs().size(), equalTo(6));
+        ClazzExport clazz1 = appExport.getClazzs().get(appExport.getClazzs().size() - 1);
         Assert.assertThat(clazz1.getName(), equalTo("clazz1"));
         Assert.assertThat(clazz1.getFields().size(), equalTo(2));
         FieldExport field1 = clazz1.getFields().get(0);

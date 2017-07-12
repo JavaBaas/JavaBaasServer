@@ -48,6 +48,10 @@ public class BaasUser extends BaasObject {
         return (String) get("sessionToken");
     }
 
+    public void setPhone(String phone) {
+        put("phone", phone);
+    }
+
     public String getPhone() {
         return (String) get("phone");
     }

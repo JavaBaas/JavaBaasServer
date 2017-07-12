@@ -12,7 +12,7 @@ public class SimpleResult extends HashMap<String, Object> {
     public static int SUCCESS = 0;
 
     public static SimpleResult success() {
-        return new SimpleResult(SUCCESS, "");
+        return new SimpleResult(SimpleCode.SUCCESS);
     }
 
     public static SimpleResult error(int code) {
@@ -53,8 +53,9 @@ public class SimpleResult extends HashMap<String, Object> {
     }
 
     @SuppressWarnings("unchecked")
-    public void putData(String key, Object value) {
+    public SimpleResult putData(String key, Object value) {
         ((LinkedHashMap<String, Object>) get("data")).put(key, value);
+        return this;
     }
 
     @SuppressWarnings("unchecked")
@@ -63,7 +64,8 @@ public class SimpleResult extends HashMap<String, Object> {
     }
 
     @SuppressWarnings("unchecked")
-    public void putDataAll(Map<? extends String, ?> map) {
+    public SimpleResult putDataAll(Map<? extends String, ?> map) {
         ((LinkedHashMap<String, Object>) get("data")).putAll(map);
+        return this;
     }
 }

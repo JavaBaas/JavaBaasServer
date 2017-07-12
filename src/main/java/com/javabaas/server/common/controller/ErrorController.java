@@ -1,6 +1,6 @@
 package com.javabaas.server.common.controller;
 
-import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.entity.SimpleResult;
@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.List;
 
 /**
+ * 全局错误处理控制器
  * Created by Staryet on 15/6/17.
  */
 @ControllerAdvice
@@ -40,7 +41,11 @@ public class ErrorController {
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public SimpleResult errorResponse(HttpMessageNotReadableException t) {
-        return new SimpleResult(SimpleCode.REQUEST_PARAM_ERROR);
+        if (t.getCause() instanceof JsonProcessingException) {
+            return new SimpleResult(SimpleCode.REQUEST_JSON_ERROR);
+        } else {
+            return new SimpleResult(SimpleCode.REQUEST_PARAM_ERROR);
+        }
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -80,12 +85,6 @@ public class ErrorController {
         return new SimpleResult(SimpleCode.REQUEST_CONTENT_TYPE_ERROR);
     }
 
-    @ExceptionHandler(JsonParseException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public SimpleResult errorResponse(JsonParseException t) {
-        return new SimpleResult(SimpleCode.REQUEST_JSON_ERROR);
-    }
 
     @ExceptionHandler(ClientAbortException.class)
     public void errorResponse(ClientAbortException t) {

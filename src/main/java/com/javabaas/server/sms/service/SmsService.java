@@ -1,7 +1,15 @@
 package com.javabaas.server.sms.service;
 
-import com.javabaas.server.config.SmsConfig;
+import com.javabaas.server.common.entity.SimpleCode;
+import com.javabaas.server.common.entity.SimpleError;
+import com.javabaas.server.config.entity.AppConfigEnum;
+import com.javabaas.server.config.service.AppConfigService;
+import com.javabaas.server.object.entity.BaasObject;
+import com.javabaas.server.object.service.ObjectService;
+import com.javabaas.server.sms.entity.SmsLog;
 import com.javabaas.server.sms.entity.SmsSendResult;
+import com.javabaas.server.sms.entity.SmsSendResultCode;
+import com.javabaas.server.sms.entity.SmsSendState;
 import com.javabaas.server.sms.handler.ISmsHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -9,7 +17,6 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -20,58 +27,74 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class SmsService {
 
+    public static final String SMS_LOG_CLASS_NAME = "_SmsLog";
     private static final String SMS_CODE_NAME = "_SMS_CODE";
-    private ISmsHandler smsHandler;
     @Autowired
-    private SmsConfig smsConfig;
+    private Map<String, ISmsHandler> handlers;
+    @Autowired
+    private ObjectService objectService;
+    @Autowired
+    private AppConfigService appConfigService;
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
     private SmsRateLimiter rateLimiter;
 
-    public ISmsHandler getSmsHandler() {
-        return smsHandler;
-    }
-
-    public void setSmsHandler(ISmsHandler smsHandler) {
-        this.smsHandler = smsHandler;
-    }
-
-    public SmsSendResult sendSms(String appId, String phoneNumber, String signName, String templateId, Map<String, String> params) {
+    public SmsSendResult sendSms(String appId, String plat, String phone, String templateId, BaasObject params) {
         //请求频率限制
-        rateLimiter.rate(appId, phoneNumber, signName, templateId, params);
+        rateLimiter.rate(appId, phone, templateId, params);
+        //获取短信签名
+        String signName = appConfigService.getString(appId, AppConfigEnum.SMS_SIGN_NAME);
+        //记录发送日志
+        SmsLog smsLog = new SmsLog();
+        smsLog.setPhone(phone);
+        smsLog.setSignName(signName);
+        smsLog.setTemplateId(templateId);
+        smsLog.setParams(params);
+        smsLog.setState(SmsSendState.WAIT.getCode());
+        smsLog = new SmsLog(objectService.insert(appId, plat, SMS_LOG_CLASS_NAME, smsLog, null, true));
         //发送
-        return smsHandler.sendSms(phoneNumber, signName, templateId, params);
+        SmsSendResult smsSendResult = getSmsHandler(appId).sendSms(appId, smsLog.getId(), phone, signName, templateId, params);
+        if (smsSendResult == null || smsSendResult.getCode() != SmsSendResultCode.SUCCESS.getCode()) {
+            //发送失败
+            smsLog.setState(SmsSendState.FAIL.getCode());
+            objectService.update(appId, plat, SMS_LOG_CLASS_NAME, smsLog.getId(), smsLog, null, true);
+        } else {
+            //发送成功
+            smsLog.setState(SmsSendState.SUCCESS.getCode());
+            objectService.update(appId, plat, SMS_LOG_CLASS_NAME, smsLog.getId(), smsLog, null, true);
+        }
+        return smsSendResult;
     }
 
     /**
      * 发送手机验证码
      *
-     * @param phoneNumber 电话号码
-     * @param ttl         失效时间(秒)
+     * @param phone 电话号码
+     * @param ttl   失效时间(秒)
      */
-    public SmsSendResult sendSmsCode(String appId, String phoneNumber, long ttl) {
+    public SmsSendResult sendSmsCode(String appId, String plat, String phone, long ttl) {
         //生成六位随机数字验证码
         String code = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
         //记录验证码
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
-        ops.set(getKey(appId, phoneNumber), code, ttl, TimeUnit.SECONDS);
+        ops.set(getKey(appId, phone), code, ttl, TimeUnit.SECONDS);
         //发送短信
-        Map<String, String> params = new HashMap<>();
+        BaasObject params = new BaasObject();
         //短信验证码参数固定为code
         params.put("code", code);
-        return sendSms(appId, phoneNumber, smsConfig.getSignName(), smsConfig.getSmsCodeTemplateId(), params);
+        return sendSms(appId, plat, phone, appConfigService.getString(appId, AppConfigEnum.SMS_CODE_TEMPLATE_ID), params);
     }
 
     /**
      * 验证手机验证码
      *
-     * @param phoneNumber 电话号码
-     * @param code        验证码
+     * @param phone 电话号码
+     * @param code  验证码
      */
-    public boolean verifySmsCode(String appId, String phoneNumber, String code) {
+    public boolean verifySmsCode(String appId, String phone, String code) {
         //获取已缓存的手机验证码
-        String key = getKey(appId, phoneNumber);
+        String key = getKey(appId, phone);
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
         String rightCode = ops.get(key);
         if (StringUtils.isEmpty(rightCode)) {
@@ -86,7 +109,7 @@ public class SmsService {
             } else {
                 //尝试次数限制
                 Long times = ops.increment(key + "_times", 1);
-                if (times > smsConfig.getTryErrorLimit()) {
+                if (times > appConfigService.getLong(appId, AppConfigEnum.SMS_TRY_LIMIT)) {
                     //超过尝试次数限制 删除缓存中的验证码
                     redisTemplate.delete(key);
                 }
@@ -95,8 +118,25 @@ public class SmsService {
         }
     }
 
-    private String getKey(String appId, String phoneNumber) {
-        return "App_" + appId + SMS_CODE_NAME + "_" + phoneNumber;
+    /**
+     * 选择短信处理器
+     */
+    private ISmsHandler getSmsHandler(String appId) {
+        String handlerName = appConfigService.getString(appId, AppConfigEnum.SMS_HANDLER);
+        if (StringUtils.isEmpty(handlerName)) {
+            //短信处理器未定义
+            SimpleError.e(SimpleCode.SMS_HANDLER_NOT_DEFINE);
+        }
+        ISmsHandler handler = handlers.get(handlerName);
+        if (handler == null) {
+            //短信处理器未找到
+            SimpleError.e(SimpleCode.SMS_HANDLER_NOT_FOUND);
+        }
+        return handler;
+    }
+
+    private String getKey(String appId, String phone) {
+        return "App_" + appId + SMS_CODE_NAME + "_" + phone;
     }
 
 }

@@ -1,26 +1,32 @@
 package com.javabaas.server.user.entity;
 
+import com.javabaas.server.object.entity.BaasObject;
+import org.hibernate.validator.constraints.NotEmpty;
+
 /**
+ * 手机号注册对象
  * Created by Codi on 2017/6/26.
  */
-public class BaasPhoneRegister {
+public class BaasPhoneRegister extends BaasObject {
 
-    private String phoneNumber;
-    private String smsCode;
-
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public BaasPhoneRegister() {
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    @NotEmpty(message = "手机号不能为空")
+    public String getPhone() {
+        return getString("phone");
     }
 
-    public String getSmsCode() {
-        return smsCode;
+    public void setPhone(String phone) {
+        put("phone", phone);
     }
 
-    public void setSmsCode(String smsCode) {
-        this.smsCode = smsCode;
+    @NotEmpty(message = "验证码不能为空")
+    public String getCode() {
+        return getString("code");
+    }
+
+    public void setCode(String code) {
+        put("code", code);
     }
 }

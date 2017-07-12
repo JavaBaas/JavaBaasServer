@@ -8,9 +8,11 @@ import com.javabaas.server.cloud.entity.CloudSetting;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.util.JSONUtil;
+import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.file.service.FileService;
 import com.javabaas.server.object.dao.impl.mongo.MongoDao;
 import com.javabaas.server.push.service.PushService;
+import com.javabaas.server.sms.service.SmsService;
 import com.javabaas.server.user.service.InstallationService;
 import com.javabaas.server.user.service.UserService;
 import org.apache.commons.logging.Log;
@@ -42,6 +44,8 @@ public class AppService {
     private ClazzService clazzService;
     @Autowired
     private FieldService fieldService;
+    @Autowired
+    private AppConfigService appConfigService;
     @Autowired
     private MongoDao dao;
     @Autowired
@@ -86,6 +90,8 @@ public class AppService {
     public void delete(String id) {
         //删除包含的类
         clazzService.deleteAll(id);
+        //删除配置
+        appConfigService.deleteConfig(id);
         //删除自己
         appRepository.delete(id);
         //删除缓存
@@ -182,7 +188,37 @@ public class AppService {
         initFileClass(appId);
         //初始化推送日志类
         initPushLogClass(appId);
+        //初始化短信日志类
+        initSmsLogClass(appId);
         log.info("App:" + appId + " 应用初始化成功.");
+    }
+
+    private void initSmsLogClass(String appId) {
+        Clazz smsLogClazz = new Clazz();
+        smsLogClazz.setName(SmsService.SMS_LOG_CLASS_NAME);
+        smsLogClazz.setInternal(true);
+        clazzService.insert(appId, smsLogClazz, false);
+        //手机号
+        Field phoneField = new Field(FieldType.STRING, "phone");
+        phoneField.setInternal(true);
+        fieldService.insert(appId, SmsService.SMS_LOG_CLASS_NAME, phoneField);
+        //短信签名
+        Field signName = new Field(FieldType.STRING, "signName");
+        signName.setInternal(true);
+        fieldService.insert(appId, SmsService.SMS_LOG_CLASS_NAME, signName);
+        //模版编号
+        Field templateId = new Field(FieldType.STRING, "templateId");
+        templateId.setInternal(true);
+        fieldService.insert(appId, SmsService.SMS_LOG_CLASS_NAME, templateId);
+        //发送参数
+        Field params = new Field(FieldType.OBJECT, "params");
+        templateId.setInternal(true);
+        fieldService.insert(appId, SmsService.SMS_LOG_CLASS_NAME, params);
+        //发送状态
+        Field state = new Field(FieldType.NUMBER, "state");
+        state.setInternal(true);
+        fieldService.insert(appId, SmsService.SMS_LOG_CLASS_NAME, state);
+        log.info("App:" + appId + " 短信日志类初始化成功.");
     }
 
     private void initPushLogClass(String appId) {

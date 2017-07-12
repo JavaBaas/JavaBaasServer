@@ -7,14 +7,15 @@ import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.common.service.MasterService;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.user.entity.BaasAuth;
+import com.javabaas.server.user.entity.BaasPhoneRegister;
 import com.javabaas.server.user.entity.BaasSnsType;
 import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -150,7 +151,6 @@ public class UserController {
      * @param username 用户名
      * @param password 密码
      * @return 请求结果
-     * @throws SimpleError
      */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     @ResponseBody
@@ -182,22 +182,22 @@ public class UserController {
     @ResponseBody
     public BaasUser loginWithPhone(@RequestHeader(value = "JB-AppId") String appId,
                                    @RequestHeader(value = "JB-Plat") String plat,
-                                   @RequestBody String body) {
-        return null;
+                                   @Valid @RequestBody BaasPhoneRegister register) {
+        return userService.loginWithPhone(appId, plat, register);
     }
 
     /**
      * 获取注册登录短信验证码
      *
-     * @param phoneNumber 手机号码
+     * @param phone 手机号码
      * @return 请求结果
      */
-    @RequestMapping(value = "/getSmsCode/{phoneNumber}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getSmsCode/{phone}", method = RequestMethod.GET)
     @ResponseBody
     public SimpleResult getSmsCode(@RequestHeader(value = "JB-AppId") String appId,
                                    @RequestHeader(value = "JB-Plat") String plat,
-                                   @PathVariable String phoneNumber) {
-        userService.getSmsCode(appId, plat, phoneNumber);
+                                   @PathVariable String phone) {
+        userService.getSmsCode(appId, plat, phone);
         return SimpleResult.success();
     }
 

@@ -17,8 +17,6 @@ public class AccountService {
     @Autowired
     private AppService appService;
 
-
-
     /**
      * 查询账号信息
      *
@@ -32,11 +30,11 @@ public class AccountService {
     /**
      * 设置账号信息
      *
-     * @param appId appId
+     * @param appId       appId
      * @param accountType type
-     * @param account account
+     * @param account     account
      */
-    public void setAccount(String appId,AccountType accountType, Account account) {
+    public void setAccount(String appId, AccountType accountType, Account account) {
         appService.setAccount(appId, accountType, account);
         log.info("App:" + appId + " " + accountType.getValue() + "账号设置成功");
     }

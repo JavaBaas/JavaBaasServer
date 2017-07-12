@@ -72,7 +72,6 @@ public class ClazzService {
      * @param appId 应用id
      * @param clazz 类
      * @param valid 是否检查名称
-     * @throws SimpleError
      */
     public void insert(String appId, Clazz clazz, boolean valid) {
         String name = clazz.getName();
