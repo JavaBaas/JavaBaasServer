@@ -1,0 +1,4 @@
+language: java
+services:
+  - mongodb
+  - redis-server
