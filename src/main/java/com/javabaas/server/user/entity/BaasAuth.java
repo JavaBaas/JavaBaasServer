@@ -16,6 +16,10 @@ public class BaasAuth extends BaasObject {
         super(m);
     }
 
+    public void setAccessToken(String accessToken) {
+        put("accessToken", accessToken);
+    }
+
     public String getAccessToken() {
         return (String) get("accessToken");
     }

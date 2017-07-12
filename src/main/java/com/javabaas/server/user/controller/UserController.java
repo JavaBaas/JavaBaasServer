@@ -6,10 +6,7 @@ import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.common.service.MasterService;
 import com.javabaas.server.common.util.JSONUtil;
-import com.javabaas.server.user.entity.BaasAuth;
-import com.javabaas.server.user.entity.BaasPhoneRegister;
-import com.javabaas.server.user.entity.BaasSnsType;
-import com.javabaas.server.user.entity.BaasUser;
+import com.javabaas.server.user.entity.*;
 import com.javabaas.server.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -161,6 +158,12 @@ public class UserController {
         return userService.login(appId, plat, username, password);
     }
 
+    /**
+     * 使用社交平台数据登录
+     *
+     * @param authData 社交平台数据
+     * @param platform 平台类型
+     */
     @RequestMapping(value = "/loginWithSns/{platform}", method = RequestMethod.POST)
     @ResponseBody
     public BaasUser loginWithSns(@RequestHeader(value = "JB-AppId") String appId,
@@ -172,7 +175,26 @@ public class UserController {
             throw new SimpleError(SimpleCode.USER_AUTH_PLATFORM_MISSING);
         }
         BaasAuth auth = jsonUtil.readValue(authData, BaasAuth.class);
-        return userService.loginWithSns(appId, plat, baasSnsType, auth);
+        return userService.registerWithSns(appId, plat, baasSnsType, auth, null);
+    }
+
+    /**
+     * 使用社交平台信息登录(用户不存在时自动注册)
+     *
+     * @param register 社交平台及用户数据
+     * @param platform 平台类型
+     */
+    @RequestMapping(value = "/registerWithSns/{platform}", method = RequestMethod.POST)
+    @ResponseBody
+    public BaasUser registerWithSns(@RequestHeader(value = "JB-AppId") String appId,
+                                    @RequestHeader(value = "JB-Plat") String plat,
+                                    @Valid @RequestBody BaasSnsRegister register,
+                                    @PathVariable int platform) {
+        BaasSnsType baasSnsType = BaasSnsType.getType(platform);
+        if (baasSnsType == null) {
+            throw new SimpleError(SimpleCode.USER_AUTH_PLATFORM_MISSING);
+        }
+        return userService.registerWithSns(appId, plat, baasSnsType, register.getAuth(), register.getUser());
     }
 
     /**

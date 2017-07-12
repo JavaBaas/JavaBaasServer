@@ -113,32 +113,48 @@ public class UserService {
     }
 
     /**
-     * 使用第三方平台登录信息进行登录
+     * 使用第三方平台登录信息进行登录 不存在时自动注册
      *
-     * @param appId   应用id
-     * @param snsType 第三方登录信息
-     * @param auth    授权信息
-     * @return 用户信息
+     * @param appId        应用id
+     * @param snsType      第三方平台
+     * @param auth         登录信息
+     * @param registerUser 自动注册时携带的用户信息
+     * @return 用户
      */
-    public BaasUser loginWithSns(String appId, String plat, BaasSnsType snsType, BaasAuth auth) {
+    public BaasUser registerWithSns(String appId, String plat, BaasSnsType snsType, BaasAuth auth, BaasUser registerUser) {
         //验证授权信息
         if (!authUtil.verifyAuthData(appId, snsType, auth)) {
             //授权无效
             throw new SimpleError(SimpleCode.USER_AUTH_REJECT);
         }
         BaasUser user = getUserByAuth(appId, plat, snsType, auth);
-        if (user == null) {
-            throw new SimpleError(SimpleCode.USER_NOT_EXIST);
+        if (user != null) {
+            //用户存在
+            BaasObject authNow = user.getAuth();
+            //填充授权信息
+            updateAuth(snsType, authNow, auth);
+            BaasUser userNew = new BaasUser();
+            userNew.setAuth(authNow);
+            objectService.update(appId, plat, UserService.USER_CLASS_NAME, user.getId(), userNew, null, true);
+            //返回用户信息
+            user.setPassword("");
+            return user;
+        } else {
+            if (registerUser == null) {
+                registerUser = new BaasUser();
+            }
+            //生成默认用户名密码
+            registerUser.setUsername(snsType.getValue() + "_" + UUID.uuid());
+            registerUser.setPassword(UUID.uuid());
+            //当前授权信息为空 创建新的授权信息
+            BaasObject authNow = new BaasObject();
+            //更新授权信息
+            updateAuth(snsType, authNow, auth);
+            //用户不存在 自动注册
+            registerUser.setAuth(authNow);
+            user = register(appId, plat, registerUser);
+            return user;
         }
-        BaasObject authNow = user.getAuth();
-        //填充授权信息
-        updateAuth(snsType, authNow, auth);
-        BaasUser userNew = new BaasUser();
-        userNew.setAuth(authNow);
-        objectService.update(appId, plat, UserService.USER_CLASS_NAME, user.getId(), userNew, null, true);
-        //返回用户信息
-        user.setPassword("");
-        return user;
     }
 
     public void update(String appId, String plat, String id, BaasUser user, BaasUser currentUser, boolean isMaster) {
@@ -246,6 +262,7 @@ public class UserService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void updateAuth(BaasSnsType snsType, BaasObject authNow, BaasAuth auth) {
         switch (snsType) {
             case WEIBO:
@@ -269,7 +286,6 @@ public class UserService {
                 authNow.put(snsType.getValue(), map);
                 break;
             default:
-                return;
         }
     }
 

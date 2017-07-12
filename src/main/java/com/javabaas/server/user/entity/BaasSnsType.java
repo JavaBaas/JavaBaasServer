@@ -26,7 +26,7 @@ public enum BaasSnsType {
     }
 
     public static BaasSnsType getType(int code) {
-        for (BaasSnsType baasSnsType :  BaasSnsType.values()) {
+        for (BaasSnsType baasSnsType : BaasSnsType.values()) {
             if (baasSnsType.code == code) {
                 return baasSnsType;
             }

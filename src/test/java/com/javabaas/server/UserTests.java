@@ -31,7 +31,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -207,14 +206,14 @@ public class UserTests {
         //验证是否绑定成功
         user1 = userService.get(app.getId(), "admin", "u1", null, true);
         BaasObject user1Auth = user1.getAuth();
-        BaasAuth weiboAuth = new BaasAuth((Map<String, Object>) user1Auth.get("weibo"));
+        BaasAuth weiboAuth = new BaasAuth(user1Auth.getBaasObject("weibo"));
         Assert.assertThat(weiboAuth.getUid(), equalTo("1929295515"));
 
         //使用第三方授权信息登录
-        user1 = userService.loginWithSns(app.getId(), "admin", BaasSnsType.WEIBO, weiboAuth);
+        user1 = userService.registerWithSns(app.getId(), "admin", BaasSnsType.WEIBO, weiboAuth, null);
         Assert.assertThat(user1.getUsername(), equalTo("u1"));
         //再次登录测试
-        user1 = userService.loginWithSns(app.getId(), "admin", BaasSnsType.WEIBO, weiboAuth);
+        user1 = userService.registerWithSns(app.getId(), "admin", BaasSnsType.WEIBO, weiboAuth, null);
         Assert.assertThat(user1.getUsername(), equalTo("u1"));
 
         //验证禁止重复绑定
@@ -289,6 +288,5 @@ public class UserTests {
                 .andExpect(jsonPath("$.sessionToken", not(empty())))
                 .andExpect(jsonPath("$.username", not(empty())));
     }
-
 
 }

@@ -1,5 +1,7 @@
 package com.javabaas.server.object.entity;
 
+import com.javabaas.server.user.entity.BaasUser;
+
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -54,6 +56,28 @@ public class BaasObject extends LinkedHashMap<String, Object> {
     public BaasList getList(String key) {
         Object value = get(key);
         return value == null ? null : (BaasList) value;
+    }
+
+    @SuppressWarnings("unchecked")
+    public BaasObject getBaasObject(String key) {
+        Object value = get(key);
+        Map<String, Object> object = null;
+        try {
+            object = (Map<String, Object>) value;
+        } catch (ClassCastException ignored) {
+        }
+        return object == null ? null : new BaasObject(object);
+    }
+
+    @SuppressWarnings("unchecked")
+    public BaasUser getBaasUser(String key) {
+        Object value = get(key);
+        Map<String, Object> object = null;
+        try {
+            object = (Map<String, Object>) value;
+        } catch (ClassCastException ignored) {
+        }
+        return object == null ? null : new BaasUser(object);
     }
 
     public Date getCreatedAt() {
