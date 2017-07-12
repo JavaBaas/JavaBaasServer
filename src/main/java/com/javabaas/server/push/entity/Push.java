@@ -1,8 +1,5 @@
 package com.javabaas.server.push.entity;
 
-import javax.validation.constraints.NotNull;
-import java.util.Map;
-
 /**
  * Created by Codi on 15/11/2.
  */

@@ -6,7 +6,6 @@ import com.javabaas.server.admin.service.FieldService;
 import com.javabaas.server.admin.service.StatService;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
-import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.file.entity.BaasFile;
 import com.javabaas.server.file.service.FileService;
 import com.javabaas.server.hook.service.HookService;
@@ -42,8 +41,6 @@ public class ObjectService {
     private StatService statService;
     @Resource(type = MongoDao.class)
     private IDao dao;
-    @Autowired
-    private JSONUtil jsonUtil;
 
     public BaasObject insert(String appId, String plat, String className, BaasObject object, BaasUser currentUser, boolean isMaster) {
         //验证表级ACL

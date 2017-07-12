@@ -1,8 +1,6 @@
 package com.javabaas.server.push.handler.impl;
 
 import com.javabaas.server.push.entity.Push;
-import com.javabaas.server.push.entity.PushMessage;
-import com.javabaas.server.push.entity.PushNotification;
 import com.javabaas.server.push.handler.IPushHandler;
 
 import java.util.Collection;
