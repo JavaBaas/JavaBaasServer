@@ -6,7 +6,6 @@ import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.sms.entity.SmsSendResult;
 import com.javabaas.server.sms.service.SmsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,7 @@ public class SmsController {
     private JSONUtil jsonUtil;
 
     /**
-     * 推送消息
+     * 发送短信
      *
      * @return 结果
      */
