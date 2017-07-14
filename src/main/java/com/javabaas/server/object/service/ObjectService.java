@@ -6,6 +6,7 @@ import com.javabaas.server.admin.service.FieldService;
 import com.javabaas.server.admin.service.StatService;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
+import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.file.entity.BaasFile;
 import com.javabaas.server.file.service.FileService;
 import com.javabaas.server.hook.service.HookService;
@@ -41,6 +42,8 @@ public class ObjectService {
     private StatService statService;
     @Resource(type = MongoDao.class)
     private IDao dao;
+    @Autowired
+    private JSONUtil jsonUtil;
 
     public BaasObject insert(String appId, String plat, String className, BaasObject object, BaasUser currentUser, boolean isMaster) {
         //验证表级ACL
@@ -211,7 +214,7 @@ public class ObjectService {
         //构建查询
         BaasQuery query = new BaasQuery();
         query.put("_id", id);
-        List<BaasObject> result = list(appId, plat, className, query, null, include, 1, 0, currentUser, isMaster);
+        List<BaasObject> result = list(appId, plat, className, ClazzAclMethod.GET, query, null, include, 1, 0, currentUser, isMaster);
         if (result.size() == 0) {
             return null;
         } else {
@@ -219,14 +222,14 @@ public class ObjectService {
         }
     }
 
-    public List<BaasObject> list(String appId, String plat, String className, BaasQuery query, BaasSort sort, BaasInclude include,
-                                 int limit, int skip, BaasUser currentUser, boolean isMaster) {
+    public List<BaasObject> list(String appId, String plat, String className, ClazzAclMethod method, BaasQuery query, BaasSort sort,
+                                 BaasInclude include, int limit, int skip, BaasUser currentUser, boolean isMaster) {
         //上限不得超过1000
         limit = limit > 1000 ? 1000 : limit;
         //limit必须为正数
         if (limit <= 0) limit = 100;
         //验证表级ACL
-        verifyClazzAccess(appId, ClazzAclMethod.FIND, className, currentUser, isMaster);
+        verifyClazzAccess(appId, method, className, currentUser, isMaster);
         //查询条件
         if (query == null) {
             query = new BaasQuery();
@@ -248,6 +251,11 @@ public class ObjectService {
         //统计
         statService.add(new ApiStat(appId, plat, className, ApiMethod.FIND, new Date()));
         return result;
+    }
+
+    public List<BaasObject> list(String appId, String plat, String className, BaasQuery query, BaasSort sort, BaasInclude include,
+                                 int limit, int skip, BaasUser currentUser, boolean isMaster) {
+        return list(appId, plat, className, ClazzAclMethod.FIND, query, sort, include, limit, skip, currentUser, isMaster);
     }
 
     private void handleSubQuery(String appId, BaasUser user, boolean isMaster, BaasQuery query) {

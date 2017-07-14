@@ -8,6 +8,7 @@ import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.object.entity.BaasAcl;
 import com.javabaas.server.object.entity.BaasObject;
+import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.service.ObjectService;
 import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.user.service.UserService;
@@ -22,13 +23,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Created by Staryet on 15/8/11.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = Main.class,webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(classes = Main.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class AclTests {
 
     @Autowired
@@ -106,6 +107,17 @@ public class AclTests {
         t.put("string", "string");
         objectService.insert(app.getId(), "cloud", "AclTest2", t, null, true);
 
+        //创建测试用类3 可get 禁止find
+        Clazz clazz3 = new Clazz();
+        clazz3.setName("AclTest3");
+        acl = new ClazzAcl();
+        acl.setPublicAccess(ClazzAclMethod.GET, true);
+        acl.setPublicAccess(ClazzAclMethod.FIND, false);
+        clazz3.setAcl(acl);
+        clazzService.insert(app.getId(), clazz3);
+        fieldString = new Field(FieldType.STRING, "string");
+        fieldService.insert(app.getId(), "AclTest3", fieldString);
+
         //创建测试用类 全局可读可写
         Clazz objectAcl = new Clazz();
         objectAcl.setName("objectAcl");
@@ -167,7 +179,6 @@ public class AclTests {
         } catch (SimpleError error) {
             Assert.assertThat(error.getCode(), equalTo(SimpleCode.OBJECT_CLAZZ_NO_ACCESS.getCode()));
         }
-
     }
 
     /**
@@ -219,6 +230,27 @@ public class AclTests {
         }
         //user2有删除权限
         objectService.delete(app.getId(), "admin", "AclTest2", t1.getId(), user2, false);
+    }
+
+    /**
+     * 测试表级权限 允许get 禁止find
+     */
+    @Test
+    public void testClazzFindAcl() {
+        BaasObject t = new BaasObject();
+        t.put("string", "string");
+        t = objectService.insert(app.getId(), "cloud", "AclTest3", t, null, true);
+        //测试get方法可用
+        BaasObject obj = objectService.get(app.getId(), "admin", "AclTest3", t.getId(), null, null, false);
+        Assert.assertThat(obj, not(nullValue()));
+        Assert.assertThat(obj.getString("string"), equalTo("string"));
+
+        //测试find方法被拒绝
+        try {
+            objectService.list(app.getId(), "admin", "AclTest3", new BaasQuery(), null, null, 0, 0, null, false);
+        } catch (SimpleError error) {
+            Assert.assertThat(error.getCode(), equalTo(SimpleCode.OBJECT_CLAZZ_NO_ACCESS.getCode()));
+        }
     }
 
     /**

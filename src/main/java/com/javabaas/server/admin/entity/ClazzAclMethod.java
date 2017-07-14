@@ -7,6 +7,7 @@ public enum ClazzAclMethod {
 
     INSERT("insert"),
     UPDATE("update"),
+    GET("get"),
     FIND("find"),
     DELETE("delete");
 

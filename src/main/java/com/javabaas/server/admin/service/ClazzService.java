@@ -93,6 +93,7 @@ public class ClazzService {
                 acl.setPublicAccess(ClazzAclMethod.DELETE, true);
                 acl.setPublicAccess(ClazzAclMethod.UPDATE, true);
                 acl.setPublicAccess(ClazzAclMethod.FIND, true);
+                acl.setPublicAccess(ClazzAclMethod.GET, true);
                 clazz.setAcl(acl);
             }
             clazzRepository.insert(clazz);

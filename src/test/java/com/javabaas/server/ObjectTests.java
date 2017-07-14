@@ -30,7 +30,7 @@ import static org.hamcrest.Matchers.*;
  * Created by Staryet on 15/8/11.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Main.class,webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(classes = Main.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class ObjectTests {
 
     @Autowired
@@ -936,7 +936,8 @@ public class ObjectTests {
         Assert.assertThat(a.getString("name"), equalTo("a"));
 
         //查询A类中 c字段中的 d字段中的name为d的对象
-        query = jsonUtil.readValue("{\"c\":{\"$sub\":{\"where\":{\"d\":{\"$sub\":{\"where\":{\"name\":\"d\"},\"searchClass\":\"D\"}}},\"searchClass\":\"C\"}}}", BaasQuery.class);
+        query = jsonUtil.readValue("{\"c\":{\"$sub\":{\"where\":{\"d\":{\"$sub\":{\"where\":{\"name\":\"d\"},\"searchClass\":\"D\"}}}," +
+                "\"searchClass\":\"C\"}}}", BaasQuery.class);
         result = objectService.list(app.getId(), "admin", "A", query, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(2));
         a = result.get(0);
