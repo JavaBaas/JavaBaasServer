@@ -168,7 +168,7 @@ public class QiniuFileHandler implements IFileHandler {
             //持久化处理成功
             BaasQuery query = new BaasQuery();
             query.put("key", key);
-            List<BaasObject> files = objectService.list(appId, "admin", FileService.FILE_CLASS_NAME, query, null, null, 1, 0, null, true);
+            List<BaasObject> files = objectService.find(appId, "admin", FileService.FILE_CLASS_NAME, query, null, null, 1, 0, null, true);
             if (files.size() > 0) {
                 //源文件
                 BaasFile sourceFile = new BaasFile(files.get(0));

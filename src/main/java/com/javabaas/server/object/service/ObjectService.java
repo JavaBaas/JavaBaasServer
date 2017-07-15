@@ -107,7 +107,7 @@ public class ObjectService {
     }
 
     public void deleteByQuery(String appId, String plat, String className, BaasQuery query, BaasUser currentUser, boolean isMaster) {
-        List<BaasObject> objects = list(appId, plat, className, query, null, null, 1000, 0, currentUser, isMaster);
+        List<BaasObject> objects = find(appId, plat, className, query, null, null, 1000, 0, currentUser, isMaster);
         for (BaasObject object : objects) {
             delete(appId, plat, className, object.getId(), currentUser, isMaster);
         }
@@ -214,7 +214,7 @@ public class ObjectService {
         //构建查询
         BaasQuery query = new BaasQuery();
         query.put("_id", id);
-        List<BaasObject> result = list(appId, plat, className, ClazzAclMethod.GET, query, null, include, 1, 0, currentUser, isMaster);
+        List<BaasObject> result = find(appId, plat, className, ClazzAclMethod.GET, query, null, include, 1, 0, currentUser, isMaster);
         if (result.size() == 0) {
             return null;
         } else {
@@ -222,7 +222,7 @@ public class ObjectService {
         }
     }
 
-    public List<BaasObject> list(String appId, String plat, String className, ClazzAclMethod method, BaasQuery query, BaasSort sort,
+    public List<BaasObject> find(String appId, String plat, String className, ClazzAclMethod method, BaasQuery query, BaasSort sort,
                                  BaasInclude include, int limit, int skip, BaasUser currentUser, boolean isMaster) {
         //上限不得超过1000
         limit = limit > 1000 ? 1000 : limit;
@@ -253,9 +253,9 @@ public class ObjectService {
         return result;
     }
 
-    public List<BaasObject> list(String appId, String plat, String className, BaasQuery query, BaasSort sort, BaasInclude include,
+    public List<BaasObject> find(String appId, String plat, String className, BaasQuery query, BaasSort sort, BaasInclude include,
                                  int limit, int skip, BaasUser currentUser, boolean isMaster) {
-        return list(appId, plat, className, ClazzAclMethod.FIND, query, sort, include, limit, skip, currentUser, isMaster);
+        return find(appId, plat, className, ClazzAclMethod.FIND, query, sort, include, limit, skip, currentUser, isMaster);
     }
 
     private void handleSubQuery(String appId, BaasUser user, boolean isMaster, BaasQuery query) {

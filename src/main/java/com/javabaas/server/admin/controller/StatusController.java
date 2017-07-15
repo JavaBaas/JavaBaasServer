@@ -32,7 +32,7 @@ public class StatusController {
 
     @RequestMapping(value = "/mongo", method = RequestMethod.GET)
     public String mongo() {
-//        List<Field> fields = fieldService.list("test");
+//        List<Field> fields = fieldService.find("test");
         return "ok";
     }
 

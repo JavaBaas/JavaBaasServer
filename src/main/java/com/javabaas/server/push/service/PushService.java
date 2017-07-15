@@ -42,7 +42,7 @@ public class PushService {
             pushHandler.pushAll(appId, push);
         } else {
             //按查询条件推送
-            List<BaasObject> devices = objectService.list(appId, plat, InstallationService.INSTALLATION_CLASS_NAME, query, null, null, 1000, 0, null, true);
+            List<BaasObject> devices = objectService.find(appId, plat, InstallationService.INSTALLATION_CLASS_NAME, query, null, null, 1000, 0, null, true);
             Collection<String> ids = new LinkedList<>();
             devices.forEach(device -> ids.add(device.getId()));
             pushHandler.pushMulti(appId, ids, push);

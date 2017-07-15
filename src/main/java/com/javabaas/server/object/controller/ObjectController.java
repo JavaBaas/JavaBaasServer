@@ -124,7 +124,7 @@ public class ObjectController {
         //处理权限
         boolean isMaster = masterService.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
-        return objectService.list(appId, plat, name, query, sort, bassInclude, limit, skip, currentUser, isMaster);
+        return objectService.find(appId, plat, name, query, sort, bassInclude, limit, skip, currentUser, isMaster);
     }
 
     /**
