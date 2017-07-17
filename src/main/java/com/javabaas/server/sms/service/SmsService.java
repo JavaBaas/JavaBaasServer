@@ -52,7 +52,7 @@ public class SmsService {
         smsLog.setTemplateId(templateId);
         smsLog.setParams(params);
         smsLog.setState(SmsSendState.WAIT.getCode());
-        smsLog = new SmsLog(objectService.insert(appId, plat, SMS_LOG_CLASS_NAME, smsLog, null, true));
+        smsLog = new SmsLog(objectService.insert(appId, plat, SMS_LOG_CLASS_NAME, smsLog, true, null, true));
         //发送
         SmsSendResult smsSendResult = getSmsHandler(appId).sendSms(appId, smsLog.getId(), phone, signName, templateId, params);
         if (smsSendResult == null || smsSendResult.getCode() != SmsSendResultCode.SUCCESS.getCode()) {

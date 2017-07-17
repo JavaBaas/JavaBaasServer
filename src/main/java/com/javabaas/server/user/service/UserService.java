@@ -67,8 +67,8 @@ public class UserService {
         user.setSessionToken(getSessionToken());
         //禁止设置ACL字段
         user.remove("acl");
-        BaasObject object = objectService.insert(appId, plat, USER_CLASS_NAME, user, null, true);
-        return new BaasUser(object);
+        BaasObject object = objectService.insert(appId, plat, USER_CLASS_NAME, user, true, null, true);
+        return trimUser(object);
     }
 
     /**
@@ -108,8 +108,7 @@ public class UserService {
             //密码错误
             throw new SimpleError(SimpleCode.USER_WRONG_PASSWORD);
         }
-        user.remove("password");
-        return user;
+        return trimUser(user);
     }
 
     /**
@@ -136,9 +135,6 @@ public class UserService {
             BaasUser userNew = new BaasUser();
             userNew.setAuth(authNow);
             objectService.update(appId, plat, UserService.USER_CLASS_NAME, user.getId(), userNew, null, true);
-            //返回用户信息
-            user.setPassword("");
-            return user;
         } else {
             if (registerUser == null) {
                 registerUser = new BaasUser();
@@ -153,8 +149,9 @@ public class UserService {
             //用户不存在 自动注册
             registerUser.setAuth(authNow);
             user = register(appId, plat, registerUser);
-            return user;
         }
+        //返回用户信息
+        return user;
     }
 
     public void update(String appId, String plat, String id, BaasUser user, BaasUser currentUser, boolean isMaster) {
@@ -221,7 +218,7 @@ public class UserService {
         objectService.update(appId, plat, UserService.USER_CLASS_NAME, id, user, null, true);
         //更新成功 清除用户缓存
         deleteUserCache(appId, oldSessionToken);
-        return user;
+        return trimUser(user);
     }
 
     public void bindingSns(String appId, String plat, String id, BaasSnsType snsType, BaasAuth auth, BaasUser currentUser, boolean
@@ -440,9 +437,7 @@ public class UserService {
             return register(appId, plat, user);
         } else {
             //用户存在 返回用户信息
-            BaasUser user = new BaasUser(users.get(0));
-            user.remove("password");
-            return user;
+            return trimUser(users.get(0));
         }
     }
 
@@ -456,6 +451,11 @@ public class UserService {
     public void getSmsCode(String appId, String plat, String phone) {
         //发送短信验证码
         smsService.sendSmsCode(appId, plat, phone, 600);//短信验证码默认十分钟内有效
+    }
+
+    private BaasUser trimUser(BaasObject object) {
+        object.remove("password");
+        return new BaasUser(object);
     }
 
     private String getSessionToken() {

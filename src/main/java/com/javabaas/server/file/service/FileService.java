@@ -32,7 +32,8 @@ public class FileService {
     @Autowired
     private QiniuFileHandler qiniuFileHandler;
 
-    public Map<String, Object> getToken(String appId, String plat, FileStoragePlatform filePlat, String fileName, Map<String, Object> policy) {
+    public Map<String, Object> getToken(String appId, String plat, FileStoragePlatform filePlat, String fileName, Map<String, Object>
+            policy) {
         return getFileHandler(filePlat).getToken(appId, plat, fileName, policy);
     }
 
@@ -59,7 +60,7 @@ public class FileService {
         if (StringUtils.isEmpty(file.getKey())) {
             file.setKey(getFileKey());
         }
-        return new BaasFile(objectService.insert(appId, plat, FILE_CLASS_NAME, file, null, true));
+        return new BaasFile(objectService.insert(appId, plat, FILE_CLASS_NAME, file, true, null, true));
     }
 
     public BaasFile saveFileWithFetch(String appId, String plat, FileStoragePlatform platform, BaasFile file, Map<String, Object> policy) {

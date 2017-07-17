@@ -53,6 +53,7 @@ public class ObjectController {
     @ResponseBody
     public SimpleResult insert(@RequestHeader(value = "JB-AppId") String appId,
                                @RequestHeader(value = "JB-Plat") String plat,
+                               @RequestParam(required = false) boolean fetch,
                                @RequestBody String body,
                                @PathVariable String name) {
         //处理权限
@@ -64,9 +65,9 @@ public class ObjectController {
         }
         BaasObject object = jsonUtil.readValue(body, BaasObject.class);
         //存储对象
-        String id = objectService.insert(appId, plat, name, object, currentUser, isMaster).getId();
+        BaasObject newObject = objectService.insert(appId, plat, name, object, fetch, currentUser, isMaster);
         SimpleResult result = SimpleResult.success();
-        result.putData("_id", id);
+        result.putAll(newObject);
         return result;
     }
 

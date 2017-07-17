@@ -6,7 +6,6 @@ import com.javabaas.server.admin.service.FieldService;
 import com.javabaas.server.admin.service.StatService;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
-import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.file.entity.BaasFile;
 import com.javabaas.server.file.service.FileService;
 import com.javabaas.server.hook.service.HookService;
@@ -42,10 +41,23 @@ public class ObjectService {
     private StatService statService;
     @Resource(type = MongoDao.class)
     private IDao dao;
-    @Autowired
-    private JSONUtil jsonUtil;
 
     public BaasObject insert(String appId, String plat, String className, BaasObject object, BaasUser currentUser, boolean isMaster) {
+        return insert(appId, plat, className, object, false, currentUser, isMaster);
+    }
+
+    /**
+     * 插入对象
+     *
+     * @param className   类名称
+     * @param object      要插入的对象
+     * @param fetch       是否返回对象信息
+     * @param currentUser 当前用户
+     * @param isMaster    超级权限
+     * @return 新创建的对象
+     */
+    public BaasObject insert(String appId, String plat, String className, BaasObject object, boolean fetch, BaasUser currentUser, boolean
+            isMaster) {
         //验证表级ACL
         verifyClazzAccess(appId, ClazzAclMethod.INSERT, className, currentUser, isMaster);
         //钩子处理
@@ -71,6 +83,15 @@ public class ObjectService {
         statService.add(new ApiStat(appId, plat, className, ApiMethod.INSERT, date));
         //钩子处理
         hookService.afterInsert(appId, className, object, currentUser);
+        if (fetch) {
+            //返回完整数据
+            object = get(appId, plat, className, id, null, currentUser, isMaster);
+        } else {
+            //只返回对象id 创建时间
+            object = new BaasObject();
+            object.setId(id);
+            object.put("createdAt", time);
+        }
         return object;
     }
 

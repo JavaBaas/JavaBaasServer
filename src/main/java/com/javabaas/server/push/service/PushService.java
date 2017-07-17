@@ -42,7 +42,8 @@ public class PushService {
             pushHandler.pushAll(appId, push);
         } else {
             //按查询条件推送
-            List<BaasObject> devices = objectService.find(appId, plat, InstallationService.INSTALLATION_CLASS_NAME, query, null, null, 1000, 0, null, true);
+            List<BaasObject> devices = objectService.find(appId, plat, InstallationService.INSTALLATION_CLASS_NAME, query, null, null,
+                    1000, 0, null, true);
             Collection<String> ids = new LinkedList<>();
             devices.forEach(device -> ids.add(device.getId()));
             pushHandler.pushMulti(appId, ids, push);
@@ -58,7 +59,7 @@ public class PushService {
             pushLog.setSound(push.getNotification().getSound());
             pushLog.setWhere(query);
             pushLog.setPushTime(new Date().getTime());
-            pushLog = new PushLog(objectService.insert(appId, plat, PUSH_LOG_CLASS_NAME, pushLog, null, true));
+            pushLog = new PushLog(objectService.insert(appId, plat, PUSH_LOG_CLASS_NAME, pushLog, true, null, true));
             logger.debug("App:" + appId
                     + " 推送成功 id:" + pushLog.getId()
                     + " title:" + pushLog.getTitle()
