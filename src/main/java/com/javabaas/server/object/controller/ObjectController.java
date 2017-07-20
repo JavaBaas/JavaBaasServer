@@ -67,7 +67,7 @@ public class ObjectController {
         //存储对象
         BaasObject newObject = objectService.insert(appId, plat, name, object, fetch, currentUser, isMaster);
         SimpleResult result = SimpleResult.success();
-        result.putAll(newObject);
+        result.putDataAll(newObject);
         return result;
     }
 
