@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 用户控制器
  * Created by Staryet on 15/8/13.
  */
 @RestController

@@ -34,10 +34,18 @@ public class CustomerCloudController {
     @RequestMapping(value = "/function3", method = RequestMethod.POST)
     public CloudResponse function3(@RequestBody CloudRequest request) {
         CloudResponse response = new CloudResponse();
-        response.setCode(1);
+        response.setCode(0);
         String param1 = request.getParams().get("param1");
         String param2 = request.getParams().get("param2");
         response.setMessage(param1 + param2 + request.getBody());
+        return response;
+    }
+
+    @RequestMapping(value = "/function4", method = RequestMethod.POST)
+    public CloudResponse function4(@RequestBody CloudRequest request) {
+        CloudResponse response = new CloudResponse();
+        response.setCode(1);
+        response.setMessage("error");
         return response;
     }
 

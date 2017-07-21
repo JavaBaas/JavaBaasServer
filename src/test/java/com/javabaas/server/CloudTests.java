@@ -78,6 +78,7 @@ public class CloudTests {
         cloudFunctions.add("function1");
         cloudFunctions.add("function2");
         cloudFunctions.add("function3");
+        cloudFunctions.add("function4");
         cloudFunctions.add("functionNotImpl");
         cloudSetting.setCloudFunctions(cloudFunctions);
         cloudService.deploy(app.getId(), cloudSetting);
@@ -131,25 +132,36 @@ public class CloudTests {
             cloudService.cloud(app.getId(), "admin", "functionNotImpl", null, false, new HashMap<>(), null);
             Assert.fail();
         } catch (SimpleError e) {
-            Assert.assertThat(e.getCode(), equalTo(SimpleCode.CLOUD_FUNCTION_ERROR.getCode()));
+            Assert.assertThat(e.getCode(), equalTo(SimpleCode.CLOUD_FUNCTION_EXECUTE_FAILED.getCode()));
         }
         //测试方法调用
         SimpleResult result = cloudService.cloud(app.getId(), "admin", "function1", null, false, new HashMap<>(), null);
         Assert.assertThat(result.getCode(), equalTo(0));
         Assert.assertThat(result.getMessage(), equalTo("success"));
+
         //测试用户是否传递成功
         BaasUser user = userService.get(app.getId(), "admin", "user", null, true);
         result = cloudService.cloud(app.getId(), "admin", "function2", user, false, new HashMap<>(), null);
         Assert.assertThat(result.getCode(), equalTo(0));
         Assert.assertThat(result.getMessage(), equalTo(user.getUsername()));
+
         //测试参数是否传递成功
         Map<String, String> params = new HashMap<>();
         params.put("param1", "param1");
         params.put("param2", "param2");
         String body = "hello world";
         result = cloudService.cloud(app.getId(), "admin", "function3", user, false, params, body);
-        Assert.assertThat(result.getCode(), equalTo(1));
+        Assert.assertThat(result.getCode(), equalTo(0));
         Assert.assertThat(result.getMessage(), equalTo("param1param2hello world"));
+
+        //测试云代码执行失败的错误返回
+        try {
+            cloudService.cloud(app.getId(), "admin", "function4", user, false, params, body);
+        } catch (SimpleError error) {
+            Assert.assertThat(error.getCode(), equalTo(1));
+            Assert.assertThat(error.getMessage(), equalTo("error"));
+        }
+
     }
 
 }

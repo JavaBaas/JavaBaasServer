@@ -31,7 +31,8 @@ public class CloudService {
     @Autowired
     private SignUtil signUtil;
 
-    public SimpleResult cloud(String appId, String plat, String functionName, BaasUser user, boolean isMaster, Map<String, String> requestParams, String body) {
+    public SimpleResult cloud(String appId, String plat, String functionName, BaasUser user, boolean isMaster, Map<String, String>
+            requestParams, String body) {
         //准备请求数据
         CloudRequest cloudRequest = new CloudRequest();
         //设置用户信息
@@ -66,8 +67,16 @@ public class CloudService {
                     cloudRequest.setSign(signUtil.getSign(app.getId(), timestampStr));
                 }
                 //发送请求
+                CloudResponse response;
                 try {
-                    CloudResponse response = rest.postForObject(app.getCloudSetting().getCustomerHost() + "/cloud/" + functionName, cloudRequest, CloudResponse.class);
+                    response = rest.postForObject(app.getCloudSetting().getCustomerHost() + "/cloud/" + functionName,
+                            cloudRequest, CloudResponse.class);
+                } catch (Exception e) {
+                    //请求执行异常
+                    throw new SimpleError(SimpleCode.CLOUD_FUNCTION_EXECUTE_FAILED);
+                }
+                if (response.getCode() == 0) {
+                    //执行成功
                     SimpleResult simpleResult = SimpleResult.success();
                     simpleResult.setCode(response.getCode());
                     simpleResult.setMessage(response.getMessage());
@@ -75,8 +84,9 @@ public class CloudService {
                         simpleResult.putDataAll(response.getData());
                     }
                     return simpleResult;
-                } catch (Exception e) {
-                    throw new SimpleError(SimpleCode.CLOUD_FUNCTION_ERROR);
+                } else {
+                    //执行失败
+                    throw new SimpleError(response.getCode(), response.getMessage());
                 }
             }
         }

@@ -80,7 +80,7 @@ public enum SimpleCode {
     //4xxx 云代码相关
     CLOUD_NOT_DEPLOYED(4001, "云代码未部署"),
     CLOUD_FUNCTION_NOT_FOUND(4002, "云方法未配置"),
-    CLOUD_FUNCTION_ERROR(4003, "云方法执行失败"),
+    CLOUD_FUNCTION_EXECUTE_FAILED(4003, "云方法执行失败"),
     //5xxx 钩子相关
     HOOK_INTERCEPTION(5001, "钩子中断"),
     //6xxx 推送相关
