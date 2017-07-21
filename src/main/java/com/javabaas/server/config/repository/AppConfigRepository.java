@@ -1,14 +1,14 @@
 package com.javabaas.server.config.repository;
 
-import com.javabaas.server.config.entity.AppConfig;
+import com.javabaas.server.config.entity.AppConfigs;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
  * Created by Codi on 2017/7/8.
  */
-public interface AppConfigRepository extends MongoRepository<AppConfig, String> {
+public interface AppConfigRepository extends MongoRepository<AppConfigs, String> {
 
-    AppConfig findByAppId(String appId);
+    AppConfigs findByAppId(String appId);
 
     long deleteByAppId(String appId);
 

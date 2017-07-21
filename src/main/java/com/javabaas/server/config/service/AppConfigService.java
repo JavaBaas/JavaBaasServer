@@ -2,8 +2,8 @@ package com.javabaas.server.config.service;
 
 import com.javabaas.server.admin.entity.App;
 import com.javabaas.server.admin.service.AppService;
-import com.javabaas.server.config.entity.AppConfig;
 import com.javabaas.server.config.entity.AppConfigEnum;
+import com.javabaas.server.config.entity.AppConfigs;
 import com.javabaas.server.config.repository.AppConfigRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -36,15 +36,19 @@ public class AppConfigService {
         return String.valueOf(getConfig(appId, config));
     }
 
+    public String getString(String appId, String key) {
+        return String.valueOf(getConfig(appId, key));
+    }
+
     public Long getLong(String appId, AppConfigEnum config) {
         return Long.valueOf(getString(appId, config));
     }
 
     public void setConfig(String appId, String key, String value) {
-        AppConfig config = appConfigRepository.findByAppId(appId);
+        AppConfigs config = appConfigRepository.findByAppId(appId);
         if (config == null) {
             //配置不存在 创建配置
-            config = new AppConfig();
+            config = new AppConfigs();
             App app = appService.get(appId);
             config.setApp(app);
         }
@@ -58,7 +62,7 @@ public class AppConfigService {
         setConfig(appId, config.getKey(), value);
     }
 
-    private Object getConfig(String appId, String key) {
+    public Object getConfig(String appId, String key) {
         //获取缓存的配置
         String config = configMap.get(getName(appId, key));
         if (config == null) {
@@ -86,11 +90,11 @@ public class AppConfigService {
     }
 
     private String getConfigFromDB(String appId, String key) {
-        AppConfig appConfig = appConfigRepository.findByAppId(appId);
-        if (appConfig == null) {
+        AppConfigs appConfigs = appConfigRepository.findByAppId(appId);
+        if (appConfigs == null) {
             return null;
         } else {
-            return appConfig.getParam(key);
+            return appConfigs.getParam(key);
         }
     }
 
