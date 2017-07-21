@@ -4,6 +4,7 @@ import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.config.entity.AppConfig;
 import com.javabaas.server.config.entity.AppConfigEnum;
 import com.javabaas.server.config.service.AppConfigService;
+import org.hibernate.validator.HibernateValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,10 +44,10 @@ public class AppConfigController {
      *
      * @param appId 应用id
      */
-    @RequestMapping(value = "/app/{key}", method = RequestMethod.GET)
+    @RequestMapping(value = "/app", method = RequestMethod.GET)
     @ResponseBody
     public String getAppConfig(@RequestHeader(value = "JB-AppId") String appId,
-                               @PathVariable String key) {
+                               @RequestParam String key) {
         return appConfigService.getString(appId, key);
     }
 

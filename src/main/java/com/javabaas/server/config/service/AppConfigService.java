@@ -53,7 +53,7 @@ public class AppConfigService {
             config.setApp(app);
         }
         config.setParam(key, value);
-        appConfigRepository.insert(config);
+        appConfigRepository.save(config);
         //清除缓存
         clearCache(appId, key);
     }
