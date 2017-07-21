@@ -7,7 +7,6 @@ import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.config.AuthConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
@@ -17,7 +16,6 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 /**
  * API权限拦截器
@@ -63,11 +61,11 @@ public class AuthInterceptor implements HandlerInterceptor {
                     throw new SimpleError(SimpleCode.AUTH_TIME_OUT);
                 }
                 //防重放攻击
-                String signNow = StringUtils.isEmpty(masterSign) ? sign : masterSign;
-                if (redisTemplate.hasKey(getKey(appId, signNow))) {
-                    //拒绝重放攻击
-                    throw new SimpleError(SimpleCode.AUTH_REPLAY_ATTACK);
-                }
+//                String signNow = StringUtils.isEmpty(masterSign) ? sign : masterSign;
+//                if (redisTemplate.hasKey(getKey(appId, signNow))) {
+//                    //拒绝重放攻击
+//                    throw new SimpleError(SimpleCode.AUTH_REPLAY_ATTACK);
+//                }
                 //判断鉴权类型
                 if (!StringUtils.isEmpty(masterSign)) {
                     //使用管理授权
@@ -89,8 +87,8 @@ public class AuthInterceptor implements HandlerInterceptor {
                     }
                 }
                 //验证成功记录sign用于防重放攻击
-                ValueOperations<String, String> ops = redisTemplate.opsForValue();
-                ops.set(getKey(appId, signNow), "1", authConfig.getTimeout(), TimeUnit.SECONDS);
+//                ValueOperations<String, String> ops = redisTemplate.opsForValue();
+//                ops.set(getKey(appId, signNow), "1", authConfig.getTimeout(), TimeUnit.SECONDS);
             }
         }
         return true;

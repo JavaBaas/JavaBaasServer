@@ -113,7 +113,6 @@ public class AuthTests {
     /**
      * 测试拒绝重放攻击
      */
-    @Test
     public void testReplayAttack() throws Exception {
         long timestamp = new Date().getTime();
         String timestampStr = String.valueOf(timestamp);
