@@ -4,11 +4,11 @@ import com.javabaas.server.admin.entity.App;
 import com.javabaas.server.admin.service.AppService;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
+import com.javabaas.server.common.sign.ReplyChecker;
+import com.javabaas.server.common.sign.SignUtil;
 import com.javabaas.server.config.AuthConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -23,13 +23,12 @@ import java.util.Date;
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
 
-    private static String SIGN_NAME = "_Sign";
     @Autowired
     private AppService appService;
     @Autowired
     private AuthConfig authConfig;
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private ReplyChecker replyChecker;
 
     /**
      * 验证授权信息
@@ -47,8 +46,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             String masterSign = httpServletRequest.getHeader("JB-MasterSign");
             String sign = httpServletRequest.getHeader("JB-Sign");
             String timestampStr = httpServletRequest.getHeader("JB-Timestamp");
-            if (StringUtils.isEmpty(timestampStr) ||
-                    StringUtils.isEmpty(appId) ||
+            String nonce = httpServletRequest.getHeader("JB-Nonce");
+            if (StringUtils.isEmpty(timestampStr) || StringUtils.isEmpty(appId) || StringUtils.isEmpty(nonce) ||
                     StringUtils.isEmpty(sign) && StringUtils.isEmpty(masterSign)) {
                 //授权信息不足
                 throw new SimpleError(SimpleCode.AUTH_LESS);
@@ -61,18 +60,14 @@ public class AuthInterceptor implements HandlerInterceptor {
                     throw new SimpleError(SimpleCode.AUTH_TIME_OUT);
                 }
                 //防重放攻击
-//                String signNow = StringUtils.isEmpty(masterSign) ? sign : masterSign;
-//                if (redisTemplate.hasKey(getKey(appId, signNow))) {
-//                    //拒绝重放攻击
-//                    throw new SimpleError(SimpleCode.AUTH_REPLAY_ATTACK);
-//                }
+                replyChecker.checkSignReplay(appId, sign, masterSign);
                 //判断鉴权类型
                 if (!StringUtils.isEmpty(masterSign)) {
                     //使用管理授权
                     App app = appService.get(appId);
                     String masterKey = app.getMasterKey();
                     //验证
-                    if (!masterSign.equals(encrypt(masterKey, timestampStr))) {
+                    if (!masterSign.equals(SignUtil.encrypt(masterKey, timestampStr, nonce))) {
                         //验证失败
                         throw new SimpleError(SimpleCode.AUTH_ERROR);
                     }
@@ -81,14 +76,13 @@ public class AuthInterceptor implements HandlerInterceptor {
                     App app = appService.get(appId);
                     String key = app.getKey();
                     //验证
-                    if (!sign.equals(encrypt(key, timestampStr))) {
+                    if (!sign.equals(SignUtil.encrypt(key, timestampStr, nonce))) {
                         //验证失败
                         throw new SimpleError(SimpleCode.AUTH_ERROR);
                     }
                 }
-                //验证成功记录sign用于防重放攻击
-//                ValueOperations<String, String> ops = redisTemplate.opsForValue();
-//                ops.set(getKey(appId, signNow), "1", authConfig.getTimeout(), TimeUnit.SECONDS);
+                //验证成功后记录sign用于防重放攻击
+                replyChecker.recordSign(appId, sign);
             }
         }
         return true;
@@ -98,7 +92,6 @@ public class AuthInterceptor implements HandlerInterceptor {
     public void postHandle(HttpServletRequest httpServletRequest,
                            HttpServletResponse httpServletResponse,
                            Object o, ModelAndView modelAndView) throws Exception {
-
     }
 
     @Override
@@ -106,14 +99,6 @@ public class AuthInterceptor implements HandlerInterceptor {
                                 HttpServletResponse httpServletResponse,
                                 Object o, Exception e) throws Exception {
 
-    }
-
-    private String encrypt(String key, String timeStamp) {
-        return DigestUtils.md5DigestAsHex((key + ":" + timeStamp).getBytes());
-    }
-
-    private String getKey(String appId, String sign) {
-        return "App_" + appId + SIGN_NAME + "_" + sign;
     }
 
 }

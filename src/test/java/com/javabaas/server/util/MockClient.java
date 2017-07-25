@@ -1,6 +1,8 @@
 package com.javabaas.server.util;
 
 import com.javabaas.server.admin.entity.App;
+import com.javabaas.server.common.sign.SignUtil;
+import com.javabaas.server.user.util.UUID;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -8,7 +10,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.DigestUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Date;
@@ -75,10 +76,12 @@ public class MockClient {
             Exception {
         long timestamp = new Date().getTime();
         String timestampStr = String.valueOf(timestamp);
+        String nonce = UUID.uuid();
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.request(method, url, params).header("JB-Plat", "cloud")
                 .header("JB-Timestamp", timestampStr)
+                .header("JB-Nonce", nonce)
                 .header("JB-AppId", app.getId())
-                .header("JB-Sign", getSign(app.getKey(), timestampStr))
+                .header("JB-Sign", SignUtil.encrypt(app.getKey(), timestampStr, nonce))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON_UTF8);
         if (body != null) {
@@ -91,10 +94,12 @@ public class MockClient {
             Exception {
         long timestamp = new Date().getTime();
         String timestampStr = String.valueOf(timestamp);
+        String nonce = UUID.uuid();
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.request(method, url, params).header("JB-Plat", "cloud")
                 .header("JB-Timestamp", timestampStr)
+                .header("JB-Nonce", nonce)
                 .header("JB-AppId", app.getId())
-                .header("JB-MasterSign", getSign(app.getMasterKey(), timestampStr))
+                .header("JB-MasterSign", SignUtil.encrypt(app.getMasterKey(), timestampStr, nonce))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON_UTF8);
         if (body != null) {
@@ -107,20 +112,17 @@ public class MockClient {
             Exception {
         long timestamp = new Date().getTime();
         String timestampStr = String.valueOf(timestamp);
+        String nonce = UUID.uuid();
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.request(method, url, params).header("JB-Plat", "cloud")
                 .header("JB-Timestamp", timestampStr)
-                .header("JB-AdminSign", getSign(key, timestampStr))
+                .header("JB-Nonce", nonce)
+                .header("JB-AdminSign", SignUtil.encrypt(key, timestampStr, nonce))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON_UTF8);
         if (body != null) {
             request.content(body);
         }
         return request;
-    }
-
-
-    private String getSign(String key, String timestamp) {
-        return DigestUtils.md5DigestAsHex((key + ":" + timestamp).getBytes());
     }
 
 }
