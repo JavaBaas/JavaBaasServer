@@ -2,10 +2,11 @@ package com.javabaas.server.common.interceptor;
 
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
+import com.javabaas.server.common.sign.ReplyChecker;
+import com.javabaas.server.common.sign.SignUtil;
 import com.javabaas.server.config.AuthConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -29,6 +30,7 @@ public class AdminInterceptor implements HandlerInterceptor {
             //配置权限验证时才需要权限验证
             String adminSign = httpServletRequest.getHeader("JB-AdminSign");
             String timestampStr = httpServletRequest.getHeader("JB-Timestamp");
+            String nonce = httpServletRequest.getHeader("JB-Nonce");
             if (StringUtils.isEmpty(adminSign)) {
                 //缺少超级权限
                 throw new SimpleError(SimpleCode.AUTH_NEED_ADMIN_SIGN);
@@ -43,7 +45,7 @@ public class AdminInterceptor implements HandlerInterceptor {
             //验证sign
             if (!StringUtils.isEmpty(adminSign)) {
                 //使用超级授权
-                if (!adminSign.equals(encrypt(authConfig.getKey(), timestampStr))) {
+                if (!adminSign.equals(SignUtil.encrypt(authConfig.getKey(), timestampStr, nonce))) {
                     //验证失败
                     throw new SimpleError(SimpleCode.AUTH_ERROR);
                 }
@@ -62,10 +64,6 @@ public class AdminInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e)
             throws Exception {
 
-    }
-
-    public String encrypt(String key, String timeStamp) {
-        return DigestUtils.md5DigestAsHex((key + ":" + timeStamp).getBytes());
     }
 
 }

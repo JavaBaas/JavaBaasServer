@@ -46,6 +46,8 @@ public class AuthTests {
 
     @Before
     public void setUp() throws Exception {
+        appService.deleteByAppName("AuthTestApp");
+
         client = new MockClient(webApplicationContext);
         app = new App();
         app.setName("AuthTestApp");
