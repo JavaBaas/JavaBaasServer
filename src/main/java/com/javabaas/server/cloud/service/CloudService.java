@@ -5,6 +5,7 @@ import com.javabaas.server.admin.service.AppService;
 import com.javabaas.server.cloud.entity.CloudRequest;
 import com.javabaas.server.cloud.entity.CloudResponse;
 import com.javabaas.server.cloud.entity.CloudSetting;
+import com.javabaas.server.cloud.handler.ICloudFunctionHandler;
 import com.javabaas.server.cloud.util.SignUtil;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
@@ -19,6 +20,7 @@ import java.util.Date;
 import java.util.Map;
 
 /**
+ * 云代码服务
  * Created by Staryet on 15/9/15.
  */
 @Service
@@ -30,6 +32,8 @@ public class CloudService {
     private AppService appService;
     @Autowired
     private SignUtil signUtil;
+    @Autowired
+    private Map<String, ICloudFunctionHandler> handlers;
 
     public SimpleResult cloud(String appId, String plat, String functionName, BaasUser user, boolean isMaster, Map<String, String>
             requestParams, String body) {
@@ -69,8 +73,8 @@ public class CloudService {
                 //发送请求
                 CloudResponse response;
                 try {
-                    response = rest.postForObject(app.getCloudSetting().getCustomerHost() + "/cloud/" + functionName,
-                            cloudRequest, CloudResponse.class);
+                    ICloudFunctionHandler handler = handlers.get("remoteCloudFunctionHandler");
+                    response = handler.cloud(app, functionName, cloudRequest);
                 } catch (Exception e) {
                     //请求执行异常
                     throw new SimpleError(SimpleCode.CLOUD_FUNCTION_EXECUTE_FAILED);
