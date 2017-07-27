@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 云代码配置
  * Created by Staryet on 15/9/22.
  */
 public class CloudSetting {
