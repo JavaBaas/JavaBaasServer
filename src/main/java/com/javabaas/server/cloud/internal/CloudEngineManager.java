@@ -28,10 +28,8 @@ public class CloudEngineManager {
             engine = manager.getEngineByName("nashorn");
             engine.put("JB", jb);
 
-            engine.eval("function cloud(request){\n" +
+            engine.eval("function test(request){\n" +
                     "\tvar book = JB.get(\"Book\",\"b4f4290920174c058307fd502fedea3a\");\n" +
-                    "\tprint(book);\n" +
-                    "\tJB.log(book);\n" +
                     "}");
 
             engineMap.put(getKey(appId, name), engine);

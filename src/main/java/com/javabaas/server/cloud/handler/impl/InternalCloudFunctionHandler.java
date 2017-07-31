@@ -31,14 +31,15 @@ public class InternalCloudFunctionHandler implements ICloudFunctionHandler {
             e.printStackTrace();
         }
         Invocable invocable = (Invocable) engine;
+        CloudResponse response = new CloudResponse();
         try {
-            invocable.invokeFunction(name, request);
+            invocable.invokeFunction(name, request, response);
         } catch (ScriptException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
-        return null;
+        return response;
     }
 
 }
