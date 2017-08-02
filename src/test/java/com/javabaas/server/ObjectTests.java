@@ -323,6 +323,33 @@ public class ObjectTests {
     }
 
     /**
+     * 测试带检查更新
+     */
+    @Test
+    public void testFindAndModify() {
+        BaasObject t = new BaasObject();
+        t.put("number", 100);
+        String id = objectService.insert(app.getId(), "cloud", "ObjectTest", t, null, false).getId();
+
+        //测试检查更新
+        BaasQuery query = new BaasQuery();
+        BaasObject gte = new BaasObject();
+        gte.put("$gte", 100);
+        query.put("number", gte);
+        t.put("number", 50);
+        objectService.update(app.getId(), "admin", "ObjectTest", id, query, t, null, false);
+
+        //不满足条件 禁止更新
+        try {
+            objectService.update(app.getId(), "admin", "ObjectTest", id, query, t, null, false);
+            Assert.fail();
+        } catch (SimpleError error) {
+            Assert.assertThat(error.getCode(), equalTo(SimpleCode.OBJECT_FIND_AND_MODIFY_FAILED.getCode()));
+        }
+
+    }
+
+    /**
      * 测试原子操作
      *
      * @throws SimpleError

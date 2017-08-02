@@ -24,7 +24,7 @@ public class EmptyController implements ErrorController {
     @RequestMapping(value = ERROR_PATH)
     @ResponseBody
     public SimpleResult error() {
-        return new SimpleResult(SimpleCode.NOT_FOUND);
+        return SimpleResult.error(SimpleCode.NOT_FOUND);
     }
 
 

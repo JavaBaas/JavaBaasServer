@@ -81,8 +81,7 @@ public class FileController {
             policyMap = jsonUtil.readValue(policy, new TypeReference<HashMap<String, Object>>() {
             });
         }
-        result.putDataAll(fileService.getToken(appId, plat, filePlat, fileName, policyMap));
-        return result;
+        return result.putDataAll(fileService.getToken(appId, plat, filePlat, fileName, policyMap));
     }
 
     @RequestMapping(value = "/file/callback", method = RequestMethod.POST)

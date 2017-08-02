@@ -138,7 +138,13 @@ public class ObjectService {
         dao.removeClass(appId, className);
     }
 
-    public void update(String appId, String plat, String className, String id, BaasObject object, BaasUser currentUser, boolean isMaster) {
+    public long update(String appId, String plat, String className, String id, BaasObject object, BaasUser currentUser,
+                       boolean isMaster) {
+        return update(appId, plat, className, id, null, object, currentUser, isMaster);
+    }
+
+    public long update(String appId, String plat, String className, String id, BaasQuery query, BaasObject object, BaasUser currentUser,
+                       boolean isMaster) {
         //查询已经存在的对象
         BaasObject exist = getObject(appId, className, id, isMaster);
         if (exist == null) {
@@ -172,11 +178,20 @@ public class ObjectService {
         //设置plat
         object.put("updatedPlat", plat);
         //更新
-        dao.update(appId, className, new BaasQuery("_id", id), object);
+        if (query == null) {
+            //更新条件为空 默认使用update
+            dao.update(appId, className, new BaasQuery("_id", id), object);
+        } else {
+            //更新条件非空 使用findAndModify更新
+            query.put("_id", id);
+            dao.findAndModify(appId, className, query, object);
+        }
         //统计
         statService.add(new ApiStat(appId, plat, className, ApiMethod.UPDATE, date));
         //钩子处理
         hookService.afterUpdate(appId, className, object, currentUser);
+        //返回更新时间
+        return time;
     }
 
     public void increment(String appId, String plat, String className, String id, BaasObject object, BaasUser currentUser, boolean

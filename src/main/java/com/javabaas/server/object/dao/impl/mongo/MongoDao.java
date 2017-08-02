@@ -121,6 +121,22 @@ public class MongoDao implements IDao {
     }
 
     @Override
+    public void findAndModify(String appId, String className, BaasQuery query, BaasObject object) {
+        DBCollection c = getCollection(appId, className);
+        DBObject dbo = obj2dbo(object, true);
+        try {
+            DBObject result = c.findAndModify(new BasicDBObject(query), dbo);
+            if (result == null) {
+                //更新失败 条件不满足 抛出异常
+                SimpleError.e(SimpleCode.OBJECT_FIND_AND_MODIFY_FAILED);
+            }
+        } catch (DuplicateKeyException e) {
+            //唯一索引字段重复
+            throw new DuplicateKeyError("");
+        }
+    }
+
+    @Override
     public void increment(String appId, String className, BaasQuery query, BaasObject object) {
         DBCollection c = getCollection(appId, className);
         DBObject dbo = obj2inc(object);

@@ -1,7 +1,8 @@
 package com.javabaas.server.common.entity;
 
+import com.javabaas.server.object.entity.BaasObject;
+
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -15,11 +16,8 @@ public class SimpleResult extends HashMap<String, Object> {
         return new SimpleResult(SimpleCode.SUCCESS);
     }
 
-    public static SimpleResult error(int code) {
-        return new SimpleResult(code, "");
-    }
-
-    private SimpleResult() {
+    public static SimpleResult error(SimpleCode simpleCode) {
+        return new SimpleResult(simpleCode);
     }
 
     public SimpleResult(SimpleCode simpleCode) {
@@ -27,7 +25,8 @@ public class SimpleResult extends HashMap<String, Object> {
     }
 
     public SimpleResult(int code, String message) {
-        put("data", new LinkedHashMap<String, Object>());
+        //初始化data对象
+        put("data", new BaasObject());
         setCode(code);
         setMessage(message);
     }
@@ -52,20 +51,21 @@ public class SimpleResult extends HashMap<String, Object> {
         put("message", message);
     }
 
-    @SuppressWarnings("unchecked")
     public SimpleResult putData(String key, Object value) {
-        ((LinkedHashMap<String, Object>) get("data")).put(key, value);
+        getData().put(key, value);
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public Object getData(String key) {
-        return ((LinkedHashMap<String, Object>) get("data")).get(key);
+        return getData().get(key);
     }
 
-    @SuppressWarnings("unchecked")
     public SimpleResult putDataAll(Map<? extends String, ?> map) {
-        ((LinkedHashMap<String, Object>) get("data")).putAll(map);
+        getData().putAll(map);
         return this;
+    }
+
+    private BaasObject getData() {
+        return (BaasObject) get("data");
     }
 }

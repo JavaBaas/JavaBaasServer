@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 对象控制器
  * Created by Staryet on 15/6/4.
  */
 @RestController
@@ -47,7 +48,6 @@ public class ObjectController {
      * @param body 对象
      * @param name 类名
      * @return 结果
-     * @throws SimpleError
      */
     @RequestMapping(value = "/{name}", method = RequestMethod.POST)
     @ResponseBody
@@ -66,6 +66,7 @@ public class ObjectController {
         BaasObject object = jsonUtil.readValue(body, BaasObject.class);
         //存储对象
         BaasObject newObject = objectService.insert(appId, plat, name, object, fetch, currentUser, isMaster);
+        //只有fetch为true时 返回完整对象信息
         SimpleResult result = SimpleResult.success();
         result.putDataAll(newObject);
         return result;
@@ -76,8 +77,7 @@ public class ObjectController {
      *
      * @param name 类名
      * @param id   id
-     * @return
-     * @throws SimpleError
+     * @return 对象
      */
     @RequestMapping(value = "/{name}/{id}", method = RequestMethod.GET)
     @ResponseBody
@@ -104,7 +104,7 @@ public class ObjectController {
      *
      * @param name  类名
      * @param where 查询条件
-     * @return
+     * @return 对象列表
      */
     @RequestMapping(value = "/{name}", method = RequestMethod.GET)
     @ResponseBody
@@ -133,7 +133,7 @@ public class ObjectController {
      *
      * @param name  类名
      * @param where 查询条件
-     * @return
+     * @return 个数
      */
     @RequestMapping(value = "/{name}/count", method = RequestMethod.GET)
     @ResponseBody
@@ -145,9 +145,7 @@ public class ObjectController {
         //处理权限
         boolean isMaster = masterService.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
-        SimpleResult result = SimpleResult.success();
-        result.putData("count", objectService.count(appId, name, query, currentUser, isMaster));
-        return result;
+        return SimpleResult.success().putData("count", objectService.count(appId, name, query, currentUser, isMaster));
     }
 
     /**
@@ -155,15 +153,18 @@ public class ObjectController {
      *
      * @param body 对象
      * @param name 类名
-     * @return
+     * @return 结果
      */
     @RequestMapping(value = "/{name}/{id}", method = RequestMethod.PUT)
     @ResponseBody
     public SimpleResult update(@RequestHeader(value = "JB-AppId") String appId,
                                @RequestHeader(value = "JB-Plat") String plat,
+                               @RequestParam(required = false) String where,
                                @RequestBody Map<String, Object> body,
                                @PathVariable String name,
                                @PathVariable String id) {
+        //处理查询字段
+        BaasQuery query = StringUtils.isEmpty(where) ? null : jsonUtil.readValue(where, BaasQuery.class);
         //处理权限
         boolean isMaster = masterService.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
@@ -172,8 +173,8 @@ public class ObjectController {
             throw new SimpleError(SimpleCode.CLAZZ_NAME_ERROR);
         }
         BaasObject object = new BaasObject(body);
-        objectService.update(appId, plat, name, id, object, currentUser, isMaster);
-        return SimpleResult.success();
+        long time = objectService.update(appId, plat, name, id, query, object, currentUser, isMaster);
+        return SimpleResult.success().putData("createdAt", time);
     }
 
     /**
@@ -181,7 +182,7 @@ public class ObjectController {
      *
      * @param body 对象
      * @param name 类名
-     * @return
+     * @return 结果
      */
     @RequestMapping(value = "/{name}/{id}/inc", method = RequestMethod.PUT)
     @ResponseBody
@@ -207,8 +208,7 @@ public class ObjectController {
      *
      * @param name 类名
      * @param id   id
-     * @return
-     * @throws SimpleError
+     * @return 结果
      */
     @RequestMapping(value = "/{name}/{id}", method = RequestMethod.DELETE)
     @ResponseBody

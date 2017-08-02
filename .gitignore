@@ -24,3 +24,4 @@ target
 .project
 
 test.properties
+src/main/.DS_Store

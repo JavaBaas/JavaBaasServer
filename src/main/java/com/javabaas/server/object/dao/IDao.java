@@ -20,6 +20,8 @@ public interface IDao {
 
     void update(String appId, String className, BaasQuery query, BaasObject object);
 
+    void findAndModify(String appId, String className, BaasQuery query, BaasObject object);
+
     void increment(String appId, String className, BaasQuery query, BaasObject object);
 
     void remove(String appId, String className, BaasQuery query);
