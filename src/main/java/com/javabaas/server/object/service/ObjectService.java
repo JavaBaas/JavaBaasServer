@@ -145,15 +145,15 @@ public class ObjectService {
 
     public long update(String appId, String plat, String className, String id, BaasQuery query, BaasObject object, BaasUser currentUser,
                        boolean isMaster) {
+        //判断id是否合法
+        if (!isValidId(id)) {
+            throw new SimpleError(SimpleCode.OBJECT_ID_ERROR);
+        }
         //查询已经存在的对象
         BaasObject exist = getObject(appId, className, id, isMaster);
         if (exist == null) {
             //对象不存在
             throw new SimpleError(SimpleCode.OBJECT_NOT_EXIST);
-        }
-        //判断id是否合法
-        if (!isValidId(id)) {
-            throw new SimpleError(SimpleCode.OBJECT_ID_ERROR);
         }
         //验证表级ACL
         verifyClazzAccess(appId, ClazzAclMethod.UPDATE, className, currentUser, isMaster);
