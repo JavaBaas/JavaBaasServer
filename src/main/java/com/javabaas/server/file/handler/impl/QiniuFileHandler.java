@@ -15,8 +15,10 @@ import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.service.ObjectService;
 import com.qiniu.common.QiniuException;
+import com.qiniu.common.Zone;
 import com.qiniu.http.Response;
 import com.qiniu.processing.OperationManager;
+import com.qiniu.storage.Configuration;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.util.Auth;
 import com.qiniu.util.Base64;
@@ -86,7 +88,8 @@ public class QiniuFileHandler implements IFileHandler {
                     //处理多个策略并发的情况 为每一个处理策略添加文件存储地址
                     String persistentFileKey = fileService.getFileKey();
                     String persistentFileName = appId + "/" + persistentFileKey;
-                    persistentFileKey = "saveas/" + new String(Base64.encode((qiniuConfig.getBucket() + ":" + persistentFileName).getBytes(), 0));
+                    persistentFileKey = "saveas/" + new String(Base64.encode((qiniuConfig.getBucket() + ":" + persistentFileName)
+                            .getBytes(), 0));
                     persistent.append(op).append("|").append(persistentFileKey).append(";");
                 }
                 policyMap.put("persistentOps", persistent.toString());
@@ -97,7 +100,8 @@ public class QiniuFileHandler implements IFileHandler {
         if (!StringUtils.isEmpty(qiniuConfig.getPipeline())) {
             policyMap.put("persistentPipeline", qiniuConfig.getPipeline());
         }
-        String url = "platform=qiniu&key=" + key + "&source=" + name + "&app=" + appId + "&plat=" + plat + "&mimeType=$(mimeType)&size=$(fsize)&duration=$(avinfo.format.duration)&avinfo=$(avinfo)&persistentId=$(persistentId)";
+        String url = "platform=qiniu&key=" + key + "&source=" + name + "&app=" + appId + "&plat=" + plat + "&mimeType=$(mimeType)&size=$" +
+                "(fsize)&duration=$(avinfo.format.duration)&avinfo=$(avinfo)&persistentId=$(persistentId)";
         policyMap.put("callbackBody", url);
         policyMap.put("returnBody", url);
         String token = auth.uploadToken(qiniuConfig.getBucket(), fileName, 60000, policyMap);
@@ -111,7 +115,8 @@ public class QiniuFileHandler implements IFileHandler {
     public BaasFile callback(String body, HttpServletRequest request) {
         //云存储回调 处理BaasFile的存储
         Auth auth = Auth.create(qiniuConfig.getAk(), qiniuConfig.getSk());
-        boolean isValid = auth.isValidCallback(request.getHeader("Authorization"), request.getRequestURL().toString(), body.getBytes(), request.getContentType());
+        boolean isValid = auth.isValidCallback(request.getHeader("Authorization"), request.getRequestURL().toString(), body.getBytes(),
+                request.getContentType());
         if (!isValid) {
             //授权失败 无效请求
             throw new SimpleError(SimpleCode.FILE_CALLBACK_NO_VALID);
@@ -130,7 +135,7 @@ public class QiniuFileHandler implements IFileHandler {
         }
         BaasFile file = new BaasFile(object);
         Auth auth = Auth.create(qiniuConfig.getAk(), qiniuConfig.getSk());
-        OperationManager operationManager = new OperationManager(auth);
+        OperationManager operationManager = new OperationManager(auth, new Configuration(Zone.zone1()));
         StringMap policyMap = new StringMap();
         policyMap.putAll(policy);
         String notifyUrl = baasConfig.getHost() + "api/file/notify/qiniu";
@@ -209,7 +214,7 @@ public class QiniuFileHandler implements IFileHandler {
             InputStream body = response.getBody();
             byte[] bytes = InputStreamTOByte(body);
             Map<String, Object> token = getToken(appId, plat, "fetch", policy);
-            UploadManager uploadManager = new UploadManager();
+            UploadManager uploadManager = new UploadManager(new Configuration(Zone.zone1()));
             //上传文件
             Response uploadResponse = uploadManager.put(bytes, (String) token.get("name"), (String) token.get("token"));
             String resultString = uploadResponse.bodyString();
