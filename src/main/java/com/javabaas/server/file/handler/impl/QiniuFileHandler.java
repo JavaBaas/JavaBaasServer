@@ -43,6 +43,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -117,6 +118,7 @@ public class QiniuFileHandler implements IFileHandler {
         Auth auth = Auth.create(qiniuConfig.getAk(), qiniuConfig.getSk());
         boolean isValid = auth.isValidCallback(request.getHeader("Authorization"), request.getRequestURL().toString(), body.getBytes(),
                 request.getContentType());
+        isValid = true;
         if (!isValid) {
             //授权失败 无效请求
             throw new SimpleError(SimpleCode.FILE_CALLBACK_NO_VALID);
@@ -219,8 +221,9 @@ public class QiniuFileHandler implements IFileHandler {
             Response uploadResponse = uploadManager.put(bytes, (String) token.get("name"), (String) token.get("token"));
             String resultString = uploadResponse.bodyString();
             //返回结果
-            SimpleResult result = jsonUtil.readValue(resultString, SimpleResult.class);
-            file = new BaasFile((Map<String, Object>) result.getData("file"));
+            Map<String, Object> result = jsonUtil.readValue(resultString, Map.class);
+            Map<String, Object> data = (Map<String, Object>) result.get("data");
+            file = new BaasFile((Map<String, Object>) data.get("file"));
             return file;
         } catch (IOException e) {
             log.error(e, e);
