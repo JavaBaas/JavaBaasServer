@@ -4,7 +4,6 @@ import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.config.entity.AppConfig;
 import com.javabaas.server.config.entity.AppConfigEnum;
 import com.javabaas.server.config.service.AppConfigService;
-import org.hibernate.validator.HibernateValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

@@ -2,7 +2,6 @@ package com.javabaas.server.common.interceptor;
 
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
-import com.javabaas.server.common.sign.ReplyChecker;
 import com.javabaas.server.common.sign.SignUtil;
 import com.javabaas.server.config.AuthConfig;
 import org.springframework.beans.factory.annotation.Autowired;
