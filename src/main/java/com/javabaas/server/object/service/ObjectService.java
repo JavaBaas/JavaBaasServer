@@ -1,19 +1,17 @@
 package com.javabaas.server.object.service;
 
-import com.javabaas.server.admin.entity.*;
-import com.javabaas.server.admin.service.ClazzService;
+import com.javabaas.server.admin.entity.ApiMethod;
+import com.javabaas.server.admin.entity.ApiStat;
+import com.javabaas.server.admin.entity.ClazzAclMethod;
+import com.javabaas.server.admin.entity.Field;
 import com.javabaas.server.admin.service.FieldService;
 import com.javabaas.server.admin.service.StatService;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
-import com.javabaas.server.file.entity.BaasFile;
-import com.javabaas.server.file.service.FileService;
 import com.javabaas.server.hook.service.HookService;
 import com.javabaas.server.object.dao.IDao;
 import com.javabaas.server.object.dao.impl.mongo.MongoDao;
 import com.javabaas.server.object.entity.*;
-import com.javabaas.server.object.entity.error.FieldRequiredError;
-import com.javabaas.server.object.entity.error.FieldTypeError;
 import com.javabaas.server.user.entity.BaasUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,15 +28,15 @@ import java.util.*;
 public class ObjectService {
 
     @Autowired
-    private ClazzService clazzService;
-    @Autowired
     private FieldService fieldService;
-    @Autowired
-    private FileService fileService;
     @Autowired
     private HookService hookService;
     @Autowired
     private StatService statService;
+    @Autowired
+    private ObjectChecker objectChecker;
+    @Autowired
+    private ClazzAclChecker clazzAclChecker;
     @Resource(type = MongoDao.class)
     private IDao dao;
 
@@ -59,13 +57,11 @@ public class ObjectService {
     public BaasObject insert(String appId, String plat, String className, BaasObject object, boolean fetch, BaasUser currentUser, boolean
             isMaster) {
         //验证表级ACL
-        verifyClazzAccess(appId, ClazzAclMethod.INSERT, className, currentUser, isMaster);
+        clazzAclChecker.verifyClazzAccess(appId, ClazzAclMethod.INSERT, className, currentUser, isMaster);
         //钩子处理
         hookService.beforeInsert(appId, className, object, currentUser);
-        //获取字段
-        List<Field> fields = fieldService.list(appId, className);
         //验证数据
-        object = verifyObject(appId, fields, object, false, isMaster);
+        object = objectChecker.checkInsert(appId, className, object, isMaster);
         //设置id
         String id = createId();
         object.setId(id);
@@ -95,6 +91,14 @@ public class ObjectService {
         return object;
     }
 
+    /**
+     * 删除对象
+     *
+     * @param className   类名称
+     * @param id          id
+     * @param currentUser 当前用户
+     * @param isMaster    超级权限
+     */
     public void delete(String appId, String plat, String className, String id, BaasUser currentUser, boolean isMaster) {
         //判断id是否合法
         if (!isValidId(id)) {
@@ -107,7 +111,7 @@ public class ObjectService {
             throw new SimpleError(SimpleCode.OBJECT_NOT_EXIST);
         }
         //验证表级ACL
-        verifyClazzAccess(appId, ClazzAclMethod.DELETE, className, currentUser, isMaster);
+        clazzAclChecker.verifyClazzAccess(appId, ClazzAclMethod.DELETE, className, currentUser, isMaster);
         //验证对象ACL权限
         if (!isMaster) {
             //非master权限验证acl
@@ -143,6 +147,16 @@ public class ObjectService {
         return update(appId, plat, className, id, null, object, currentUser, isMaster);
     }
 
+    /**
+     * 更新对象
+     *
+     * @param className   类名称
+     * @param id          id
+     * @param query       查询条件(此值不为空时 需检查查询条件 满足条件才进行更新)
+     * @param object      对象
+     * @param currentUser 当前用户
+     * @param isMaster    管理权限
+     */
     public long update(String appId, String plat, String className, String id, BaasQuery query, BaasObject object, BaasUser currentUser,
                        boolean isMaster) {
         //判断id是否合法
@@ -156,7 +170,7 @@ public class ObjectService {
             throw new SimpleError(SimpleCode.OBJECT_NOT_EXIST);
         }
         //验证表级ACL
-        verifyClazzAccess(appId, ClazzAclMethod.UPDATE, className, currentUser, isMaster);
+        clazzAclChecker.verifyClazzAccess(appId, ClazzAclMethod.UPDATE, className, currentUser, isMaster);
         //验证对象ACL权限
         if (!isMaster) {
             //非master权限验证acl
@@ -168,9 +182,8 @@ public class ObjectService {
         }
         //钩子处理
         hookService.beforeUpdate(appId, className, object, currentUser);
-        //获取字段信息
-        List<Field> fields = fieldService.list(appId, className);
-        object = verifyObject(appId, fields, object, true, isMaster);
+        //验证数据
+        object = objectChecker.checkUpdate(appId, className, object, isMaster);
         //设置时间
         Date date = new Date();
         long time = date.getTime();
@@ -192,40 +205,6 @@ public class ObjectService {
         hookService.afterUpdate(appId, className, object, currentUser);
         //返回更新时间
         return time;
-    }
-
-    public void increment(String appId, String plat, String className, String id, BaasObject object, BaasUser currentUser, boolean
-            isMaster) {
-        //查询已经存在的对象
-        BaasObject exist = getObject(appId, className, id, isMaster);
-        if (exist == null) {
-            //对象不存在
-            throw new SimpleError(SimpleCode.OBJECT_NOT_EXIST);
-        }
-        //验证表级ACL
-        verifyClazzAccess(appId, ClazzAclMethod.UPDATE, className, currentUser, isMaster);
-        //验证对象ACL权限
-        if (!isMaster) {
-            //非master权限验证acl
-            BaasAcl acl = exist.getAcl();
-            if (acl != null && !acl.hasWriteAccess(currentUser)) {
-                //无操作权限
-                throw new SimpleError(SimpleCode.OBJECT_NO_ACCESS);
-            }
-        }
-        //判断类是否存在
-        List<Field> fields = fieldService.list(appId, className);
-        object = verifyIncrement(appId, fields, object, isMaster);
-        //设置plat
-        object.put("updatedPlat", plat);
-        //设置时间
-        Date date = new Date();
-        long time = date.getTime();
-        object.put("updatedAt", time);
-        //更新对象
-        dao.increment(appId, className, new BaasQuery("_id", id), object);
-        //统计
-        statService.add(new ApiStat(appId, plat, className, ApiMethod.INSERT, date));
     }
 
     /**
@@ -265,7 +244,7 @@ public class ObjectService {
         //limit必须为正数
         if (limit <= 0) limit = 100;
         //验证表级ACL
-        verifyClazzAccess(appId, method, className, currentUser, isMaster);
+        clazzAclChecker.verifyClazzAccess(appId, method, className, currentUser, isMaster);
         //查询条件
         if (query == null) {
             query = new BaasQuery();
@@ -472,7 +451,7 @@ public class ObjectService {
 
     public long count(String appId, String className, BaasQuery query, BaasUser currentUser, boolean isMaster) {
         //验证表级ACL
-        verifyClazzAccess(appId, ClazzAclMethod.FIND, className, currentUser, isMaster);
+        clazzAclChecker.verifyClazzAccess(appId, ClazzAclMethod.FIND, className, currentUser, isMaster);
         //处理子查询
         handleSubQuery(appId, currentUser, isMaster, query);
         query = handleAcl(query, currentUser, isMaster);
@@ -523,184 +502,6 @@ public class ObjectService {
             }
         });
         return extracted;
-    }
-
-    private BaasObject verifyIncrement(String appId, List<Field> fields, BaasObject object, boolean isMaster) {
-        BaasObject verified = new BaasObject();
-        for (Field field : fields) {
-            if (!field.isSecurity() || isMaster) {
-                //非管理权限 无法操作保密字段
-                String key = field.getName();
-                Object value;
-                int type = field.getType();
-                value = object.get(key);
-                if (value != null) {
-                    //验证数据类型
-                    switch (type) {
-                        case FieldType.NUMBER:
-                            //只有数据型字段可以已经自增操作
-                            if (!(value instanceof Number)) {
-                                throw new FieldTypeError("字段: " + key + " 类型错误。需要数值型，实际为" + value.getClass().getSimpleName() + "。");
-                            }
-                            verified.put(key, value);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-        return verified;
-    }
-
-    private BaasObject verifyObject(String appId, List<Field> fields, BaasObject object, boolean isUpdate, boolean isMaster) {
-        BaasObject verified = new BaasObject();
-        for (Field field : fields) {
-            if (!field.isSecurity() || isMaster) {
-                //非管理权限 无法操作保密字段
-                String key = field.getName();
-                Object value;
-                int type = field.getType();
-                value = object.get(key);
-                if (field.isRequired()) {
-                    //非空字段 新建时不能为空 更新时不能删除
-                    if (!isUpdate && StringUtils.isEmpty(value)) {
-                        //新建时不能为空
-                        throw new FieldRequiredError(key);
-                    }
-                    if (isUpdate && value != null && value.equals("")) {
-                        //更新时不能删除
-                        throw new FieldRequiredError(key);
-                    }
-                }
-                if (value != null) {
-                    if (isUpdate && value instanceof String && StringUtils.isEmpty(value)) {
-                        //更新时，若输入为空字符串，则认为是抹除字段数据。
-                        verified.put(key, value);
-                    } else {
-                        //验证数据类型
-                        switch (type) {
-                            case FieldType.STRING:
-                                if (!(value instanceof String)) {
-                                    throw new FieldTypeError("字段: " + key + " 类型错误。需要字符型，实际为" + value.getClass().getSimpleName() + "。");
-                                }
-                                break;
-                            case FieldType.NUMBER:
-                                if (!(value instanceof Number)) {
-                                    throw new FieldTypeError("字段: " + key + " 类型错误。需要数值型，实际为" + value.getClass().getSimpleName() + "。");
-                                }
-                                break;
-                            case FieldType.BOOLEAN:
-                                if (!(value instanceof Boolean)) {
-                                    throw new FieldTypeError("字段: " + key + " 类型错误。需要布尔型，实际为" + value.getClass().getSimpleName() + "。");
-                                }
-                                break;
-                            case FieldType.DATE:
-                                if (!(value instanceof Number)) {
-                                    throw new FieldTypeError("字段: " + key + " 类型错误。日期字段需要数值型，实际为" + value.getClass().getSimpleName() + "。");
-                                }
-                                break;
-                            case FieldType.FILE:
-                                if (!(value instanceof Map) || ((Map) value).get("__type") == null
-                                        || ((Map) value).get("__type") != null && !((Map) value).get("__type").equals("File")) {
-                                    throw new FieldTypeError("字段: " + key + " 类型错误。需要文件型，实际为" + value.getClass().getSimpleName() + "。");
-                                } else {
-                                    //根据文件ID填充文件信息
-                                    String id = (String) ((Map) value).get("_id");
-                                    if (StringUtils.isEmpty(id)) {
-                                        throw new FieldTypeError("字段: " + key + " 错误。缺失id。");
-                                    }
-                                    BaasFile file = fileService.getFile(appId, null, id);
-                                    if (file == null) {
-                                        //文件不存在
-                                        throw new SimpleError(SimpleCode.OBJECT_FILE_NOT_FOUND);
-                                    } else {
-                                        ((Map) value).put("url", file.getUrl());
-                                        ((Map) value).put("name", file.getName());
-                                    }
-                                }
-                                break;
-                            case FieldType.POINTER:
-                                if (!(value instanceof Map) || ((Map) value).get("__type") == null
-                                        || ((Map) value).get("__type") != null && !((Map) value).get("__type").equals("Pointer")) {
-                                    throw new FieldTypeError("字段: " + key + " 类型错误。需要指针型，实际为" + value.getClass().getSimpleName() + "。");
-                                } else {
-                                    Object id = ((Map) value).get("_id");
-                                    Object className = ((Map) value).get("className");
-                                    if (StringUtils.isEmpty(id) || StringUtils.isEmpty(className)) {
-                                        throw new FieldTypeError("字段: " + key + " 错误。缺失id或className。");
-                                    }
-                                    if (!(id instanceof String) || !(className instanceof String)) {
-                                        throw new FieldTypeError("字段: " + key + " 类型错误。id或className需要为字符型。");
-                                    }
-                                    //检查类是否存在
-                                    clazzService.get(appId, (String) className);
-                                    //调整存储顺序
-                                    Map<String, Object> sorted = new LinkedHashMap<>();
-                                    sorted.put("__type", "Pointer");
-                                    sorted.put("className", className);
-                                    sorted.put("_id", id);
-                                    value = sorted;
-                                }
-                                break;
-                            case FieldType.OBJECT:
-                                if (!(value instanceof Map)) {
-                                    throw new FieldTypeError("字段: " + key + " 类型错误。需要对象类型，实际为" + value.getClass().getSimpleName() + "。");
-                                }
-                                break;
-                            case FieldType.ARRAY:
-                                if (!(value instanceof List)) {
-                                    throw new FieldTypeError("字段: " + key + " 类型错误。需要数组类型，实际为" + value.getClass().getSimpleName() + "。");
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                        verified.put(key, value);
-                    }
-                }
-            }
-        }
-        //处理ACL
-        if (isUpdate) {
-            Object value = object.get("acl");
-            if (value != null) {
-                //修改ACL
-                if (!(value instanceof Map)) {
-                    throw new FieldTypeError("ACL格式错误");
-                }
-                verified.put("acl", value);
-            }
-        } else {
-            Object value = object.get("acl");
-            if (value == null) {
-                //默认全局读写
-                BaasAcl acl = new BaasAcl();
-                acl.setPublicReadAccess(true);
-                acl.setPublicWriteAccess(true);
-                verified.put("acl", acl);
-            } else {
-                if (!(value instanceof Map)) {
-                    throw new FieldTypeError("ACL格式错误");
-                }
-                verified.put("acl", value);
-            }
-        }
-        return verified;
-    }
-
-    private void verifyClazzAccess(String appId, ClazzAclMethod method, String className, BaasUser user, boolean isMaster) {
-        Clazz clazz = clazzService.get(appId, className);
-        if (clazz.getAcl() != null) {
-            //验证表级ACL权限
-            if (!isMaster) {
-                //非master权限验证acl
-                if (!clazz.getAcl().hasAccess(method, user)) {
-                    //无操作权限
-                    throw new SimpleError(SimpleCode.OBJECT_CLAZZ_NO_ACCESS);
-                }
-            }
-        }
     }
 
     private BaasQuery handleAcl(BaasQuery query, BaasUser user, boolean isMaster) {

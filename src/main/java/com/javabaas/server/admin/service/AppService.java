@@ -33,8 +33,8 @@ import java.util.regex.Pattern;
  * Created by Staryet on 15/9/15.
  */
 @Service
-public class AppService {
 
+public class AppService {
     private Log log = LogFactory.getLog(getClass());
     @Autowired
     private StringRedisTemplate redisTemplate;

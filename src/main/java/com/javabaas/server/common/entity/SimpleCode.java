@@ -71,6 +71,9 @@ public enum SimpleCode {
     OBJECT_SUB_QUERY_EMPTY_WHERE(2011, "子查询缺少where字段或where字段不是map"),
     OBJECT_SUB_QUERY_EMPTY_SEARCH_CLASS(2012, "子查询缺少searchClass字段"),
     OBJECT_FIND_AND_MODIFY_FAILED(2013, "更新失败 条件不满足"),
+    OBJECT_OPERATOR_NOT_EXIST(2014, "对象操作符不存在"),
+    OBJECT_OPERATOR_WRONG_TYPE(2015, "对象操作符类型错误"),
+    OBJECT_OPERATOR_WRONG_VALUE(2016, "对象操作符取值错误"),
     //3XXX 文件存储相关
     FILE_NO_HANDLER(3001, "无对应的物理文件处理器"),
     FILE_CALLBACK_NO_VALID(3002, "回调授权失败"),

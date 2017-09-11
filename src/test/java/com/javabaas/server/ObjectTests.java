@@ -304,9 +304,9 @@ public class ObjectTests {
 
         //测试抹除字段
         t = new BaasObject();
-        t.put("string", "");
-        t.put("number", "");
-        t.put("boolean", "");
+        t.put("string", new BaasOperator(BaasOperatorEnum.DELETE, 0));
+        t.put("number", new BaasOperator(BaasOperatorEnum.DELETE, 0));
+        t.put("boolean", new BaasOperator(BaasOperatorEnum.DELETE, 0));
         objectService.update(app.getId(), "admin", "ObjectTest", id, t, null, false);
         //检查对象是否修改成功
         t = objectService.get(app.getId(), "admin", "ObjectTest", id);
@@ -350,7 +350,7 @@ public class ObjectTests {
     }
 
     /**
-     * 测试原子操作
+     * 测试自增操作
      *
      * @throws SimpleError
      */
@@ -374,8 +374,8 @@ public class ObjectTests {
 
         //修改对象 +1
         t = new BaasObject();
-        t.put("number", 1);
-        objectService.increment(app.getId(), "admin", "ObjectTest", id, t, null, false);
+        t.put("number", new BaasOperator(BaasOperatorEnum.INCREMENT, 1));
+        objectService.update(app.getId(), "admin", "ObjectTest", id, t, null, false);
         //检查对象是否修改成功
         t = objectService.get(app.getId(), "admin", "ObjectTest", id);
         Assert.assertThat(t.get("string"), equalTo("string"));
@@ -388,9 +388,9 @@ public class ObjectTests {
 
         //修改对象 +5 * 10
         t = new BaasObject();
-        t.put("number", 5);
+        t.put("number", new BaasOperator(BaasOperatorEnum.INCREMENT, 5));
         for (int i = 0; i < 10; i++) {
-            objectService.increment(app.getId(), "admin", "ObjectTest", id, t, null, false);
+            objectService.update(app.getId(), "admin", "ObjectTest", id, t, null, false);
         }
         //检查对象是否修改成功
         t = objectService.get(app.getId(), "admin", "ObjectTest", id);
@@ -400,9 +400,9 @@ public class ObjectTests {
 
         //修改对象 -10 * 5
         t = new BaasObject();
-        t.put("number", -10);
+        t.put("number", new BaasOperator(BaasOperatorEnum.INCREMENT, -10));
         for (int i = 0; i < 5; i++) {
-            objectService.increment(app.getId(), "admin", "ObjectTest", id, t, null, false);
+            objectService.update(app.getId(), "admin", "ObjectTest", id, t, null, false);
         }
         //检查对象是否修改成功
         t = objectService.get(app.getId(), "admin", "ObjectTest", id);
@@ -412,15 +412,132 @@ public class ObjectTests {
 
         //修改对象 -100 * 10
         t = new BaasObject();
-        t.put("number", -100);
+        t.put("number", new BaasOperator(BaasOperatorEnum.INCREMENT, -100));
         for (int i = 0; i < 10; i++) {
-            objectService.increment(app.getId(), "admin", "ObjectTest", id, t, null, false);
+            objectService.update(app.getId(), "admin", "ObjectTest", id, t, null, false);
         }
         //检查对象是否修改成功
         t = objectService.get(app.getId(), "admin", "ObjectTest", id);
         Assert.assertThat(t.get("string"), equalTo("string"));
         Assert.assertThat(t.get("number"), equalTo(-899));
         Assert.assertThat(t.get("boolean"), equalTo(true));
+    }
+
+    /**
+     * 测试原子乘
+     */
+    @Test
+    public void testMultiply() {
+        BaasObject t = new BaasObject();
+        t.put("number", 100);
+        String id = objectService.insert(app.getId(), "cloud", "ObjectTest", t, null, false).getId();
+
+        //修改对象 *2
+        t = new BaasObject();
+        t.put("number", new BaasOperator(BaasOperatorEnum.MULTIPLY, 2));
+        objectService.update(app.getId(), "admin", "ObjectTest", id, t, null, false);
+        //检查对象是否修改成功
+        t = objectService.get(app.getId(), "admin", "ObjectTest", id);
+        Assert.assertThat(t.get("number"), equalTo(200));
+    }
+
+    @Test
+    public void testArrayAddOperator() {
+        BaasObject t = new BaasObject();
+        BaasList array = new BaasList();
+        BaasObject arrayObj1 = new BaasObject();
+        arrayObj1.put("string", "string");
+        arrayObj1.put("number", 100);
+        array.add(arrayObj1);
+        t.put("array", array);
+        String id = objectService.insert(app.getId(), "cloud", "ObjectTest", t, null, false).getId();
+
+        t = objectService.get(app.getId(), "admin", "ObjectTest", id);
+        //检查对象是否保存成功
+        array = t.getList("array");
+        BaasObject a1 = array.getBaasObject(0);
+        Assert.assertThat(a1.getString("string"), equalTo("string"));
+        Assert.assertThat(a1.getInt("number"), equalTo(100));
+
+        //数组增加
+        t = new BaasObject();
+        BaasObject arrayObj2 = new BaasObject();
+        BaasList list = new BaasList();
+        arrayObj2.put("string", "string");
+        arrayObj2.put("number", 200);
+        list.add(arrayObj2);
+        t.put("array", new BaasOperator(BaasOperatorEnum.ADD, list));
+        objectService.update(app.getId(), "admin", "ObjectTest", id, t, null, false);
+
+        t = objectService.get(app.getId(), "admin", "ObjectTest", id);
+        //检查对象是否保存成功
+        array = t.getList("array");
+        BaasObject a2 = array.getBaasObject(1);
+        Assert.assertThat(a2.getString("string"), equalTo("string"));
+        Assert.assertThat(a2.getInt("number"), equalTo(200));
+    }
+
+    @Test
+    public void testArrayAddUniqueOperator() {
+        BaasObject t = new BaasObject();
+        BaasList array = new BaasList();
+        array.addAll(Arrays.asList("a", "b", "c"));
+        t.put("array", array);
+        String id = objectService.insert(app.getId(), "cloud", "ObjectTest", t, null, false).getId();
+
+        //检查对象是否保存成功
+        t = objectService.get(app.getId(), "admin", "ObjectTest", id);
+        array = t.getList("array");
+        Assert.assertThat(array.size(), equalTo(3));
+        Assert.assertThat(array.get(0), equalTo("a"));
+        Assert.assertThat(array.get(1), equalTo("b"));
+        Assert.assertThat(array.get(2), equalTo("c"));
+
+        //添加a d
+        t = new BaasObject();
+        BaasList uniqueList = new BaasList();
+        uniqueList.addAll(Arrays.asList("a", "d"));
+        t.put("array", new BaasOperator(BaasOperatorEnum.ADD_UNIQUE, uniqueList));
+        objectService.update(app.getId(), "admin", "ObjectTest", id, t, null, false);
+        //检查对象是否添加正确 因为a重复 不添加 添加后结果为a b c d
+        t = objectService.get(app.getId(), "admin", "ObjectTest", id);
+        array = t.getList("array");
+        Assert.assertThat(array.size(), equalTo(4));
+        Assert.assertThat(array.get(0), equalTo("a"));
+        Assert.assertThat(array.get(1), equalTo("b"));
+        Assert.assertThat(array.get(2), equalTo("c"));
+        Assert.assertThat(array.get(3), equalTo("d"));
+    }
+
+    @Test
+    public void testArrayRemoveOperator() {
+        BaasObject t = new BaasObject();
+        BaasList array = new BaasList();
+        array.addAll(Arrays.asList("a", "b", "c", "d"));
+        t.put("array", array);
+        String id = objectService.insert(app.getId(), "cloud", "ObjectTest", t, null, false).getId();
+
+        //检查对象是否保存成功
+        t = objectService.get(app.getId(), "admin", "ObjectTest", id);
+        array = t.getList("array");
+        Assert.assertThat(array.size(), equalTo(4));
+        Assert.assertThat(array.get(0), equalTo("a"));
+        Assert.assertThat(array.get(1), equalTo("b"));
+        Assert.assertThat(array.get(2), equalTo("c"));
+        Assert.assertThat(array.get(3), equalTo("d"));
+
+        //移除a c
+        t = new BaasObject();
+        BaasList uniqueList = new BaasList();
+        uniqueList.addAll(Arrays.asList("a", "c"));
+        t.put("array", new BaasOperator(BaasOperatorEnum.REMOVE, uniqueList));
+        objectService.update(app.getId(), "admin", "ObjectTest", id, t, null, false);
+        //检查对象是否正确移除
+        t = objectService.get(app.getId(), "admin", "ObjectTest", id);
+        array = t.getList("array");
+        Assert.assertThat(array.size(), equalTo(2));
+        Assert.assertThat(array.get(0), equalTo("b"));
+        Assert.assertThat(array.get(1), equalTo("d"));
     }
 
     /**

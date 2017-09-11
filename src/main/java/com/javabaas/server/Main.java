@@ -1,13 +1,19 @@
 package com.javabaas.server;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.javabaas.server.common.interceptor.AdminInterceptor;
 import com.javabaas.server.common.interceptor.AuthInterceptor;
 import com.javabaas.server.common.interceptor.HeaderInterceptor;
 import com.javabaas.server.common.interceptor.MasterInterceptor;
+import com.javabaas.server.object.entity.BaasList;
+import com.javabaas.server.object.entity.BaasObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.convert.DbRefResolver;
@@ -15,9 +21,13 @@ import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoPersistentEntity;
 import org.springframework.data.mongodb.core.mapping.MongoPersistentProperty;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import java.util.List;
+import java.util.Map;
 
 @SpringBootApplication
 public class Main extends WebMvcConfigurerAdapter {
@@ -47,6 +57,12 @@ public class Main extends WebMvcConfigurerAdapter {
         registry.addInterceptor(adminInterceptor).addPathPatterns("/api/admin/**");
         //管理权限
         registry.addInterceptor(masterInterceptor).addPathPatterns("/api/master/**");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addAbstractTypeMapping(Map.class, BaasObject.class);
+        module.addAbstractTypeMapping(List.class, BaasList.class);
+        objectMapper.registerModule(module);
     }
 
     @Bean
@@ -63,5 +79,30 @@ public class Main extends WebMvcConfigurerAdapter {
         mongoConverter.setMapKeyDotReplacement("_");
         return mongoConverter;
     }
+
+    @Bean(name = "baasMapper")
+    public ObjectMapper baasMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addAbstractTypeMapping(Map.class, BaasObject.class);
+        module.addAbstractTypeMapping(List.class, BaasList.class);
+        return objectMapper.registerModule(module);
+    }
+
+    @Bean(name = "objectMapper")
+    @Primary
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
+
+    @Bean
+    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
+        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        jsonConverter.setObjectMapper(objectMapper);
+        return jsonConverter;
+    }
+
 
 }

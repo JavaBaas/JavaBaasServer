@@ -3,16 +3,12 @@ package com.javabaas.server.object.dao.impl.mongo;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.object.dao.IDao;
-import com.javabaas.server.object.entity.BaasList;
-import com.javabaas.server.object.entity.BaasObject;
-import com.javabaas.server.object.entity.BaasQuery;
-import com.javabaas.server.object.entity.BaasSort;
+import com.javabaas.server.object.entity.*;
 import com.javabaas.server.object.entity.error.DuplicateKeyError;
 import com.mongodb.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -197,17 +193,54 @@ public class MongoDao implements IDao {
 
     private DBObject obj2dbo(BaasObject object, boolean isUpdate) {
         BasicDBObject dbo = new BasicDBObject();
+        //存储所有操作符
         BasicDBObject set = new BasicDBObject();
         BasicDBObject unset = new BasicDBObject();
+        BasicDBObject inc = new BasicDBObject();
+        BasicDBObject mul = new BasicDBObject();
+        BasicDBObject add = new BasicDBObject();
+        BasicDBObject addUnique = new BasicDBObject();
+        BasicDBObject remove = new BasicDBObject();
+
         Set<Map.Entry<String, Object>> entries = object.entrySet();
         for (Map.Entry<String, Object> entry : entries) {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (value != null) {
-                if (isUpdate && value instanceof String && StringUtils.isEmpty(value)) {
-                    //更新时，若输入为空字符串，则认为是抹除字段数据。
-                    unset.put(key, 1);
+                if (value instanceof BaasOperator) {
+                    //操作符
+                    BaasOperator operator = (BaasOperator) value;
+                    switch (operator.getType()) {
+                        case DELETE:
+                            unset.put(key, 1);
+                            break;
+                        case INCREMENT:
+                            inc.put(key, operator.getValue());
+                            break;
+                        case MULTIPLY:
+                            mul.put(key, operator.getValue());
+                            break;
+                        case ADD:
+                            BaasList addList = (BaasList) operator.getValue();
+                            BasicDBList dbList = new BasicDBList();
+                            dbList.addAll(addList);
+                            add.put(key, dbList);
+                            break;
+                        case ADD_UNIQUE:
+                            BaasList uniqueList = (BaasList) operator.getValue();
+                            dbList = new BasicDBList();
+                            dbList.addAll(uniqueList);
+                            addUnique.put(key, new BasicDBObject("$each", dbList));
+                            break;
+                        case REMOVE:
+                            BaasList removeList = (BaasList) operator.getValue();
+                            dbList = new BasicDBList();
+                            dbList.addAll(removeList);
+                            remove.put(key, dbList);
+                            break;
+                    }
                 } else {
+                    //非操作符
                     if (isUpdate) {
                         //更新时将数据放入$set中
                         set.put(key, value);
@@ -220,11 +253,24 @@ public class MongoDao implements IDao {
         if (isUpdate) {
             if (set.size() > 0) {
                 dbo.put("$set", set);
-            } else {
-                dbo.put("$set", new BasicDBObject());
             }
             if (unset.size() > 0) {
                 dbo.put("$unset", unset);
+            }
+            if (inc.size() > 0) {
+                dbo.put("$inc", inc);
+            }
+            if (mul.size() > 0) {
+                dbo.put("$mul", mul);
+            }
+            if (add.size() > 0) {
+                dbo.put("$pushAll", add);
+            }
+            if (addUnique.size() > 0) {
+                dbo.put("$addToSet", addUnique);
+            }
+            if (remove.size() > 0) {
+                dbo.put("$pullAll", remove);
             }
         }
         return dbo;
