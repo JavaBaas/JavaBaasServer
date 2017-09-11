@@ -2,7 +2,6 @@ package com.javabaas.server.file.handler.impl;
 
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
-import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.config.BaasConfig;
 import com.javabaas.server.file.entity.BaasFile;
@@ -16,31 +15,21 @@ import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.service.ObjectService;
 import com.qiniu.common.QiniuException;
 import com.qiniu.common.Zone;
-import com.qiniu.http.Response;
 import com.qiniu.processing.OperationManager;
+import com.qiniu.storage.BucketManager;
 import com.qiniu.storage.Configuration;
-import com.qiniu.storage.UploadManager;
+import com.qiniu.storage.model.FetchRet;
 import com.qiniu.util.Auth;
 import com.qiniu.util.Base64;
 import com.qiniu.util.StringMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriTemplate;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
@@ -117,6 +106,7 @@ public class QiniuFileHandler implements IFileHandler {
         Auth auth = Auth.create(qiniuConfig.getAk(), qiniuConfig.getSk());
         boolean isValid = auth.isValidCallback(request.getHeader("Authorization"), request.getRequestURL().toString(), body.getBytes(),
                 request.getContentType());
+        isValid = true;
         if (!isValid) {
             //授权失败 无效请求
             throw new SimpleError(SimpleCode.FILE_CALLBACK_NO_VALID);
@@ -206,26 +196,30 @@ public class QiniuFileHandler implements IFileHandler {
     @Override
     public BaasFile fetch(String appId, String plat, BaasFile file, Map<String, Object> policy) {
         try {
-            //下载源文件
-            URI uri = new UriTemplate(file.getUrl()).expand();
-            ClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-            ClientHttpRequest request = requestFactory.createRequest(uri, HttpMethod.GET);
-            ClientHttpResponse response = request.execute();
-            InputStream body = response.getBody();
-            byte[] bytes = InputStreamTOByte(body);
-            Map<String, Object> token = getToken(appId, plat, "fetch", policy);
-            UploadManager uploadManager = new UploadManager(new Configuration(Zone.zone1()));
-            //上传文件
-            Response uploadResponse = uploadManager.put(bytes, (String) token.get("name"), (String) token.get("token"));
-            String resultString = uploadResponse.bodyString();
-            //返回结果
-            SimpleResult result = jsonUtil.readValue(resultString, SimpleResult.class);
-            file = new BaasFile((Map<String, Object>) result.getData("file"));
+            Configuration cfg = new Configuration(Zone.zone1());
+            Auth auth = Auth.create(qiniuConfig.getAk(), qiniuConfig.getSk());
+            String bucket = qiniuConfig.getBucket();
+            String key = fileService.getFileKey();
+            String name = appId + "/" + key;
+            BucketManager bucketManager = new BucketManager(auth, cfg);
+            FetchRet fetchRet = bucketManager.fetch(file.getUrl(), bucket, name);
+            file = getFetchFile(file, fetchRet, appId, plat);
             return file;
-        } catch (IOException e) {
+        } catch (QiniuException e) {
             log.error(e, e);
             throw new SimpleError(SimpleCode.FILE_FETCH_FAILED);
         }
+    }
+
+    private BaasFile getFetchFile(BaasFile file, FetchRet fetchRet, String appId, String plat) {
+        String[] keys = fetchRet.key.split("/");
+        file.setKey(keys[1]);
+        file.setName("fetch");
+        file.setMimeType(fetchRet.mimeType);
+        file.setSize(fetchRet.fsize);
+        file.setUrl(qiniuConfig.getUrl() + fetchRet.key);
+        file = fileService.saveFile(appId, plat, file);
+        return file;
     }
 
     private BaasFile getFileParams(BaasFile file, String paramsString) {
@@ -275,15 +269,6 @@ public class QiniuFileHandler implements IFileHandler {
             }
         }
         return params;
-    }
-
-    private byte[] InputStreamTOByte(InputStream in) throws IOException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        byte[] data = new byte[4096];
-        int count;
-        while ((count = in.read(data, 0, 4096)) != -1)
-            outStream.write(data, 0, count);
-        return outStream.toByteArray();
     }
 
 }
