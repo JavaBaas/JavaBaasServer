@@ -67,7 +67,7 @@ public class ObjectController {
         BaasObject newObject = objectService.insert(appId, plat, name, object, fetch, currentUser, isMaster);
         //只有fetch为true时 返回完整对象信息
         SimpleResult result = SimpleResult.success();
-        result.putDataAll(newObject);
+        result.putData("result", newObject);
         return result;
     }
 
@@ -80,21 +80,23 @@ public class ObjectController {
      */
     @RequestMapping(value = "/{name}/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public BaasObject get(@RequestHeader(value = "JB-AppId") String appId,
-                          @RequestHeader(value = "JB-Plat") String plat,
-                          @PathVariable String name,
-                          @PathVariable String id,
-                          @RequestParam(required = false) String include) {
+    public SimpleResult get(@RequestHeader(value = "JB-AppId") String appId,
+                            @RequestHeader(value = "JB-Plat") String plat,
+                            @PathVariable String name,
+                            @PathVariable String id,
+                            @RequestParam(required = false) String include) {
         //处理include
         BaasInclude bassInclude = objectService.getBaasInclude(include);
         //处理权限
         boolean isMaster = masterService.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         //获取数据
-        BaasObject result = objectService.get(appId, plat, name, id, bassInclude, currentUser, isMaster);
-        if (result == null) {
-            result = new BaasObject();
+        BaasObject object = objectService.get(appId, plat, name, id, bassInclude, currentUser, isMaster);
+        if (object == null) {
+            object = new BaasObject();
         }
+        SimpleResult result = SimpleResult.success();
+        result.putDataAll(object);
         return result;
     }
 
@@ -107,14 +109,14 @@ public class ObjectController {
      */
     @RequestMapping(value = "/{name}", method = RequestMethod.GET)
     @ResponseBody
-    public List<BaasObject> find(@RequestHeader(value = "JB-AppId") String appId,
-                                 @RequestHeader(value = "JB-Plat") String plat,
-                                 @PathVariable String name,
-                                 @RequestParam(required = false) String where,
-                                 @RequestParam(required = false) String order,
-                                 @RequestParam(required = false) String include,
-                                 @RequestParam(required = false, defaultValue = "100") int limit,
-                                 @RequestParam(required = false, defaultValue = "0") int skip) {
+    public SimpleResult find(@RequestHeader(value = "JB-AppId") String appId,
+                             @RequestHeader(value = "JB-Plat") String plat,
+                             @PathVariable String name,
+                             @RequestParam(required = false) String where,
+                             @RequestParam(required = false) String order,
+                             @RequestParam(required = false) String include,
+                             @RequestParam(required = false, defaultValue = "100") int limit,
+                             @RequestParam(required = false, defaultValue = "0") int skip) {
         //处理查询字段
         BaasQuery query = StringUtils.isEmpty(where) ? null : jsonUtil.readBaas(where, BaasQuery.class);
         //处理排序字段
@@ -124,7 +126,10 @@ public class ObjectController {
         //处理权限
         boolean isMaster = masterService.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
-        return objectService.find(appId, plat, name, query, sort, bassInclude, limit, skip, currentUser, isMaster);
+        List<BaasObject> list = objectService.find(appId, plat, name, query, sort, bassInclude, limit, skip, currentUser, isMaster);
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", list);
+        return result;
     }
 
     /**
