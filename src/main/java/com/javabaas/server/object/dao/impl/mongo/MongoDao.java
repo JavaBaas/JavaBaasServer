@@ -133,18 +133,6 @@ public class MongoDao implements IDao {
     }
 
     @Override
-    public void increment(String appId, String className, BaasQuery query, BaasObject object) {
-        DBCollection c = getCollection(appId, className);
-        DBObject dbo = obj2inc(object);
-        try {
-            c.update(new BasicDBObject(query), dbo);
-        } catch (DuplicateKeyException e) {
-            //唯一索引字段重复
-            throw new DuplicateKeyError("");
-        }
-    }
-
-    @Override
     public void remove(String appId, String className, BaasQuery query) {
         DBCollection c = getCollection(appId, className);
         BasicDBObject queryObject = new BasicDBObject(query);
