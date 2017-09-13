@@ -15,7 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * 测试推送
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Main.class,webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(classes = Main.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class PushTests {
 
     @Autowired

@@ -11,7 +11,7 @@ public enum BaasOperatorEnum {
     ADD_UNIQUE("AddUnique"),
     REMOVE("Remove"),
     INCREMENT("Increment"),
-    MULTIPLY("multiply");
+    MULTIPLY("Multiply");
 
     private String name;
 

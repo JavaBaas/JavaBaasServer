@@ -24,7 +24,7 @@ import static org.hamcrest.Matchers.*;
  * Created by Staryet on 15/8/11.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Main.class,webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(classes = Main.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class FileTests {
 
     @Autowired

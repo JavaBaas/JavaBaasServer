@@ -1,5 +1,6 @@
 package com.javabaas.server.object.dao;
 
+import com.javabaas.server.object.entity.BaasList;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.entity.BaasSort;
@@ -16,7 +17,7 @@ public interface IDao {
 
     BaasObject findOne(String appId, String className, BaasQuery query);
 
-    List<BaasObject> find(String appId, String className, BaasQuery query, BaasSort sort, Integer limit, Integer skip);
+    List<BaasObject> find(String appId, String className, BaasQuery query, BaasList keys, BaasSort sort, Integer limit, Integer skip);
 
     void update(String appId, String className, BaasQuery query, BaasObject object);
 

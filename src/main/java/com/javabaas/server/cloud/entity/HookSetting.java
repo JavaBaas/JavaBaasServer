@@ -24,7 +24,8 @@ public class HookSetting {
         this.afterDelete = enable;
     }
 
-    public HookSetting(boolean beforeInsert, boolean afterInsert, boolean beforeUpdate, boolean afterUpdate, boolean beforeDelete, boolean afterDelete) {
+    public HookSetting(boolean beforeInsert, boolean afterInsert, boolean beforeUpdate, boolean afterUpdate, boolean beforeDelete,
+                       boolean afterDelete) {
         this.beforeInsert = beforeInsert;
         this.afterInsert = afterInsert;
         this.beforeUpdate = beforeUpdate;

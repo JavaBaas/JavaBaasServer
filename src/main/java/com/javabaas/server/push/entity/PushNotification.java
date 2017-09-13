@@ -4,7 +4,7 @@ import java.util.Map;
 
 /**
  * Created by test on 2017/6/27.
- *
+ * <p>
  * 通知类消息，是会作为“通知”推送到客户端的
  */
 public class PushNotification {

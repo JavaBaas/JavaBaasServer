@@ -96,7 +96,7 @@ public class ObjectController {
             object = new BaasObject();
         }
         SimpleResult result = SimpleResult.success();
-        result.putDataAll(object);
+        result.putData("result", object);
         return result;
     }
 

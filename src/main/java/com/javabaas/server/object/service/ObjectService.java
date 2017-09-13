@@ -12,6 +12,7 @@ import com.javabaas.server.hook.service.HookService;
 import com.javabaas.server.object.dao.IDao;
 import com.javabaas.server.object.dao.impl.mongo.MongoDao;
 import com.javabaas.server.object.entity.*;
+import com.javabaas.server.object.util.BaasObjectIdUtil;
 import com.javabaas.server.user.entity.BaasUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,8 @@ public class ObjectService {
     private HookService hookService;
     @Autowired
     private StatService statService;
+    @Autowired
+    private AclHandler aclHandler;
     @Autowired
     private ObjectChecker objectChecker;
     @Autowired
@@ -63,7 +66,7 @@ public class ObjectService {
         //验证数据
         object = objectChecker.checkInsert(appId, className, object, isMaster);
         //设置id
-        String id = createId();
+        String id = BaasObjectIdUtil.createId();
         object.setId(id);
         //设置时间
         Date date = new Date();
@@ -101,7 +104,7 @@ public class ObjectService {
      */
     public void delete(String appId, String plat, String className, String id, BaasUser currentUser, boolean isMaster) {
         //判断id是否合法
-        if (!isValidId(id)) {
+        if (!BaasObjectIdUtil.isValidId(id)) {
             throw new SimpleError(SimpleCode.OBJECT_ID_ERROR);
         }
         //查询已经存在的对象
@@ -160,7 +163,7 @@ public class ObjectService {
     public long update(String appId, String plat, String className, String id, BaasQuery query, BaasObject object, BaasUser currentUser,
                        boolean isMaster) {
         //判断id是否合法
-        if (!isValidId(id)) {
+        if (!BaasObjectIdUtil.isValidId(id)) {
             throw new SimpleError(SimpleCode.OBJECT_ID_ERROR);
         }
         //查询已经存在的对象
@@ -223,7 +226,7 @@ public class ObjectService {
     public BaasObject get(String appId, String plat, String className, String id, BaasInclude include, BaasUser currentUser, boolean
             isMaster) {
         //判断id是否合法
-        if (!isValidId(id)) {
+        if (!BaasObjectIdUtil.isValidId(id)) {
             throw new SimpleError(SimpleCode.OBJECT_ID_ERROR);
         }
         //构建查询
@@ -442,8 +445,8 @@ public class ObjectService {
             return null;
         }
         //处理ACL权限
-        query = handleAcl(query, user, isMaster);
-        List<BaasObject> objects = dao.find(appId, className, query, sort, limit, skip);
+        query = aclHandler.handleAcl(query, user, isMaster);
+        List<BaasObject> objects = dao.find(appId, className, query, null, sort, limit, skip);
         Map<String, BaasObject> result = new LinkedHashMap<>();
         objects.forEach(obj -> result.put(obj.getId(), extractObject(fields, obj, isMaster)));
         return result;
@@ -454,7 +457,7 @@ public class ObjectService {
         clazzAclChecker.verifyClazzAccess(appId, ClazzAclMethod.FIND, className, currentUser, isMaster);
         //处理子查询
         handleSubQuery(appId, currentUser, isMaster, query);
-        query = handleAcl(query, currentUser, isMaster);
+        query = aclHandler.handleAcl(query, currentUser, isMaster);
         return dao.count(appId, className, query);
     }
 
@@ -465,6 +468,15 @@ public class ObjectService {
         dao.removeField(appId, className, fieldName);
     }
 
+    /**
+     * 提取对象
+     * 按照权限提取对象 无管理权限时过滤掉保密字段
+     *
+     * @param fields   对象字段列表
+     * @param object   原对象
+     * @param isMaster 是否为管理权限
+     * @return 提取后对象
+     */
     private BaasObject extractObject(List<Field> fields, BaasObject object, boolean isMaster) {
         BaasObject extracted = new BaasObject();
         //获取id
@@ -504,37 +516,6 @@ public class ObjectService {
         return extracted;
     }
 
-    private BaasQuery handleAcl(BaasQuery query, BaasUser user, boolean isMaster) {
-        //处理ACL权限
-        if (!isMaster) {
-            //非master权限则检查ACL
-            BaasAcl aclQuery;
-            //全局读权限
-            BaasAcl aclAll = new BaasAcl("acl.*.read", true);
-            if (user == null) {
-                aclQuery = aclAll;
-            } else {
-                //添加登录用户所拥有的读取权限
-                String id = user.getId();
-                //用户读权限
-                BaasList acls = new BaasList();
-                acls.add(aclAll);
-                acls.add(new BaasObject("acl." + id + ".read", true));
-                aclQuery = new BaasAcl("$or", acls);
-            }
-            //将ACL权限查询合并到主查询
-            BaasQuery newQuery = new BaasQuery();
-            BaasList list = new BaasList();
-            list.add(aclQuery);
-            if (query != null) {
-                list.add(query);
-            }
-            newQuery.put("$and", list);
-            return newQuery;
-        }
-        return query;
-    }
-
     /**
      * 整理包含字段
      * <br>
@@ -569,14 +550,6 @@ public class ObjectService {
             }
             return root;
         }
-    }
-
-    private String createId() {
-        return UUID.randomUUID().toString().replace("-", "");
-    }
-
-    private boolean isValidId(String id) {
-        return !StringUtils.isEmpty(id) && id.length() == 32;
     }
 
 }

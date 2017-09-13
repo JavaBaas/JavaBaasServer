@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.equalTo;
  * Created by test on 2017/6/19.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Main.class,webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(classes = Main.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class AccountTests {
     @Autowired
     private AppService appService;

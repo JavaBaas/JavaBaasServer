@@ -55,7 +55,8 @@ public class SnsAuthUtil {
             if (StringUtils.isEmpty(auth.getUid()) || StringUtils.isEmpty(auth.getAccessToken())) {
                 throw new SimpleError(SimpleCode.USER_AUTH_ERROR);
             }
-            String resultStr = rest.postForObject("https://api.weibo.com/oauth2/get_token_info?access_token={accessToken}", null, String.class, auth.getAccessToken());
+            String resultStr = rest.postForObject("https://api.weibo.com/oauth2/get_token_info?access_token={accessToken}", null, String
+                    .class, auth.getAccessToken());
             if (StringUtils.isEmpty(resultStr)) {
                 //返回信息为空 鉴权失败
                 errorLog("weibo", auth, resultStr, "返回信息为空");
@@ -83,7 +84,8 @@ public class SnsAuthUtil {
             throw new SimpleError(SimpleCode.USER_AUTH_ERROR);
         }
         //请求微信授权服务器验证授权是否有效
-        String resultStr = rest.getForObject("https://api.weixin.qq.com/sns/auth?access_token={access_token}&openid={openid}", String.class, auth.getAccessToken(), auth.getOpenId());
+        String resultStr = rest.getForObject("https://api.weixin.qq.com/sns/auth?access_token={access_token}&openid={openid}", String
+                .class, auth.getAccessToken(), auth.getOpenId());
         if (StringUtils.isEmpty(resultStr)) {
             //返回信息为空 鉴权失败
             errorLog("weixin", auth, resultStr, "返回信息为空");
@@ -101,7 +103,8 @@ public class SnsAuthUtil {
         }
         //请求qq授权服务器验证授权是否有效
         try {
-            String resultStr = rest.getForObject("https://graph.qq.com/oauth2.0/me?access_token={access_token}", String.class, auth.getAccessToken());
+            String resultStr = rest.getForObject("https://graph.qq.com/oauth2.0/me?access_token={access_token}", String.class, auth
+                    .getAccessToken());
             if (StringUtils.isEmpty(resultStr)) {
                 //返回信息为空 鉴权失败
                 errorLog("qq", auth, resultStr, "返回信息为空");

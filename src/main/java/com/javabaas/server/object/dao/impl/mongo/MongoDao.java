@@ -77,11 +77,20 @@ public class MongoDao implements IDao {
     }
 
     @Override
-    public List<BaasObject> find(String appId, String className, BaasQuery query, BaasSort sort, Integer limit, Integer skip) {
+    public List<BaasObject> find(String appId, String className, BaasQuery query, BaasList keys, BaasSort sort, Integer limit, Integer
+            skip) {
         DBCollection c = getCollection(appId, className);
         DBCursor cursor;
         BasicDBObject queryObject = new BasicDBObject(query);
-        cursor = c.find(queryObject);
+        if (keys != null && keys.size() > 0) {
+            //筛选返回字段
+            BasicDBObject projection = new BasicDBObject();
+            keys.forEach(key -> projection.put((String) key, 1));
+            cursor = c.find(queryObject, projection);
+        } else {
+            //返回所有字段
+            cursor = c.find(queryObject);
+        }
         BasicDBObject sortObject = new BasicDBObject(sort);
         cursor.sort(sortObject);
         if (limit != null) {

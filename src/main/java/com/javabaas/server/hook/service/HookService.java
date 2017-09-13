@@ -75,7 +75,8 @@ public class HookService {
             request.setUser(user);
             request.setObject(object);
             try {
-                HookResponse response = rest.postForObject(app.getCloudSetting().getCustomerHost() + "/hook/" + className + "/" + event.getName(), request, HookResponse.class);
+                HookResponse response = rest.postForObject(app.getCloudSetting().getCustomerHost() + "/hook/" + className + "/" + event
+                        .getName(), request, HookResponse.class);
                 if (response != null) {
                     //执行成功
                     if (response.getCode() == HookResponseCode.ERROR) {
@@ -106,7 +107,8 @@ public class HookService {
             request.setUser(user);
             request.setObject(object);
             try {
-                rest.postForObject(app.getCloudSetting().getCustomerHost() + "/hook/" + className + "/" + event.getName(), request, HookResponse.class);
+                rest.postForObject(app.getCloudSetting().getCustomerHost() + "/hook/" + className + "/" + event.getName(), request,
+                        HookResponse.class);
             } catch (RestClientException e) {
                 //执行失败直接返回
                 log.debug("App:" + appId + " HookFail:" + event.getName() + " class:" + className + " _id:" + object.getId());

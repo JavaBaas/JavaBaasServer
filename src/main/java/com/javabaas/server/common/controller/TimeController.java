@@ -15,7 +15,7 @@ import java.util.Date;
 public class TimeController {
 
     @RequestMapping(value = "", method = RequestMethod.GET)
-    public long time()  {
+    public long time() {
         return new Date().getTime();
     }
 

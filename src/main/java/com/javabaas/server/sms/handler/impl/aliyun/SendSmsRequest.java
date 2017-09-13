@@ -3,8 +3,7 @@ package com.javabaas.server.sms.handler.impl.aliyun;
 import com.aliyuncs.RpcAcsRequest;
 
 public class SendSmsRequest
-        extends RpcAcsRequest<SendSmsResponse>
-{
+        extends RpcAcsRequest<SendSmsResponse> {
     private String outId;
     private String signName;
     private Long ownerId;
@@ -14,101 +13,83 @@ public class SendSmsRequest
     private String resourceOwnerAccount;
     private String templateParam;
 
-    public SendSmsRequest()
-    {
+    public SendSmsRequest() {
         super("Dysmsapi", "2017-05-25", "SendSms");
     }
 
-    public String getOutId()
-    {
+    public String getOutId() {
         return this.outId;
     }
 
-    public void setOutId(String outId)
-    {
+    public void setOutId(String outId) {
         this.outId = outId;
         putQueryParameter("OutId", outId);
     }
 
-    public String getSignName()
-    {
+    public String getSignName() {
         return this.signName;
     }
 
-    public void setSignName(String signName)
-    {
+    public void setSignName(String signName) {
         this.signName = signName;
         putQueryParameter("SignName", signName);
     }
 
-    public Long getOwnerId()
-    {
+    public Long getOwnerId() {
         return this.ownerId;
     }
 
-    public void setOwnerId(Long ownerId)
-    {
+    public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
         putQueryParameter("OwnerId", ownerId);
     }
 
-    public Long getResourceOwnerId()
-    {
+    public Long getResourceOwnerId() {
         return this.resourceOwnerId;
     }
 
-    public void setResourceOwnerId(Long resourceOwnerId)
-    {
+    public void setResourceOwnerId(Long resourceOwnerId) {
         this.resourceOwnerId = resourceOwnerId;
         putQueryParameter("ResourceOwnerId", resourceOwnerId);
     }
 
-    public String getTemplateCode()
-    {
+    public String getTemplateCode() {
         return this.templateCode;
     }
 
-    public void setTemplateCode(String templateCode)
-    {
+    public void setTemplateCode(String templateCode) {
         this.templateCode = templateCode;
         putQueryParameter("TemplateCode", templateCode);
     }
 
-    public String getPhoneNumbers()
-    {
+    public String getPhoneNumbers() {
         return this.phoneNumbers;
     }
 
-    public void setPhoneNumbers(String phoneNumbers)
-    {
+    public void setPhoneNumbers(String phoneNumbers) {
         this.phoneNumbers = phoneNumbers;
         putQueryParameter("PhoneNumbers", phoneNumbers);
     }
 
-    public String getResourceOwnerAccount()
-    {
+    public String getResourceOwnerAccount() {
         return this.resourceOwnerAccount;
     }
 
-    public void setResourceOwnerAccount(String resourceOwnerAccount)
-    {
+    public void setResourceOwnerAccount(String resourceOwnerAccount) {
         this.resourceOwnerAccount = resourceOwnerAccount;
         putQueryParameter("ResourceOwnerAccount", resourceOwnerAccount);
     }
 
-    public String getTemplateParam()
-    {
+    public String getTemplateParam() {
         return this.templateParam;
     }
 
-    public void setTemplateParam(String templateParam)
-    {
+    public void setTemplateParam(String templateParam) {
         this.templateParam = templateParam;
         putQueryParameter("TemplateParam", templateParam);
     }
 
-    public Class<SendSmsResponse> getResponseClass()
-    {
+    public Class<SendSmsResponse> getResponseClass() {
         return SendSmsResponse.class;
     }
 }

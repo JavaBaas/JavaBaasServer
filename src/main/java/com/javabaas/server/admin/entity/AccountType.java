@@ -24,7 +24,7 @@ public enum AccountType {
     }
 
     public static AccountType getType(int code) {
-        for (AccountType accountType :  AccountType.values()) {
+        for (AccountType accountType : AccountType.values()) {
             if (accountType.code == code) {
                 return accountType;
             }

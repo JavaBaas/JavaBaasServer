@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
  */
 public class Account extends LinkedHashMap<String, Object> {
 
-    public Account(){
+    public Account() {
         super();
     }
 
