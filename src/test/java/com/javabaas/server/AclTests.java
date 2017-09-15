@@ -140,7 +140,7 @@ public class AclTests {
     @Test
     public void testMaster() {
         //可以查询
-        List<BaasObject> result = objectService.find(app.getId(), "admin", "AclMaster", null, null, null, 100, 0, null, true);
+        List<BaasObject> result = objectService.find(app.getId(), "admin", "AclMaster", null, null, null, null, 100, 0, null, true);
         Assert.assertThat(result.size(), equalTo(1));
     }
 
@@ -152,7 +152,7 @@ public class AclTests {
     @Test
     public void testClazz1Acl() {
         //可以查询
-        List<BaasObject> result = objectService.find(app.getId(), "admin", "AclTest1", null, null, null, 100, 0, null, false);
+        List<BaasObject> result = objectService.find(app.getId(), "admin", "AclTest1", null, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(1));
         //禁止更新
         BaasObject t = result.get(0);
@@ -191,13 +191,13 @@ public class AclTests {
         BaasUser user1 = userService.get(app.getId(), "admin", "user1", null, true);
         BaasUser user2 = userService.get(app.getId(), "admin", "user2", null, true);
         //user1有读权限
-        List<BaasObject> result = objectService.find(app.getId(), "admin", "AclTest2", null, null, null, 100, 0, user1, false);
+        List<BaasObject> result = objectService.find(app.getId(), "admin", "AclTest2", null, null, null, null, 100, 0, user1, false);
         //已存在的对象
         BaasObject t1 = result.get(0);
         Assert.assertThat(result.size(), equalTo(1));
         //user2无读权限
         try {
-            objectService.find(app.getId(), "admin", "AclTest2", null, null, null, 100, 0, user2, false);
+            objectService.find(app.getId(), "admin", "AclTest2", null, null, null, null, 100, 0, user2, false);
             Assert.fail();
         } catch (SimpleError error) {
             Assert.assertThat(error.getCode(), equalTo(SimpleCode.OBJECT_CLAZZ_NO_ACCESS.getCode()));
@@ -241,13 +241,13 @@ public class AclTests {
         t.put("string", "string");
         t = objectService.insert(app.getId(), "cloud", "AclTest3", t, null, true);
         //测试get方法可用
-        BaasObject obj = objectService.get(app.getId(), "admin", "AclTest3", t.getId(), null, null, false);
+        BaasObject obj = objectService.get(app.getId(), "admin", "AclTest3", t.getId(), null, null, null, false);
         Assert.assertThat(obj, not(nullValue()));
         Assert.assertThat(obj.getString("string"), equalTo("string"));
 
         //测试find方法被拒绝
         try {
-            objectService.find(app.getId(), "admin", "AclTest3", new BaasQuery(), null, null, 0, 0, null, false);
+            objectService.find(app.getId(), "admin", "AclTest3", new BaasQuery(), null, null, null, 0, 0, null, false);
         } catch (SimpleError error) {
             Assert.assertThat(error.getCode(), equalTo(SimpleCode.OBJECT_CLAZZ_NO_ACCESS.getCode()));
         }
@@ -271,7 +271,7 @@ public class AclTests {
         o1.setAcl(acl);
         String o1Id = objectService.insert(app.getId(), "cloud", "objectAcl", o1, null, false).getId();
 
-        o1 = objectService.get(app.getId(), "admin", "objectAcl", o1Id, null, null, false);
+        o1 = objectService.get(app.getId(), "admin", "objectAcl", o1Id, null, null, null, false);
         Assert.assertThat(o1.get("string"), equalTo("old"));
         o1.put("string", "new");
         //user2无改权限
@@ -283,12 +283,12 @@ public class AclTests {
         }
         //user1有改权限
         objectService.update(app.getId(), "admin", "objectAcl", o1.getId(), o1, user1, false);
-        o1 = objectService.get(app.getId(), "admin", "objectAcl", o1Id, null, null, false);
+        o1 = objectService.get(app.getId(), "admin", "objectAcl", o1Id, null, null, null, false);
         Assert.assertThat(o1.get("string"), equalTo("new"));
         //master权限 可以修改
         o1.put("string", "master");
         objectService.update(app.getId(), "admin", "objectAcl", o1.getId(), o1, null, true);
-        o1 = objectService.get(app.getId(), "admin", "objectAcl", o1Id, null, null, false);
+        o1 = objectService.get(app.getId(), "admin", "objectAcl", o1Id, null, null, null, false);
         Assert.assertThat(o1.get("string"), equalTo("master"));
 
         //测试对象 user1可读
@@ -301,34 +301,34 @@ public class AclTests {
         String o2Id = objectService.insert(app.getId(), "cloud", "objectAcl", o2, null, false).getId();
 
         //无用户身份 无法获取到o2
-        o2 = objectService.get(app.getId(), "admin", "objectAcl", o2Id, null, null, false);
+        o2 = objectService.get(app.getId(), "admin", "objectAcl", o2Id, null, null, null, false);
         Assert.assertThat(o2, equalTo(null));
         //无用户身份 无法查询到o2 可以查询到o1
-        List<BaasObject> objects = objectService.find(app.getId(), "admin", "objectAcl", null, null, null, 100, 0, null, false);
+        List<BaasObject> objects = objectService.find(app.getId(), "admin", "objectAcl", null, null, null, null, 100, 0, null, false);
         Assert.assertThat(objects.size(), equalTo(1));
         Assert.assertThat(objects.get(0).getId(), equalTo(o1Id));
 
         //user2 无法获取到o2
-        o2 = objectService.get(app.getId(), "admin", "objectAcl", o2Id, null, user2, false);
+        o2 = objectService.get(app.getId(), "admin", "objectAcl", o2Id, null, null, user2, false);
         Assert.assertThat(o2, equalTo(null));
         //user2 无法查询到o2 可以查询到o1
-        objects = objectService.find(app.getId(), "admin", "objectAcl", null, null, null, 100, 0, user2, false);
+        objects = objectService.find(app.getId(), "admin", "objectAcl", null, null, null, null, 100, 0, user2, false);
         Assert.assertThat(objects.size(), equalTo(1));
         Assert.assertThat(objects.get(0).getId(), equalTo(o1Id));
 
         //user1 可以获取到o2
-        o2 = objectService.get(app.getId(), "admin", "objectAcl", o2Id, null, user1, false);
+        o2 = objectService.get(app.getId(), "admin", "objectAcl", o2Id, null, null, user1, false);
         Assert.assertThat(o2.get("string"), equalTo("old"));
         //user1 可以查询到o2 可以查询到o1
-        objects = objectService.find(app.getId(), "admin", "objectAcl", null, null, null, 100, 0, user1, false);
+        objects = objectService.find(app.getId(), "admin", "objectAcl", null, null, null, null, 100, 0, user1, false);
         Assert.assertThat(objects.size(), equalTo(2));
         Assert.assertThat(objects.get(0).getId(), equalTo(o2Id));
 
         //master权限 可以获取到o2
-        o2 = objectService.get(app.getId(), "admin", "objectAcl", o2Id, null, null, true);
+        o2 = objectService.get(app.getId(), "admin", "objectAcl", o2Id, null, null, null, true);
         Assert.assertThat(o2.get("string"), equalTo("old"));
         //master权限 可以查询到o2 可以查询到o1
-        objects = objectService.find(app.getId(), "admin", "objectAcl", null, null, null, 100, 0, null, true);
+        objects = objectService.find(app.getId(), "admin", "objectAcl", null, null, null, null, 100, 0, null, true);
         Assert.assertThat(objects.size(), equalTo(2));
         Assert.assertThat(objects.get(0).getId(), equalTo(o2Id));
 

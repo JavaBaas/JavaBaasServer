@@ -1,9 +1,6 @@
 package com.javabaas.server.object.service;
 
-import com.javabaas.server.admin.entity.ApiMethod;
-import com.javabaas.server.admin.entity.ApiStat;
-import com.javabaas.server.admin.entity.ClazzAclMethod;
-import com.javabaas.server.admin.entity.Field;
+import com.javabaas.server.admin.entity.*;
 import com.javabaas.server.admin.service.FieldService;
 import com.javabaas.server.admin.service.StatService;
 import com.javabaas.server.common.entity.SimpleCode;
@@ -84,7 +81,7 @@ public class ObjectService {
         hookService.afterInsert(appId, className, object, currentUser);
         if (fetch) {
             //返回完整数据
-            object = get(appId, plat, className, id, null, currentUser, isMaster);
+            object = get(appId, plat, className, id, null, null, currentUser, isMaster);
         } else {
             //只返回对象id 创建时间
             object = new BaasObject();
@@ -135,7 +132,7 @@ public class ObjectService {
     }
 
     public void deleteByQuery(String appId, String plat, String className, BaasQuery query, BaasUser currentUser, boolean isMaster) {
-        List<BaasObject> objects = find(appId, plat, className, query, null, null, 1000, 0, currentUser, isMaster);
+        List<BaasObject> objects = find(appId, plat, className, query, null, null, null, 1000, 0, currentUser, isMaster);
         for (BaasObject object : objects) {
             delete(appId, plat, className, object.getId(), currentUser, isMaster);
         }
@@ -220,11 +217,12 @@ public class ObjectService {
      * @return 对象
      */
     public BaasObject get(String appId, String plat, String className, String id) {
-        return get(appId, plat, className, id, null, null, true);
+        return get(appId, plat, className, id, null, null, null, true);
     }
 
-    public BaasObject get(String appId, String plat, String className, String id, BaasInclude include, BaasUser currentUser, boolean
-            isMaster) {
+    public BaasObject get(String appId, String plat, String className, String id, BaasInclude include, BaasList keys, BaasUser currentUser,
+                          boolean
+                                  isMaster) {
         //判断id是否合法
         if (!BaasObjectIdUtil.isValidId(id)) {
             throw new SimpleError(SimpleCode.OBJECT_ID_ERROR);
@@ -232,7 +230,8 @@ public class ObjectService {
         //构建查询
         BaasQuery query = new BaasQuery();
         query.put("_id", id);
-        List<BaasObject> result = find(appId, plat, className, ClazzAclMethod.GET, query, null, include, 1, 0, currentUser, isMaster);
+        List<BaasObject> result = findInternal(appId, plat, className, ClazzAclMethod.GET, query, null, include, keys, 1, 0, currentUser,
+                isMaster);
         if (result.size() == 0) {
             return null;
         } else {
@@ -240,8 +239,13 @@ public class ObjectService {
         }
     }
 
-    public List<BaasObject> find(String appId, String plat, String className, ClazzAclMethod method, BaasQuery query, BaasSort sort,
-                                 BaasInclude include, int limit, int skip, BaasUser currentUser, boolean isMaster) {
+    public List<BaasObject> find(String appId, String plat, String className, BaasQuery query, BaasSort sort, BaasInclude include,
+                                 BaasList keys, int limit, int skip, BaasUser currentUser, boolean isMaster) {
+        return findInternal(appId, plat, className, ClazzAclMethod.FIND, query, sort, include, keys, limit, skip, currentUser, isMaster);
+    }
+
+    private List<BaasObject> findInternal(String appId, String plat, String className, ClazzAclMethod method, BaasQuery query, BaasSort
+            sort, BaasInclude include, BaasList keys, int limit, int skip, BaasUser currentUser, boolean isMaster) {
         //上限不得超过1000
         limit = limit > 1000 ? 1000 : limit;
         //limit必须为正数
@@ -255,25 +259,18 @@ public class ObjectService {
         //处理子查询
         handleSubQuery(appId, currentUser, isMaster, query);
         //获取根数据
-        Map<String, BaasObject> resultMap = getObjects(appId, className, query, sort, limit, skip, currentUser, isMaster);
+        Map<String, BaasObject> resultMap = getObjects(appId, className, query, keys, sort, limit, skip, currentUser, isMaster);
         List<BaasObject> result = new ArrayList<>();
         if (resultMap == null) {
+            //查询结果为空
             return result;
         }
         result.addAll(resultMap.values());
         //处理包含数据
-        if (result.size() > 0 && include != null && include.getSubs().size() > 0) {
-            //获取包含数据
-            include.getSubs().forEach((name, i) -> handleInclude(appId, result, i, currentUser, isMaster));
-        }
+        handleIncludes(appId, result, include, currentUser, isMaster);
         //统计
         statService.add(new ApiStat(appId, plat, className, ApiMethod.FIND, new Date()));
         return result;
-    }
-
-    public List<BaasObject> find(String appId, String plat, String className, BaasQuery query, BaasSort sort, BaasInclude include,
-                                 int limit, int skip, BaasUser currentUser, boolean isMaster) {
-        return find(appId, plat, className, ClazzAclMethod.FIND, query, sort, include, limit, skip, currentUser, isMaster);
     }
 
     private void handleSubQuery(String appId, BaasUser user, boolean isMaster, BaasQuery query) {
@@ -320,7 +317,7 @@ public class ObjectService {
         if (StringUtils.isEmpty(searchClass) || !(searchClass instanceof String)) {
             throw new SimpleError(SimpleCode.OBJECT_SUB_QUERY_EMPTY_SEARCH_CLASS);
         }
-        Map<String, BaasObject> subs = getObjects(appId, (String) searchClass, new BaasQuery((Map) where), null, 1000, null, user,
+        Map<String, BaasObject> subs = getObjects(appId, (String) searchClass, new BaasQuery((Map) where), null, null, 1000, null, user,
                 isMaster);
         if (subs != null) {
             //用查询结果$in替换$sub
@@ -357,6 +354,13 @@ public class ObjectService {
             parent.remove("$sub");
             //添加$in节点
             parent.put("$in", list);
+        }
+    }
+
+    private void handleIncludes(String appId, List<BaasObject> objects, BaasInclude include, BaasUser user, boolean isMaster) {
+        if (objects.size() > 0 && include != null && include.getSubs().size() > 0) {
+            //获取包含数据
+            include.getSubs().forEach((name, i) -> handleInclude(appId, objects, i, user, isMaster));
         }
     }
 
@@ -427,11 +431,11 @@ public class ObjectService {
     }
 
     private Map<String, BaasObject> getObjects(String appId, String className, BaasQuery query, BaasUser user, boolean isMaster) {
-        return getObjects(appId, className, query, null, null, null, user, isMaster);
+        return getObjects(appId, className, query, null, null, null, null, user, isMaster);
     }
 
-    private Map<String, BaasObject> getObjects(String appId, String className, BaasQuery query, BaasSort sort, Integer limit, Integer
-            skip, BaasUser user, boolean isMaster) {
+    private Map<String, BaasObject> getObjects(String appId, String className, BaasQuery query, BaasList keys, BaasSort sort, Integer limit,
+                                               Integer skip, BaasUser user, boolean isMaster) {
         //排序条件
         if (sort == null) {
             //默认排序为更新时间倒序
@@ -446,7 +450,11 @@ public class ObjectService {
         }
         //处理ACL权限
         query = aclHandler.handleAcl(query, user, isMaster);
-        List<BaasObject> objects = dao.find(appId, className, query, null, sort, limit, skip);
+        if (keys != null) {
+            //处理keys 添加默认字段
+            keys.addAll(InternalFields.fields());
+        }
+        List<BaasObject> objects = dao.find(appId, className, query, keys, sort, limit, skip);
         Map<String, BaasObject> result = new LinkedHashMap<>();
         objects.forEach(obj -> result.put(obj.getId(), extractObject(fields, obj, isMaster)));
         return result;
@@ -549,6 +557,15 @@ public class ObjectService {
                 now = root;
             }
             return root;
+        }
+    }
+
+    public BaasList getKeys(String keysString) {
+        if (StringUtils.isEmpty(keysString)) {
+            return null;
+        } else {
+            String[] keys = keysString.split(",");
+            return new BaasList(Arrays.asList(keys));
         }
     }
 

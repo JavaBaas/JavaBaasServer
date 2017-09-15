@@ -225,7 +225,7 @@ public class ObjectTests {
         //验证删除成功
         query = new BaasQuery();
         query.put("string2", "deleteByQuery");
-        List<BaasObject> objects = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, 1000, 0, null, false);
+        List<BaasObject> objects = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, null, 1000, 0, null, false);
         Assert.assertThat(objects.size(), equalTo(2));
         Assert.assertThat(objects.get(0).get("number"), equalTo(1));
         Assert.assertThat(objects.get(0).get("string"), equalTo("b"));
@@ -598,24 +598,24 @@ public class ObjectTests {
         //字符串查询
         BaasQuery query = new BaasQuery();
         query.put("string", "object1");
-        List<BaasObject> result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, 100, 0, null, false);
+        List<BaasObject> result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(1));
         Assert.assertThat(result.get(0).getId(), equalTo(o1Id));
 
         query = new BaasQuery();
         query.put("string2", "object");
-        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(2));
 
         query = new BaasQuery();
         query.put("string3", "object");
-        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(0));
 
         //数值查询
         query = new BaasQuery();
         query.put("number", 100);
-        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(1));
         Assert.assertThat(result.get(0).getId(), equalTo(o1Id));
 
@@ -624,7 +624,7 @@ public class ObjectTests {
         BaasObject gte = new BaasObject();
         gte.put("$gte", 200);
         query.put("number", gte);
-        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(2));
 
         //大于200的查询
@@ -632,7 +632,7 @@ public class ObjectTests {
         BaasObject gt = new BaasObject();
         gt.put("$gt", 200);
         query.put("number", gt);
-        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(1));
 
         //小于300的查询
@@ -640,18 +640,18 @@ public class ObjectTests {
         BaasObject lt = new BaasObject();
         lt.put("$lt", 300);
         query.put("number", lt);
-        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(2));
 
         //布尔查询
         query = new BaasQuery();
         query.put("boolean", true);
-        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(1));
 
         query = new BaasQuery();
         query.put("boolean", false);
-        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(2));
 
         //日期查询
@@ -668,14 +668,14 @@ public class ObjectTests {
         gt = new BaasObject();
         gt.put("$gt", c.getTime().getTime());
         query.put("date", gt);
-        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(1));
 
         query = new BaasQuery();
         lt = new BaasObject();
         lt.put("$lt", c.getTime().getTime());
         query.put("date", lt);
-        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(1));
 
     }
@@ -715,7 +715,7 @@ public class ObjectTests {
         String o4Id = objectService.insert(app.getId(), "cloud", "ObjectTest", object4, null, false).getId();
 
         //测试默认排序(更新时间排序)
-        List<BaasObject> result = objectService.find(app.getId(), "admin", "ObjectTest", null, null, null, 100, 0, null, false);
+        List<BaasObject> result = objectService.find(app.getId(), "admin", "ObjectTest", null, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(4));
         Assert.assertThat(result.get(0).getId(), equalTo(o4Id));
         Assert.assertThat(result.get(1).getId(), equalTo(o3Id));
@@ -726,7 +726,7 @@ public class ObjectTests {
         //正序排列
         BaasSort sort = new BaasSort();
         sort.put("number", 1);
-        result = objectService.find(app.getId(), "admin", "ObjectTest", null, sort, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", null, sort, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(4));
         Assert.assertThat(result.get(0).getId(), equalTo(o4Id));
         Assert.assertThat(result.get(1).getId(), equalTo(o1Id));
@@ -736,7 +736,7 @@ public class ObjectTests {
         //倒序排列
         sort = new BaasSort();
         sort.put("number", -1);
-        result = objectService.find(app.getId(), "admin", "ObjectTest", null, sort, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", null, sort, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(4));
         Assert.assertThat(result.get(0).getId(), equalTo(o3Id));
         Assert.assertThat(result.get(1).getId(), equalTo(o2Id));
@@ -746,7 +746,7 @@ public class ObjectTests {
         //布尔排序
         sort = new BaasSort();
         sort.put("boolean", 1);
-        result = objectService.find(app.getId(), "admin", "ObjectTest", null, sort, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", null, sort, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(4));
         Assert.assertThat(result.get(0).getId(), equalTo(o4Id));
         Assert.assertThat(result.get(1).getId(), equalTo(o2Id));
@@ -767,29 +767,29 @@ public class ObjectTests {
             Thread.sleep(1);
         }
         //限制为100个
-        List<BaasObject> result = objectService.find(app.getId(), "admin", "ObjectTest", null, null, null, 100, 0, null, false);
+        List<BaasObject> result = objectService.find(app.getId(), "admin", "ObjectTest", null, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(100));
 
         //限制为500个
-        result = objectService.find(app.getId(), "admin", "ObjectTest", null, null, null, 500, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", null, null, null, null, 500, 0, null, false);
         Assert.assertThat(result.size(), equalTo(500));
         Assert.assertThat(result.get(0).get("number"), equalTo(1099));
         Assert.assertThat(result.get(499).get("number"), equalTo(600));
 
         //限制为1100个 实际为1000
-        result = objectService.find(app.getId(), "admin", "ObjectTest", null, null, null, 1100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", null, null, null, null, 1100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(1000));
         Assert.assertThat(result.get(0).get("number"), equalTo(1099));
         Assert.assertThat(result.get(999).get("number"), equalTo(100));
 
         //测试skip 获取100-200
-        result = objectService.find(app.getId(), "admin", "ObjectTest", null, null, null, 100, 100, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", null, null, null, null, 100, 100, null, false);
         Assert.assertThat(result.size(), equalTo(100));
         Assert.assertThat(result.get(0).get("number"), equalTo(999));
         Assert.assertThat(result.get(99).get("number"), equalTo(900));
 
         //测试skip 获取1000-1100
-        result = objectService.find(app.getId(), "admin", "ObjectTest", null, null, null, 100, 1000, null, false);
+        result = objectService.find(app.getId(), "admin", "ObjectTest", null, null, null, null, 100, 1000, null, false);
         Assert.assertThat(result.size(), equalTo(100));
         Assert.assertThat(result.get(0).get("number"), equalTo(99));
         Assert.assertThat(result.get(99).get("number"), equalTo(0));
@@ -872,7 +872,7 @@ public class ObjectTests {
         //查询验证
         //a包含b不包含c
         BaasInclude include = objectService.getBaasInclude("b");
-        List<BaasObject> result = objectService.find(app.getId(), "admin", "A", null, null, include, 1, 0, null, false);
+        List<BaasObject> result = objectService.find(app.getId(), "admin", "A", null, null, include, null, 1, 0, null, false);
         BaasObject resultA = result.get(0);
         BaasObject bina = (BaasObject) resultA.get("b");
         BaasObject cina = (BaasObject) resultA.get("c");
@@ -883,7 +883,7 @@ public class ObjectTests {
 
         //a包含b包含c
         include = objectService.getBaasInclude("b,c");
-        result = objectService.find(app.getId(), "admin", "A", null, null, include, 1, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "A", null, null, include, null, 1, 0, null, false);
         resultA = result.get(0);
         bina = (BaasObject) resultA.get("b");
         cina = (BaasObject) resultA.get("c");
@@ -900,7 +900,7 @@ public class ObjectTests {
 
         //a包含b包含c c包含d包含e
         include = objectService.getBaasInclude("b,c,c.d,c.e");
-        result = objectService.find(app.getId(), "admin", "A", null, null, include, 1, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "A", null, null, include, null, 1, 0, null, false);
         resultA = result.get(0);
         cina = (BaasObject) resultA.get("c");
         dinc = (BaasObject) cina.get("d");
@@ -912,7 +912,7 @@ public class ObjectTests {
 
         //a包含c c包含d d包含f
         include = objectService.getBaasInclude("c.d.f");
-        result = objectService.find(app.getId(), "admin", "A", null, null, include, 1, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "A", null, null, include, null, 1, 0, null, false);
         resultA = result.get(0);
         cina = (BaasObject) resultA.get("c");
         dinc = (BaasObject) cina.get("d");
@@ -968,17 +968,17 @@ public class ObjectTests {
         String objectId = objectService.insert(app.getId(), "admin", "SecurityTest", t, null, true).getId();
 
         //普通用户权限查询安全字段不显示
-        BaasObject object = objectService.get(app.getId(), "admin", "SecurityTest", objectId, null, null, false);
+        BaasObject object = objectService.get(app.getId(), "admin", "SecurityTest", objectId, null, null, null, false);
         Assert.assertThat(object.get("string"), nullValue());
 
-        object = objectService.find(app.getId(), "admin", "SecurityTest", null, null, null, 100, 0, null, false).get(0);
+        object = objectService.find(app.getId(), "admin", "SecurityTest", null, null, null, null, 100, 0, null, false).get(0);
         Assert.assertThat(object.get("string"), nullValue());
 
         //管理权限可以查询安全字段
-        object = objectService.get(app.getId(), "admin", "SecurityTest", objectId, null, null, true);
+        object = objectService.get(app.getId(), "admin", "SecurityTest", objectId, null, null, null, true);
         Assert.assertThat(object.get("string"), equalTo("string"));
 
-        object = objectService.find(app.getId(), "admin", "SecurityTest", null, null, null, 100, 0, null, true).get(0);
+        object = objectService.find(app.getId(), "admin", "SecurityTest", null, null, null, null, 100, 0, null, true).get(0);
         //普通用户权限查询安全字段不显示
         Assert.assertThat(object.get("string"), equalTo("string"));
 
@@ -1051,12 +1051,12 @@ public class ObjectTests {
         subQuery.put("where", where);
         subQuery.put("searchClass", "C");
 
-        List<BaasObject> result = objectService.find(app.getId(), "admin", "A", query, null, null, 100, 0, null, false);
+        List<BaasObject> result = objectService.find(app.getId(), "admin", "A", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(2));
         a = result.get(0);
         Assert.assertThat(a.getString("name"), equalTo("a"));
 
-        result = objectService.find(app.getId(), "admin", "B", query, null, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "B", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(1));
         b = result.get(0);
         Assert.assertThat(b.getString("name"), equalTo("b"));
@@ -1074,7 +1074,7 @@ public class ObjectTests {
         subQuery.put("targetClass", "C");
         subQuery.put("searchKey", "c");
 
-        result = objectService.find(app.getId(), "admin", "A", query, null, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "A", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(2));
         a = result.get(0);
         Assert.assertThat(a.getString("name"), equalTo("a"));
@@ -1082,7 +1082,7 @@ public class ObjectTests {
         //查询A类中 c字段中的 d字段中的name为d的对象
         query = jsonUtil.readValue("{\"c\":{\"$sub\":{\"where\":{\"d\":{\"$sub\":{\"where\":{\"name\":\"d\"},\"searchClass\":\"D\"}}}," +
                 "\"searchClass\":\"C\"}}}", BaasQuery.class);
-        result = objectService.find(app.getId(), "admin", "A", query, null, null, 100, 0, null, false);
+        result = objectService.find(app.getId(), "admin", "A", query, null, null, null, 100, 0, null, false);
         Assert.assertThat(result.size(), equalTo(2));
         a = result.get(0);
         Assert.assertThat(a.getString("name"), equalTo("a"));
@@ -1108,6 +1108,37 @@ public class ObjectTests {
         query.put("number", number);
         count = objectService.count(app.getId(), "ObjectTest", query, null, false);
         Assert.assertThat(count, equalTo(50L));
+    }
+
+    /**
+     * 测试筛选获取结果字段
+     */
+    @Test
+    public void testKeys() {
+        BaasObject t = new BaasObject();
+        t.put("string", "string");
+        t.put("string2", "string2");
+        t.put("number", 100);
+        t.put("boolean", true);
+        String id = objectService.insert(app.getId(), "cloud", "ObjectTest", t, null, false).getId();
+
+        //测试get方法
+        t = objectService.get(app.getId(), "admin", "ObjectTest", id, null, new BaasList(Arrays.asList("string", "number")), null,
+                false);
+        Assert.assertThat(t.get("string"), equalTo("string"));
+        Assert.assertThat(t.get("number"), equalTo(100));
+        Assert.assertThat(t.get("string2"), nullValue());
+        Assert.assertThat(t.get("boolean"), nullValue());
+
+        //测试find方法
+        List<BaasObject> list = objectService.find(app.getId(), "admin", "ObjectTest", null, null, null, new BaasList(Arrays.asList
+                        ("string", "number"))
+                , 100, 0, null, false);
+        Assert.assertThat(list.get(0).get("string"), equalTo("string"));
+        Assert.assertThat(list.get(0).get("number"), equalTo(100));
+        Assert.assertThat(list.get(0).get("string2"), nullValue());
+        Assert.assertThat(list.get(0).get("boolean"), nullValue());
+
     }
 
 }

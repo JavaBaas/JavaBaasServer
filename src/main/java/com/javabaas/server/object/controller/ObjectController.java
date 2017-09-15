@@ -6,10 +6,7 @@ import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.common.service.MasterService;
 import com.javabaas.server.common.util.JSONUtil;
-import com.javabaas.server.object.entity.BaasInclude;
-import com.javabaas.server.object.entity.BaasObject;
-import com.javabaas.server.object.entity.BaasQuery;
-import com.javabaas.server.object.entity.BaasSort;
+import com.javabaas.server.object.entity.*;
 import com.javabaas.server.object.service.ObjectService;
 import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.user.service.UserService;
@@ -84,14 +81,17 @@ public class ObjectController {
                             @RequestHeader(value = "JB-Plat") String plat,
                             @PathVariable String name,
                             @PathVariable String id,
-                            @RequestParam(required = false) String include) {
+                            @RequestParam(required = false) String include,
+                            @RequestParam(required = false) String keys) {
         //处理include
         BaasInclude bassInclude = objectService.getBaasInclude(include);
+        //处理keys
+        BaasList keyList = objectService.getKeys(keys);
         //处理权限
         boolean isMaster = masterService.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         //获取数据
-        BaasObject object = objectService.get(appId, plat, name, id, bassInclude, currentUser, isMaster);
+        BaasObject object = objectService.get(appId, plat, name, id, bassInclude,keyList, currentUser, isMaster);
         if (object == null) {
             object = new BaasObject();
         }
@@ -115,6 +115,7 @@ public class ObjectController {
                              @RequestParam(required = false) String where,
                              @RequestParam(required = false) String order,
                              @RequestParam(required = false) String include,
+                             @RequestParam(required = false) String keys,
                              @RequestParam(required = false, defaultValue = "100") int limit,
                              @RequestParam(required = false, defaultValue = "0") int skip) {
         //处理查询字段
@@ -123,10 +124,13 @@ public class ObjectController {
         BaasSort sort = StringUtils.isEmpty(order) ? null : jsonUtil.readBaas(order, BaasSort.class);
         //处理include
         BaasInclude bassInclude = objectService.getBaasInclude(include);
+        //处理keys
+        BaasList keyList = objectService.getKeys(keys);
         //处理权限
         boolean isMaster = masterService.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
-        List<BaasObject> list = objectService.find(appId, plat, name, query, sort, bassInclude, limit, skip, currentUser, isMaster);
+        List<BaasObject> list = objectService.find(appId, plat, name, query, sort, bassInclude, keyList, limit, skip, currentUser,
+                isMaster);
         SimpleResult result = SimpleResult.success();
         result.putData("result", list);
         return result;

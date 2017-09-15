@@ -80,7 +80,7 @@ public class UserService {
     public BaasUser get(String appId, String plat, String username, BaasUser currentUser, boolean isMaster) {
         BaasQuery query = new BaasQuery();
         query.put("username", username);
-        List<BaasObject> users = objectService.find(appId, plat, USER_CLASS_NAME, query, null, null, 1, 0, currentUser, isMaster);
+        List<BaasObject> users = objectService.find(appId, plat, USER_CLASS_NAME, query, null, null, null, 1, 0, currentUser, isMaster);
         if (users.size() == 0) {
             return null;
         }
@@ -334,7 +334,7 @@ public class UserService {
             //未找到缓存 查询用户数据
             BaasQuery query = new BaasQuery();
             query.put("sessionToken", sessionToken);
-            List<BaasObject> users = objectService.find(appId, plat, USER_CLASS_NAME, query, null, null, 1, 0, null, true);
+            List<BaasObject> users = objectService.find(appId, plat, USER_CLASS_NAME, query, null, null, null, 1, 0, null, true);
             if (users.size() == 0) {
                 //未查询到 sessionToken无效 提示错误
                 throw new SimpleError(SimpleCode.USER_SESSION_TOKEN_ERROR);
@@ -365,7 +365,7 @@ public class UserService {
             default:
                 return null;
         }
-        List<BaasObject> users = objectService.find(appId, plat, USER_CLASS_NAME, query, null, null, 1, 0, null, true);
+        List<BaasObject> users = objectService.find(appId, plat, USER_CLASS_NAME, query, null, null, null, 1, 0, null, true);
         if (users.size() == 0) {
             return null;
         }
@@ -403,7 +403,7 @@ public class UserService {
     public void deleteUser(String appId, String plat, String name) {
         BaasQuery query = new BaasQuery();
         query.put("username", name);
-        List<BaasObject> users = objectService.find(appId, plat, USER_CLASS_NAME, query, null, null, 1, 0, null, true);
+        List<BaasObject> users = objectService.find(appId, plat, USER_CLASS_NAME, query, null, null, null, 1, 0, null, true);
         if (users.size() > 0) {
             String sessionToken = users.get(0).getString("sessionToken");
             deleteUserCache(appId, sessionToken);
@@ -423,7 +423,7 @@ public class UserService {
         //判断用户是否存在
         BaasQuery query = new BaasQuery();
         query.put("phone", register.getPhone());
-        List<BaasObject> users = objectService.find(appId, plat, USER_CLASS_NAME, query, null, null, 1, 0, null, true);
+        List<BaasObject> users = objectService.find(appId, plat, USER_CLASS_NAME, query, null, null, null, 1, 0, null, true);
         if (users.size() == 0) {
             //用户不存在 自动注册用户
             BaasUser user = new BaasUser();
