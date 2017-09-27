@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -86,12 +87,12 @@ public class ObjectController {
         //处理include
         BaasInclude bassInclude = objectService.getBaasInclude(include);
         //处理keys
-        BaasList keyList = objectService.getKeys(keys);
+        BaasList keyList = getKeys(keys);
         //处理权限
         boolean isMaster = masterService.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         //获取数据
-        BaasObject object = objectService.get(appId, plat, name, id, bassInclude,keyList, currentUser, isMaster);
+        BaasObject object = objectService.get(appId, plat, name, id, bassInclude, keyList, currentUser, isMaster);
         if (object == null) {
             object = new BaasObject();
         }
@@ -125,7 +126,7 @@ public class ObjectController {
         //处理include
         BaasInclude bassInclude = objectService.getBaasInclude(include);
         //处理keys
-        BaasList keyList = objectService.getKeys(keys);
+        BaasList keyList = getKeys(keys);
         //处理权限
         boolean isMaster = masterService.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
@@ -231,6 +232,15 @@ public class ObjectController {
         }
         objectService.deleteByQuery(appId, plat, name, query, currentUser, isMaster);
         return SimpleResult.success();
+    }
+
+    private BaasList getKeys(String keysString) {
+        if (StringUtils.isEmpty(keysString)) {
+            return null;
+        } else {
+            String[] keys = keysString.split(",");
+            return new BaasList(Arrays.asList(keys));
+        }
     }
 
 }
