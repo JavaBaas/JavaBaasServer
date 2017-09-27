@@ -36,6 +36,8 @@ public class ObjectService {
     @Autowired
     private ObjectChecker objectChecker;
     @Autowired
+    private ObjectExtractor objectExtractor;
+    @Autowired
     private ClazzAclChecker clazzAclChecker;
     @Resource(type = MongoDao.class)
     private IDao dao;
@@ -427,7 +429,7 @@ public class ObjectService {
     private BaasObject getObject(String appId, String className, String id, boolean isMaster) {
         List<Field> fields = fieldService.list(appId, className);
         BaasObject object = dao.findOne(appId, className, new BaasQuery("_id", id));
-        return object == null ? null : extractObject(fields, object, isMaster);
+        return object == null ? null : objectExtractor.extractObject(fields, object, isMaster);
     }
 
     private Map<String, BaasObject> getObjects(String appId, String className, BaasQuery query, BaasUser user, boolean isMaster) {
@@ -456,7 +458,7 @@ public class ObjectService {
         }
         List<BaasObject> objects = dao.find(appId, className, query, keys, sort, limit, skip);
         Map<String, BaasObject> result = new LinkedHashMap<>();
-        objects.forEach(obj -> result.put(obj.getId(), extractObject(fields, obj, isMaster)));
+        objects.forEach(obj -> result.put(obj.getId(), objectExtractor.extractObject(fields, obj, isMaster)));
         return result;
     }
 
@@ -477,56 +479,7 @@ public class ObjectService {
     }
 
     /**
-     * 提取对象
-     * 按照权限提取对象 无管理权限时过滤掉保密字段
-     *
-     * @param fields   对象字段列表
-     * @param object   原对象
-     * @param isMaster 是否为管理权限
-     * @return 提取后对象
-     */
-    private BaasObject extractObject(List<Field> fields, BaasObject object, boolean isMaster) {
-        BaasObject extracted = new BaasObject();
-        //获取id
-        Object id = object.get("_id");
-        if (id == null) {
-            return null;
-        }
-        extracted.put("_id", id.toString());
-        //获取时间
-        Object createdAt = object.get("createdAt");
-        Object updatedAt = object.get("updatedAt");
-        if (createdAt == null || updatedAt == null) {
-            return null;
-        }
-        extracted.put("createdAt", object.get("createdAt"));
-        extracted.put("updatedAt", object.get("updatedAt"));
-        //获取plat
-        extracted.put("createdPlat", object.get("createdPlat"));
-        extracted.put("updatedPlat", object.get("updatedPlat"));
-        //获取ACL
-        Object acl = object.get("acl");
-        if (acl == null) {
-            return null;
-        }
-        extracted.put("acl", new BaasAcl((BaasObject) acl));
-        //自定义字段
-        fields.forEach(field -> {
-            if (!field.isSecurity() || isMaster) {
-                //非管理权限 无法操作保密字段
-                String name = field.getName();
-                Object value = object.get(name);
-                if (value != null) {
-                    extracted.put(name, value);
-                }
-            }
-        });
-        return extracted;
-    }
-
-    /**
      * 整理包含字段
-     * <br>
      * 由字符串描述模式转换为对象树模式
      *
      * @param include 引用字段 如:a,a.b,a.c,d
@@ -557,15 +510,6 @@ public class ObjectService {
                 now = root;
             }
             return root;
-        }
-    }
-
-    public BaasList getKeys(String keysString) {
-        if (StringUtils.isEmpty(keysString)) {
-            return null;
-        } else {
-            String[] keys = keysString.split(",");
-            return new BaasList(Arrays.asList(keys));
         }
     }
 
