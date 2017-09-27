@@ -36,8 +36,11 @@ public class ClazzController {
 
     @RequestMapping(value = "/{name}", method = RequestMethod.GET)
     @ResponseBody
-    public Clazz get(@RequestHeader(value = "JB-AppId") String appId, @PathVariable String name) {
-        return clazzService.get(appId, name);
+    public SimpleResult get(@RequestHeader(value = "JB-AppId") String appId, @PathVariable String name) {
+        Clazz clazz = clazzService.get(appId, name);
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", clazz);
+        return result;
     }
 
     @RequestMapping(value = "/{name}/export", method = RequestMethod.GET)
@@ -55,8 +58,11 @@ public class ClazzController {
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     @ResponseBody
-    public List<Clazz> list(@RequestHeader(value = "JB-AppId") String appId) {
-        return clazzService.list(appId);
+    public SimpleResult list(@RequestHeader(value = "JB-AppId") String appId) {
+        List<Clazz> list = clazzService.list(appId);
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", list);
+        return result;
     }
 
     @RequestMapping(value = "/{name}/acl", method = RequestMethod.POST)

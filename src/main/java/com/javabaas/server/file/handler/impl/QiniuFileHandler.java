@@ -106,7 +106,6 @@ public class QiniuFileHandler implements IFileHandler {
         Auth auth = Auth.create(qiniuConfig.getAk(), qiniuConfig.getSk());
         boolean isValid = auth.isValidCallback(request.getHeader("Authorization"), request.getRequestURL().toString(), body.getBytes(),
                 request.getContentType());
-        isValid = true;
         if (!isValid) {
             //授权失败 无效请求
             throw new SimpleError(SimpleCode.FILE_CALLBACK_NO_VALID);

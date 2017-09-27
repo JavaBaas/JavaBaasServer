@@ -15,7 +15,7 @@ public class Clazz {
     private String name;
     private ClazzAcl acl;
     private boolean internal;
-    private long count;
+    transient private long count;
 
     public Clazz() {
     }

@@ -182,7 +182,7 @@ public class ObjectController {
         }
         BaasObject object = jsonUtil.readBaas(body, BaasObject.class);
         long time = objectService.update(appId, plat, name, id, query, object, currentUser, isMaster);
-        return SimpleResult.success().putData("createdAt", time);
+        return SimpleResult.success().putData("result", new BaasObject("createdAt", time));
     }
 
     /**

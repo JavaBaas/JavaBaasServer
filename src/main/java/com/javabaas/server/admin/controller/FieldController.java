@@ -62,16 +62,22 @@ public class FieldController {
     }
 
     @RequestMapping(value = "/{clazzName}/field/{name}", method = RequestMethod.GET)
-    public Field get(@RequestHeader(value = "JB-AppId") String appId,
+    public SimpleResult get(@RequestHeader(value = "JB-AppId") String appId,
                      @PathVariable String clazzName,
                      @PathVariable String name) {
-        return fieldService.get(appId, clazzName, name);
+        Field field = fieldService.get(appId, clazzName, name);
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", field);
+        return result;
     }
 
     @RequestMapping(value = "/{clazzName}/field", method = RequestMethod.GET)
-    public List<Field> list(@RequestHeader(value = "JB-AppId") String appId,
+    public SimpleResult list(@RequestHeader(value = "JB-AppId") String appId,
                             @PathVariable String clazzName) {
-        return fieldService.list(appId, clazzName);
+        List<Field> list = fieldService.list(appId, clazzName);
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", list);
+        return result;
     }
 
 }

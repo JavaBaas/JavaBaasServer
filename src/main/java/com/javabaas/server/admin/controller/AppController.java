@@ -34,7 +34,7 @@ public class AppController {
     public SimpleResult insert(@RequestBody App app) {
         App newApp = appService.insert(app);
         SimpleResult result = SimpleResult.success();
-        result.putData("app", newApp);
+        result.putData("result", newApp);
         return result;
     }
 
@@ -47,13 +47,16 @@ public class AppController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public App get(@PathVariable String id) {
-        return appService.get(id);
+    public SimpleResult get(@PathVariable String id) {
+        App app = appService.get(id);
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", app);
+        return result;
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     @ResponseBody
-    public List<AppDto> list() {
+    public SimpleResult  list() {
         List<App> apps = appService.list();
         LinkedList<AppDto> appDTOs = new LinkedList<>();
         apps.forEach(app -> {
@@ -66,7 +69,9 @@ public class AppController {
             dto.setYesterday(statService.getYesterdayApiCount(app.getId()));
             dto.setCurrentMonth(statService.getCurrentMonthApiCount(app.getId()));
         });
-        return appDTOs;
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", appDTOs);
+        return result;
     }
 
     @RequestMapping(value = "/{id}/resetKey", method = RequestMethod.PUT)

@@ -6,6 +6,7 @@ import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.common.service.MasterService;
 import com.javabaas.server.common.util.JSONUtil;
+import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.user.entity.*;
 import com.javabaas.server.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,9 +49,11 @@ public class UserController {
         BaasUser register = jsonUtil.readValue(body, BaasUser.class);
         BaasUser user = userService.register(appId, plat, register);
         SimpleResult result = SimpleResult.success();
-        result.putData("_id", user.getId());
-        result.putData("createdAt", user.getCreatedAt());
-        result.putData("sessionToken", user.getSessionToken());
+        BaasObject object = new BaasObject();
+        object.setId(user.getId());
+        object.put("createdAt", user.getCreatedAt());
+        object.put("sessionToken", user.getSessionToken());
+        result.putData("result", object);
         return result;
     }
 
@@ -139,7 +142,7 @@ public class UserController {
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         BaasUser user = userService.updatePassword(appId, plat, id, oldPassword, newPassword, currentUser);
         SimpleResult result = SimpleResult.success();
-        result.putData("sessionToken", user.getSessionToken());
+        result.putData("result", new BaasObject("sessionToken", user.getSessionToken()));
         return result;
     }
 
@@ -152,11 +155,14 @@ public class UserController {
      */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     @ResponseBody
-    public BaasUser login(@RequestHeader(value = "JB-AppId") String appId,
+    public SimpleResult login(@RequestHeader(value = "JB-AppId") String appId,
                           @RequestHeader(value = "JB-Plat") String plat,
                           @RequestParam(required = true) String username,
                           @RequestParam(required = true) String password) {
-        return userService.login(appId, plat, username, password);
+        BaasUser user = userService.login(appId, plat, username, password);
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", user);
+        return result;
     }
 
     /**
@@ -167,7 +173,7 @@ public class UserController {
      */
     @RequestMapping(value = "/loginWithSns/{platform}", method = RequestMethod.POST)
     @ResponseBody
-    public BaasUser loginWithSns(@RequestHeader(value = "JB-AppId") String appId,
+    public SimpleResult loginWithSns(@RequestHeader(value = "JB-AppId") String appId,
                                  @RequestHeader(value = "JB-Plat") String plat,
                                  @RequestBody String authData,
                                  @PathVariable int platform) {
@@ -176,7 +182,10 @@ public class UserController {
             throw new SimpleError(SimpleCode.USER_AUTH_PLATFORM_MISSING);
         }
         BaasAuth auth = jsonUtil.readValue(authData, BaasAuth.class);
-        return userService.registerWithSns(appId, plat, baasSnsType, auth, null);
+        BaasUser user = userService.registerWithSns(appId, plat, baasSnsType, auth, null);
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", user);
+        return result;
     }
 
     /**
@@ -187,7 +196,7 @@ public class UserController {
      */
     @RequestMapping(value = "/registerWithSns/{platform}", method = RequestMethod.POST)
     @ResponseBody
-    public BaasUser registerWithSns(@RequestHeader(value = "JB-AppId") String appId,
+    public SimpleResult registerWithSns(@RequestHeader(value = "JB-AppId") String appId,
                                     @RequestHeader(value = "JB-Plat") String plat,
                                     @Valid @RequestBody BaasSnsRegister register,
                                     @PathVariable int platform) {
@@ -195,7 +204,10 @@ public class UserController {
         if (baasSnsType == null) {
             throw new SimpleError(SimpleCode.USER_AUTH_PLATFORM_MISSING);
         }
-        return userService.registerWithSns(appId, plat, baasSnsType, register.getAuth(), register.getUser());
+        BaasUser user = userService.registerWithSns(appId, plat, baasSnsType, register.getAuth(), register.getUser());
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", user);
+        return result;
     }
 
     /**
@@ -203,10 +215,13 @@ public class UserController {
      */
     @RequestMapping(value = "/loginWithPhone", method = RequestMethod.POST)
     @ResponseBody
-    public BaasUser loginWithPhone(@RequestHeader(value = "JB-AppId") String appId,
+    public SimpleResult loginWithPhone(@RequestHeader(value = "JB-AppId") String appId,
                                    @RequestHeader(value = "JB-Plat") String plat,
                                    @Valid @RequestBody BaasPhoneRegister register) {
-        return userService.loginWithPhone(appId, plat, register);
+        BaasUser user = userService.loginWithPhone(appId, plat, register);
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", user);
+        return result;
     }
 
     /**
