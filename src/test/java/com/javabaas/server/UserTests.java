@@ -261,8 +261,8 @@ public class UserTests {
         register.setCode(code);
         mockClient.user(app, HttpMethod.POST, "/api/user/loginWithPhone", jsonUtil.writeValueAsString(register))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.phone", is("13800138000")))
-                .andExpect(jsonPath("$.username", not(empty())));
+                .andExpect(jsonPath("$.data.result.phone", is("13800138000")))
+                .andExpect(jsonPath("$.data.result.username", not(empty())));
     }
 
     /**
@@ -283,10 +283,10 @@ public class UserTests {
         register.setCode(code);
         mockClient.user(app, HttpMethod.POST, "/api/user/loginWithPhone", jsonUtil.writeValueAsString(register))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.phone", is("13813813838")))
-                .andExpect(jsonPath("$.password").doesNotExist())
-                .andExpect(jsonPath("$.sessionToken", not(empty())))
-                .andExpect(jsonPath("$.username", not(empty())));
+                .andExpect(jsonPath("$.data.result.phone", is("13813813838")))
+                .andExpect(jsonPath("$.data.result.password").doesNotExist())
+                .andExpect(jsonPath("$.data.result.sessionToken", not(empty())))
+                .andExpect(jsonPath("$.data.result.username", not(empty())));
     }
 
 }
