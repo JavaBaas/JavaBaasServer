@@ -45,8 +45,11 @@ public class ClazzController {
 
     @RequestMapping(value = "/{name}/export", method = RequestMethod.GET)
     @ResponseBody
-    public ClazzExport export(@RequestHeader(value = "JB-AppId") String appId, @PathVariable String name) {
-        return clazzService.export(appId, name);
+    public SimpleResult export(@RequestHeader(value = "JB-AppId") String appId, @PathVariable String name) {
+        ClazzExport clazzExport = clazzService.export(appId, name);
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", clazzExport);
+        return result;
     }
 
     @RequestMapping(value = "/import", method = RequestMethod.POST)

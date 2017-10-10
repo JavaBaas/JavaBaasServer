@@ -90,8 +90,11 @@ public class AppController {
 
     @RequestMapping(value = "/{id}/export", method = RequestMethod.GET)
     @ResponseBody
-    public AppExport export(@PathVariable String id) {
-        return appService.export(id);
+    public SimpleResult export(@PathVariable String id) {
+        AppExport appExport = appService.export(id);
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", appExport);
+        return result;
     }
 
     @RequestMapping(value = "/import", method = RequestMethod.POST)
