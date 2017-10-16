@@ -1,5 +1,6 @@
 package com.javabaas.server;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -82,17 +83,20 @@ public class Main extends WebMvcConfigurerAdapter {
 
     @Bean(name = "baasMapper")
     public ObjectMapper baasMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         SimpleModule module = new SimpleModule();
         module.addAbstractTypeMapping(Map.class, BaasObject.class);
         module.addAbstractTypeMapping(List.class, BaasList.class);
-        return objectMapper.registerModule(module);
+        return mapper.registerModule(module);
     }
 
     @Bean(name = "objectMapper")
     @Primary
     public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        return mapper;
     }
 
     @Bean

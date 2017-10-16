@@ -1,5 +1,6 @@
 package com.javabaas.server.common.listener;
 
+import com.javabaas.server.common.service.TimeService;
 import com.javabaas.server.config.AuthConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,6 +12,8 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisConnectionUtils;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
 
 /**
  * 监听系统启动成功
@@ -24,15 +27,17 @@ public class ApplicationEventListener implements ApplicationListener<Application
     private Log log = LogFactory.getLog(getClass());
     @Autowired
     private AuthConfig authConfig;
-
+    @Autowired
+    private TimeService timeService;
     @Autowired
     private RedisConnectionFactory redisConnectionFactory;
     @Autowired
     private MongoTemplate mongoTemplate;
 
-
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
+        //记录启动时间
+        timeService.setStartedTime(new Date());
         ready = true;
         //check out database health
         try {

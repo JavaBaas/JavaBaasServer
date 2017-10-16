@@ -113,6 +113,10 @@ public class AppService {
         return app;
     }
 
+    public App getAppByName(String name) {
+        return appRepository.findByName(name);
+    }
+
     public void setCloudSetting(String id, CloudSetting setting) {
         App app = get(id);
         app.setCloudSetting(setting);
