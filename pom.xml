@@ -56,6 +56,11 @@
             <artifactId>bcprov-jdk15</artifactId>
             <version>1.46</version>
         </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+            <version>1.5.16</version>
+        </dependency>
         <!--阿里云-->
         <dependency>
             <groupId>com.aliyun</groupId>
