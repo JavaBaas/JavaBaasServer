@@ -17,8 +17,8 @@ public enum SimpleCode {
     AUTH_LESS(10, "缺少授权信息"),
     AUTH_TIME_OUT(11, "授权信息失效"),
     AUTH_ERROR(12, "授权信息验证失败"),
-    AUTH_NEED_ADMIN_SIGN(13, "缺少超级权限"),
-    AUTH_NEED_MASTER_SIGN(14, "缺少管理权限"),
+    AUTH_NEED_ADMIN_AUTH(13, "缺少超级权限"),
+    AUTH_NEED_MASTER_AUTH(14, "缺少管理权限"),
     AUTH_REPLAY_ATTACK(15, "拒绝重放攻击"),
     AUTH_APP_ID_LESS(16, "缺少JB-AppId"),
     //1xx 管理端相关

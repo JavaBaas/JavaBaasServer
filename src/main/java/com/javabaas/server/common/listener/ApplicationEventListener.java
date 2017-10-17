@@ -5,7 +5,7 @@ import com.javabaas.server.config.AuthConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -20,7 +20,7 @@ import java.util.Date;
  * Created by Codi on 15/10/30.
  */
 @Component
-public class ApplicationEventListener implements ApplicationListener<ApplicationReadyEvent> {
+public class ApplicationEventListener implements ApplicationListener<EmbeddedServletContainerInitializedEvent> {
 
     public static boolean error;
     private static boolean ready;
@@ -35,7 +35,9 @@ public class ApplicationEventListener implements ApplicationListener<Application
     private MongoTemplate mongoTemplate;
 
     @Override
-    public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
+    public void onApplicationEvent(EmbeddedServletContainerInitializedEvent applicationReadyEvent) {
+        //启动端口
+        int port = applicationReadyEvent.getEmbeddedServletContainer().getPort();
         //记录启动时间
         timeService.setStartedTime(new Date());
         ready = true;
@@ -64,18 +66,25 @@ public class ApplicationEventListener implements ApplicationListener<Application
         }
         if (!error) {
             //应用启动成功
-            success();
+            success(port);
         } else {
             //应用启动失败
             log.error("JavaBaasServer failed to start!");
         }
     }
 
-    private void success() {
+    private void success(int port) {
         //显示配置信息
         log.info("JavaBaasServer started.");
-        log.info("Key: " + authConfig.getKey());
+        log.info("Key: " + authConfig.getAdminKey());
         log.info("Timeout: " + authConfig.getTimeout());
+        //显示浏览器
+        log.info("JavaBaas status at " + getLocalHost() + ":" + port);
+        log.info("Browse REST API at " + getLocalHost() + ":" + port + "/explorer.html");
+    }
+
+    private String getLocalHost() {
+        return "http://localhost";
     }
 
     public static boolean isReady() {

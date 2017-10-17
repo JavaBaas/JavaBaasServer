@@ -43,7 +43,7 @@ public class ConsoleController {
             if (!sessionToken.equals(sessionTokenExist)) {
                 throw new SimpleError(SimpleCode.CONSOLE_SESSION_TOKEN_ERROR);
             } else {
-                result.put("key", authConfig.getKey());
+                result.put("key", authConfig.getAdminKey());
             }
         }
         return result;

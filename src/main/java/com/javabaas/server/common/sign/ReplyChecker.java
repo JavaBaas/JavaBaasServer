@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -28,14 +27,12 @@ public class ReplyChecker {
     /**
      * 验证签名是否已经存在
      *
-     * @param appId      应用id
-     * @param sign       签名
-     * @param masterSign 管理签名
+     * @param appId 应用id
+     * @param sign  签名
      */
-    public void checkSignReplay(String appId, String sign, String masterSign) {
+    public void checkSignReplay(String appId, String sign) {
         //防重放攻击
-        String signNow = StringUtils.isEmpty(masterSign) ? sign : masterSign;
-        if (redisTemplate.hasKey(getKey(appId, signNow))) {
+        if (redisTemplate.hasKey(getKey(appId, sign))) {
             //拒绝重放攻击
             throw new SimpleError(SimpleCode.AUTH_REPLAY_ATTACK);
         }

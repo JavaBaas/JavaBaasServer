@@ -15,16 +15,14 @@ public class AuthConfig {
     private static final String DEFAULT_ADMIN_KEY = "JavaBaas";
     private static final String DEFAULT_USERNAME = "admin";
     private static final String DEFAULT_PASSWORD = "admin";
-    private static final boolean DEFAULT_ENABLE = true;
 
     private String key;
     private String username;
     private String password;
-    private Boolean enable;
 
     private long timeout;
 
-    public String getKey() {
+    public String getAdminKey() {
         if (key == null) {
             return DEFAULT_ADMIN_KEY;
         } else {
@@ -72,15 +70,4 @@ public class AuthConfig {
         this.password = password;
     }
 
-    public Boolean getEnable() {
-        if (enable == null) {
-            return DEFAULT_ENABLE;
-        } else {
-            return enable;
-        }
-    }
-
-    public void setEnable(Boolean enable) {
-        this.enable = enable;
-    }
 }

@@ -58,12 +58,6 @@ public class Main extends WebMvcConfigurerAdapter {
         registry.addInterceptor(adminInterceptor).addPathPatterns("/api/admin/**");
         //管理权限
         registry.addInterceptor(masterInterceptor).addPathPatterns("/api/master/**");
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addAbstractTypeMapping(Map.class, BaasObject.class);
-        module.addAbstractTypeMapping(List.class, BaasList.class);
-        objectMapper.registerModule(module);
     }
 
     @Bean
