@@ -29,7 +29,7 @@ JavaBaas基于JDK1.8编写，编译及运行需要安装JDK1.8环境。
 #### MongoDB
 JavaBaas使用MongoDB作为存储数据库，请先正确安装并启动MongoDB数据库。
 
-提示: 在MongoDB官网可以下载最新的[MongoDB安装包](www.mongodb.com)。
+提示: 在MongoDB官网可以下载最新的[MongoDB安装包](http://www.mongodb.com)。
 
 #### Redis
 JavaBaas使用Redis作为缓存引擎，请先正确安装并启动Redis数据库。
