@@ -102,5 +102,4 @@ public class Main extends WebMvcConfigurerAdapter {
         return jsonConverter;
     }
 
-
 }
