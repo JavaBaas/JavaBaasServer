@@ -1,7 +1,9 @@
 # JavaBaas
 **JavaBaas** 是基于Java语言开发的后台服务框架，其核心设计目标是实现移动客户端的后台结构化数据存储、物理文件存储、消息推送等功能。极大的降低移动客户端的后台开发难度，实现快速开发。
 
-项目地址：[GitHub](https://github.com/JavaBaas/JavaBaasServer)
+项目地址：
+* [码云](https://gitee.com/javabaas/JavaBaas)
+* [GitHub](https://github.com/JavaBaas/JavaBaasServer)
 
 技术讨论群：479167886
 
