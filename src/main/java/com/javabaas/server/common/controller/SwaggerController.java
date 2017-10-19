@@ -9,6 +9,8 @@ import com.javabaas.server.admin.service.ClazzService;
 import com.javabaas.server.admin.service.FieldService;
 import com.javabaas.server.common.util.JSONUtil;
 import io.swagger.models.*;
+import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.In;
 import io.swagger.models.parameters.HeaderParameter;
 import io.swagger.models.properties.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,11 +49,11 @@ public class SwaggerController {
      */
     @RequestMapping(value = "/{name}", produces = "application/json;charset=UTF-8")
     @ResponseBody
-    public String app(@PathVariable String name) {
+    public String app(HttpServletRequest request, @PathVariable String name) {
         //获取app数据
         App app = appService.getAppByName(name);
         //创建swagger
-        Swagger swagger = initSwagger(app);
+        Swagger swagger = initSwagger(app, request);
         //获取类数据
         List<Clazz> clazzs = clazzService.list(app.getId());
         //添加公用模型
@@ -63,15 +66,23 @@ public class SwaggerController {
         return mapper.writeValueAsString(swagger);
     }
 
-    private Swagger initSwagger(App app) {
+    private Swagger initSwagger(App app, HttpServletRequest request) {
         Swagger swagger = new Swagger();
-        swagger.setHost("127.0.0.1:8080");
+        //生成本地地址
+        swagger.setHost(request.getLocalAddr() + ":" + request.getLocalPort());
         swagger.setBasePath("/api/");
         Info info = new Info();
         info.setTitle(app.getName());
         info.setVersion("1.0.0");
         swagger.setInfo(info);
         swagger.setSchemes(Collections.singletonList(Scheme.HTTP));
+        //应用鉴权
+        swagger.security(new SecurityRequirement().requirement("appId"));
+        swagger.security(new SecurityRequirement().requirement("appKey"));
+        swagger.security(new SecurityRequirement().requirement("plat"));
+        swagger.securityDefinition("appId", new ApiKeyAuthDefinition().in(In.HEADER).name("JB-AppId"));
+        swagger.securityDefinition("appKey", new ApiKeyAuthDefinition().in(In.HEADER).name("JB-Key"));
+        swagger.securityDefinition("plat", new ApiKeyAuthDefinition().in(In.HEADER).name("JB-Plat"));
         return swagger;
     }
 
@@ -132,7 +143,7 @@ public class SwaggerController {
                 //新增
                 Operation insertOperation = new Operation();
                 insertOperation.tag(clazz.getName());
-                insertOperation.summary("Create object");
+                insertOperation.summary("创建对象");
                 insertOperation.parameter(body(new RefModel(clazz.getName())));
                 insertOperation.parameter(fetch());
                 insertOperation.response(200, new Response());
@@ -140,7 +151,7 @@ public class SwaggerController {
                 rootPath.post(insertOperation);
                 //查询
                 Operation findOperation = new Operation();
-                findOperation.summary("Find objects");
+                findOperation.summary("查询对象");
                 findOperation.tag(clazz.getName());
                 findOperation.parameter(where());
                 findOperation.parameter(include());
@@ -157,7 +168,7 @@ public class SwaggerController {
                 Path objectPath = new Path();
                 //获取对象
                 Operation getOperation = new Operation();
-                getOperation.summary("Get object");
+                getOperation.summary("获取对象");
                 getOperation.tag(clazz.getName());
                 getOperation.parameter(id());
                 getOperation.response(200, new Response());
@@ -165,7 +176,7 @@ public class SwaggerController {
                 objectPath.get(getOperation);
                 //更新对象
                 Operation updateOperation = new Operation();
-                updateOperation.summary("Update object");
+                updateOperation.summary("更新对象");
                 updateOperation.tag(clazz.getName());
                 updateOperation.parameter(id());
                 updateOperation.parameter(body(new RefModel(clazz.getName())));
@@ -174,7 +185,7 @@ public class SwaggerController {
                 objectPath.put(updateOperation);
                 //删除对象
                 Operation deleteOperation = new Operation();
-                deleteOperation.summary("Delete object");
+                deleteOperation.summary("删除对象");
                 deleteOperation.tag(clazz.getName());
                 deleteOperation.parameter(id());
                 deleteOperation.response(200, new Response());
@@ -185,7 +196,7 @@ public class SwaggerController {
                 //计数路径
                 Path countPath = new Path();
                 Operation countOperation = new Operation();
-                countOperation.summary("Count objects");
+                countOperation.summary("对象计数");
                 countOperation.tag(clazz.getName());
                 countOperation.parameter(where());
                 countOperation.response(200, new Response());
@@ -197,15 +208,19 @@ public class SwaggerController {
     }
 
     private void addHeader(App app, Operation operation) {
-        HeaderParameter plat = new HeaderParameter();
-        plat.setName("JB-Plat");
-        plat.setDefaultValue("cloud");
-        plat.setReadOnly(true);
-        operation.addParameter(plat);
-        HeaderParameter appId = new HeaderParameter();
-        appId.setName("JB-AppId");
-        appId.setDefaultValue(app.getId());
-        operation.addParameter(appId);
+//        HeaderParameter plat = new HeaderParameter();
+//        plat.setName("JB-Plat");
+//        plat.setDefaultValue("cloud");
+//        plat.setReadOnly(true);
+//        operation.addParameter(plat);
+//        HeaderParameter appId = new HeaderParameter();
+//        appId.setName("JB-AppId");
+//        appId.setDefaultValue(app.getId());
+//        operation.addParameter(appId);
+//        HeaderParameter key = new HeaderParameter();
+//        key.setName("JB-Key");
+//        key.setDefaultValue(app.getKey());
+//        operation.addParameter(key);
     }
 
 }
