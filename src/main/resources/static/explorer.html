@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <title>JavaBaas API 测试工具</title>
+    <link href='css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
+    <link href='css/reset.css' media='screen' rel='stylesheet' type='text/css'/>
+    <link href='css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
+    <link href='css/reset.css' media='print' rel='stylesheet' type='text/css'/>
+    <link href='css/print.css' media='print' rel='stylesheet' type='text/css'/>
+    <!-- element -->
+    <link href='css/element.css' rel='stylesheet'/>
+
+    <script src='lib/object-assign-pollyfill.js' type='text/javascript'></script>
+    <script src='lib/jquery-1.8.0.min.js' type='text/javascript'></script>
+    <script src='lib/jquery.slideto.min.js' type='text/javascript'></script>
+    <script src='lib/jquery.wiggle.min.js' type='text/javascript'></script>
+    <script src='lib/jquery.ba-bbq.min.js' type='text/javascript'></script>
+    <script src='lib/handlebars-4.0.5.js' type='text/javascript'></script>
+    <script src='lib/lodash.min.js' type='text/javascript'></script>
+    <script src='lib/backbone-min.js' type='text/javascript'></script>
+    <script src='swagger-ui.js' type='text/javascript'></script>
+    <script src='lib/highlight.9.1.0.pack.js' type='text/javascript'></script>
+    <script src='lib/highlight.9.1.0.pack_extended.js' type='text/javascript'></script>
+    <script src='lib/jsoneditor.min.js' type='text/javascript'></script>
+    <script src='lib/marked.js' type='text/javascript'></script>
+    <script src='lib/swagger-oauth.js' type='text/javascript'></script>
+    <script src='lang/translator.js' type='text/javascript'></script>
+    <script src='lang/zh-cn.js' type='text/javascript'></script>
+    <!-- vue -->
+    <script src='lib/vue.min.js' type='text/javascript'></script>
+    <script src='lib/vue-resource.min.js' type='text/javascript'></script>
+    <!-- element -->
+    <script src='lib/element.js' type='text/javascript'></script>
+
+</head>
+
+<body class="swagger-section">
+<div id="app">
+    <div id='header'>
+        <div class="swagger-ui-wrap">
+            <a id="logo" href="http://javabaas.com"><img class="logo__img" alt="swagger" height="30" width="30"
+                                                         src="images/logo.png"/><span
+                    class="logo__title">JavaBaas API 测试工具</span></a>
+            <form id='api_selector'>
+                <div class='input'>
+                    <el-row :gutter="10">
+                        <el-col :span="12">
+                            <el-input v-model="key" @keyup.enter.native="enterKey"
+                                      placeholder="请输出AdminKey"></el-input>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-select v-model="appId" @change="selectApp" placeholder="选择应用">
+                                <el-option
+                                        v-for="app in apps"
+                                        :key="app.id"
+                                        :label="app.name"
+                                        :value="app.id">
+                                </el-option>
+                            </el-select>
+                        </el-col>
+                    </el-row>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>
+<div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+</body>
+<script>
+    var swaggerUi;
+    host = 'http://' + window.location.host;
+    var vue = new Vue({
+        el: '#app',
+        data: {
+            apps: [],
+            app: {},
+            appId: "",
+            key: ""
+        },
+        http: {
+            root: host,
+            headers: {
+                'JB-Plat': 'js'
+            }
+        },
+        methods: {
+            getApps: function () {
+                vue.$http.get('/api/admin/app').then(function (response) {
+                    console.log(response.body);
+                    this.$message({
+                        message: '获取成功 请选择应用',
+                        type: 'success'
+                    });
+                    //返回数据
+                    vue.$data.apps = response.body.data.result;
+                }, function (response) {
+                    //请求失败
+                    console.log(response.body);
+                    this.$message.error(response.body.message);
+                });
+            },
+            selectApp: function () {
+                var apps = vue.$data.apps;
+                for (var i in vue.$data.apps) {
+                    if (apps[i].id === vue.$data.appId) {
+                        vue.$data.app = apps[i];
+                        break;
+                    }
+                }
+                swaggerUi = new SwaggerUi({
+                    url: host + '/swagger/' + vue.$data.app.name,
+                    dom_id: 'swagger-ui-container',
+                    onComplete: function (swaggerApi, swaggerUi) {
+                        //翻译界面
+                        if (window.SwaggerTranslator) {
+                            window.SwaggerTranslator.translate();
+                        }
+                    }
+                });
+                swaggerUi.load();
+                //设置鉴权信息
+                swaggerUi.api.clientAuthorizations.add("appId", new SwaggerClient.ApiKeyAuthorization("JB-AppId",
+                    vue.$data.app.id, "header"));
+                swaggerUi.api.clientAuthorizations.add("appKey", new SwaggerClient.ApiKeyAuthorization("JB-Key",
+                    vue.$data.app.key, "header"));
+                swaggerUi.api.clientAuthorizations.add("plat", new SwaggerClient.ApiKeyAuthorization("JB-Plat",
+                    "js", "header"));
+            },
+            enterKey: function () {
+                Vue.http.headers.common["JB-AdminKey"] = vue.$data.key;
+                vue.getApps();
+            }
+        }
+    });
+
+</script>
+</html>
