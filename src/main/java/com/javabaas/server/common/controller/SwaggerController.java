@@ -11,7 +11,6 @@ import com.javabaas.server.common.util.JSONUtil;
 import io.swagger.models.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.In;
-import io.swagger.models.parameters.HeaderParameter;
 import io.swagger.models.properties.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -147,7 +146,6 @@ public class SwaggerController {
                 insertOperation.parameter(body(new RefModel(clazz.getName())));
                 insertOperation.parameter(fetch());
                 insertOperation.response(200, new Response());
-                addHeader(app, insertOperation);
                 rootPath.post(insertOperation);
                 //查询
                 Operation findOperation = new Operation();
@@ -160,7 +158,6 @@ public class SwaggerController {
                 findOperation.parameter(limit());
                 findOperation.parameter(skip());
                 findOperation.response(200, new Response());
-                addHeader(app, findOperation);
                 rootPath.get(findOperation);
                 swagger.path("/object/" + clazz.getName(), rootPath);
 
@@ -172,7 +169,6 @@ public class SwaggerController {
                 getOperation.tag(clazz.getName());
                 getOperation.parameter(id());
                 getOperation.response(200, new Response());
-                addHeader(app, getOperation);
                 objectPath.get(getOperation);
                 //更新对象
                 Operation updateOperation = new Operation();
@@ -181,7 +177,6 @@ public class SwaggerController {
                 updateOperation.parameter(id());
                 updateOperation.parameter(body(new RefModel(clazz.getName())));
                 updateOperation.response(200, new Response());
-                addHeader(app, updateOperation);
                 objectPath.put(updateOperation);
                 //删除对象
                 Operation deleteOperation = new Operation();
@@ -189,7 +184,6 @@ public class SwaggerController {
                 deleteOperation.tag(clazz.getName());
                 deleteOperation.parameter(id());
                 deleteOperation.response(200, new Response());
-                addHeader(app, deleteOperation);
                 objectPath.delete(deleteOperation);
                 swagger.path("/object/" + clazz.getName() + "/{id}/", objectPath);
 
@@ -200,27 +194,10 @@ public class SwaggerController {
                 countOperation.tag(clazz.getName());
                 countOperation.parameter(where());
                 countOperation.response(200, new Response());
-                addHeader(app, countOperation);
                 countPath.get(countOperation);
                 swagger.path("/object/" + clazz.getName() + "/count/", countPath);
             }
         }
-    }
-
-    private void addHeader(App app, Operation operation) {
-//        HeaderParameter plat = new HeaderParameter();
-//        plat.setName("JB-Plat");
-//        plat.setDefaultValue("cloud");
-//        plat.setReadOnly(true);
-//        operation.addParameter(plat);
-//        HeaderParameter appId = new HeaderParameter();
-//        appId.setName("JB-AppId");
-//        appId.setDefaultValue(app.getId());
-//        operation.addParameter(appId);
-//        HeaderParameter key = new HeaderParameter();
-//        key.setName("JB-Key");
-//        key.setDefaultValue(app.getKey());
-//        operation.addParameter(key);
     }
 
 }
