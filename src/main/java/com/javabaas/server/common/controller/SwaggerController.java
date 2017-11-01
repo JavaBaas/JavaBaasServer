@@ -48,21 +48,19 @@ public class SwaggerController {
      */
     @RequestMapping(value = "/{name}", produces = "application/json;charset=UTF-8")
     @ResponseBody
-    public String app(HttpServletRequest request, @PathVariable String name) {
+    public Swagger app(HttpServletRequest request, @PathVariable String name) {
         //获取app数据
         App app = appService.getAppByName(name);
         //创建swagger
         Swagger swagger = initSwagger(app, request);
         //获取类数据
         List<Clazz> clazzs = clazzService.list(app.getId());
-        //添加公用模型
-        addCommonModels();
         //添加类模型
         addClazzModels(app, clazzs, swagger);
         //构建类方法
-        addClazzPath(app, clazzs, swagger);
+        addClazzPath(clazzs, swagger);
         //返回swagger数据
-        return mapper.writeValueAsString(swagger);
+        return swagger;
     }
 
     private Swagger initSwagger(App app, HttpServletRequest request) {
@@ -83,10 +81,6 @@ public class SwaggerController {
         swagger.securityDefinition("appKey", new ApiKeyAuthDefinition().in(In.HEADER).name("JB-Key"));
         swagger.securityDefinition("plat", new ApiKeyAuthDefinition().in(In.HEADER).name("JB-Plat"));
         return swagger;
-    }
-
-    private void addCommonModels() {
-
     }
 
     private void addClazzModels(App app, List<Clazz> clazzs, Swagger swagger) {
@@ -134,7 +128,7 @@ public class SwaggerController {
         }
     }
 
-    private void addClazzPath(App app, List<Clazz> clazzs, Swagger swagger) {
+    private void addClazzPath(List<Clazz> clazzs, Swagger swagger) {
         for (Clazz clazz : clazzs) {
             if (!clazz.isInternal()) {
                 //根路径

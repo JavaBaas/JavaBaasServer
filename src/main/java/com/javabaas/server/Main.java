@@ -93,11 +93,15 @@ public class Main extends WebMvcConfigurerAdapter {
         return mapper;
     }
 
+    /**
+     * 修改默认json适配器
+     */
     @Bean
     public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
         MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         jsonConverter.setObjectMapper(objectMapper);
         return jsonConverter;
     }
