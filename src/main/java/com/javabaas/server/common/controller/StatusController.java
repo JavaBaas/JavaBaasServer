@@ -1,5 +1,6 @@
 package com.javabaas.server.common.controller;
 
+import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.common.service.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.HealthEndpoint;
@@ -30,6 +31,17 @@ public class StatusController {
         result.put("time", new Date().getTime());
         result.put("started", timeService.getStartedTime());
         result.put("health", healthEndpoint.invoke());
+        return result;
+    }
+
+    @RequestMapping(value = "api", method = RequestMethod.GET)
+    public SimpleResult serverTime() {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("time", new Date().getTime());
+        data.put("started", timeService.getStartedTime());
+        data.put("health", healthEndpoint.invoke());
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", data);
         return result;
     }
 
