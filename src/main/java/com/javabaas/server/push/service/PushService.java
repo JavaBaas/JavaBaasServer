@@ -1,6 +1,5 @@
 package com.javabaas.server.push.service;
 
-import com.javabaas.server.admin.service.AppService;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.service.ObjectService;
@@ -29,8 +28,6 @@ public class PushService {
 
     public static String PUSH_LOG_CLASS_NAME = "_PushLog";
     private Log logger = LogFactory.getLog(getClass());
-    @Autowired
-    private AppService appService;
     @Autowired
     private ObjectService objectService;
     @Resource(type = JPushHandler.class)
