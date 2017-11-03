@@ -2,6 +2,7 @@ package com.javabaas.server.common.listener;
 
 import com.javabaas.server.common.service.TimeService;
 import com.javabaas.server.config.AuthConfig;
+import com.javabaas.server.config.BaasConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ public class ApplicationEventListener implements ApplicationListener<EmbeddedSer
     public static boolean error;
     private static boolean ready;
     private Log log = LogFactory.getLog(getClass());
+    @Autowired
+    private BaasConfig baasConfig;
     @Autowired
     private AuthConfig authConfig;
     @Autowired
@@ -78,6 +81,7 @@ public class ApplicationEventListener implements ApplicationListener<EmbeddedSer
         log.info("JavaBaasServer started.");
         log.info("Key: " + authConfig.getAdminKey());
         log.info("Timeout: " + authConfig.getTimeout());
+        log.info("Host:" + baasConfig.getHost());
         //显示浏览器
         log.info("JavaBaas status at " + getLocalHost() + ":" + port);
         log.info("Browse REST API at " + getLocalHost() + ":" + port + "/explorer.html");
