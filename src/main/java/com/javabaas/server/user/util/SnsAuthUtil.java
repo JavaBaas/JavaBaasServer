@@ -1,13 +1,13 @@
 package com.javabaas.server.user.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.javabaas.server.admin.entity.Account;
-import com.javabaas.server.admin.entity.AccountType;
 import com.javabaas.server.admin.entity.App;
 import com.javabaas.server.admin.service.AppService;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.util.JSONUtil;
+import com.javabaas.server.config.entity.AppConfigEnum;
+import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.user.entity.BaasAuth;
 import com.javabaas.server.user.entity.BaasSnsType;
 import org.apache.commons.logging.Log;
@@ -34,6 +34,8 @@ public class SnsAuthUtil {
     private JSONUtil jsonUtil;
     @Autowired
     private AppService appService;
+    @Autowired
+    private AppConfigService appConfigService;
 
     public boolean verifyAuthData(String appId, BaasSnsType snsType, BaasAuth auth) {
         switch (snsType) {
@@ -133,16 +135,11 @@ public class SnsAuthUtil {
             throw new SimpleError(SimpleCode.USER_AUTH_ERROR);
         }
         App app = appService.get(appId);
-        Account account = app.getAppAccounts().getAccount(AccountType.WEBAPP);
-        if (account == null) {
-            throw new SimpleError(SimpleCode.APP_WEBAPP_ACCOUNT_ERROR);
-        }
-
         try {
             //小程序唯一标识
-            String waAppid = account.getKey();
+            String waAppid = getWebAppId(appId);
             //小程序的 app secret
-            String waSecret = account.getSecret();
+            String waSecret = getSecret(appId);
             String grant_type = "authorization_code";
 
             //////////////// 1、向微信服务器 使用登录凭证 code 获取 session_key 和 openid ////////////////
@@ -182,6 +179,14 @@ public class SnsAuthUtil {
             log.debug("第三方鉴权失败 平台:" + platform + "授权信息:" + jsonUtil.writeValueAsString(auth) + "返回信息:" + result + "原因:" + message);
         } catch (SimpleError ignored) {
         }
+    }
+
+    private String getWebAppId(String appId) {
+        return appConfigService.getString(appId, AppConfigEnum.WEBAPP_APPID);
+    }
+
+    private String getSecret(String appId) {
+        return appConfigService.getString(appId, AppConfigEnum.WEBAPP_SECRET);
     }
 
 }

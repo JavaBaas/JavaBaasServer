@@ -103,7 +103,7 @@ public class ObjectChecker {
                 }
             }
         }
-        checkAcl(object, verified, false);
+        checkAcl(object, verified, isUpdate);
         return verified;
     }
 

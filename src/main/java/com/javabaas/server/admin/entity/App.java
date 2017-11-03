@@ -14,7 +14,6 @@ public class App {
     private String key;
     private String masterKey;
     private CloudSetting cloudSetting;
-    private AppAccounts appAccounts;
 
     public String getId() {
         return id;
@@ -56,11 +55,4 @@ public class App {
         this.cloudSetting = cloudSetting;
     }
 
-    public AppAccounts getAppAccounts() {
-        return appAccounts;
-    }
-
-    public void setAppAccounts(AppAccounts appAccounts) {
-        this.appAccounts = appAccounts;
-    }
 }

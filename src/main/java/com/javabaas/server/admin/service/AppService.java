@@ -1,6 +1,9 @@
 package com.javabaas.server.admin.service;
 
-import com.javabaas.server.admin.entity.*;
+import com.javabaas.server.admin.entity.App;
+import com.javabaas.server.admin.entity.Clazz;
+import com.javabaas.server.admin.entity.Field;
+import com.javabaas.server.admin.entity.FieldType;
 import com.javabaas.server.admin.entity.dto.AppExport;
 import com.javabaas.server.admin.entity.dto.ClazzExport;
 import com.javabaas.server.admin.repository.AppRepository;
@@ -120,17 +123,6 @@ public class AppService {
     public void setCloudSetting(String id, CloudSetting setting) {
         App app = get(id);
         app.setCloudSetting(setting);
-        appRepository.save(app);
-        //清除缓存信息
-        deleteCache(id);
-    }
-
-    public void setAccount(String id, AccountType accountType, Account account) {
-        App app = get(id);
-        if (app.getAppAccounts() == null) {
-            app.setAppAccounts(new AppAccounts());
-        }
-        app.getAppAccounts().setAccount(accountType, account);
         appRepository.save(app);
         //清除缓存信息
         deleteCache(id);

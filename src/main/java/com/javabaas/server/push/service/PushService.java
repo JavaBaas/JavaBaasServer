@@ -1,23 +1,20 @@
 package com.javabaas.server.push.service;
 
+import com.javabaas.server.config.entity.AppConfigEnum;
+import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.service.ObjectService;
 import com.javabaas.server.push.entity.Push;
 import com.javabaas.server.push.entity.PushLog;
 import com.javabaas.server.push.handler.IPushHandler;
-import com.javabaas.server.push.handler.impl.JPushHandler;
 import com.javabaas.server.user.service.InstallationService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 推送
@@ -30,10 +27,15 @@ public class PushService {
     private Log logger = LogFactory.getLog(getClass());
     @Autowired
     private ObjectService objectService;
-    @Resource(type = JPushHandler.class)
-    private IPushHandler pushHandler;
+
+    @Autowired
+    private Map<String, IPushHandler> handlers;
+    @Autowired
+    private AppConfigService appConfigService;
 
     public void sendPush(String appId, String plat, BaasQuery query, Push push) {
+        String handlerName = appConfigService.getString(appId, AppConfigEnum.PUSH_HANDLER);
+        IPushHandler pushHandler = handlers.get(handlerName);
         if (query == null) {
             //全体推送
             pushHandler.pushAll(appId, push);

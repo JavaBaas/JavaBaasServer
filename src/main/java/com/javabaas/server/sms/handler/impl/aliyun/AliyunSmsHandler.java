@@ -14,7 +14,7 @@ import com.javabaas.server.sms.handler.ISmsHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("aliyun")
 public class AliyunSmsHandler implements ISmsHandler {
 
     @Autowired
@@ -34,7 +34,7 @@ public class AliyunSmsHandler implements ISmsHandler {
             request.setPhoneNumbers(phone);
             request.setSignName(signName);
             request.setTemplateCode("SMS_73090044");
-            params.put("product", "硬壳科技");
+            params.put("product", "测试短信");
             request.setTemplateParam(jsonUtil.writeValueAsString(params));
             //流水号
             request.setOutId(id);

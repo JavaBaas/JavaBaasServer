@@ -12,11 +12,10 @@ import cn.jpush.api.push.model.audience.AudienceTarget;
 import cn.jpush.api.push.model.notification.AndroidNotification;
 import cn.jpush.api.push.model.notification.IosNotification;
 import cn.jpush.api.push.model.notification.Notification;
-import com.javabaas.server.admin.entity.Account;
-import com.javabaas.server.admin.entity.AccountType;
-import com.javabaas.server.admin.service.AccountService;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
+import com.javabaas.server.config.entity.AppConfigEnum;
+import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.push.entity.Push;
 import com.javabaas.server.push.entity.PushMessage;
 import com.javabaas.server.push.entity.PushNotification;
@@ -25,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -36,14 +34,14 @@ import java.util.Map;
  * 极光推送
  * Created by Codi on 15/11/3.
  */
-@Component
+@Component("jpush")
 public class JPushHandler implements IPushHandler {
 
     private Log logger = LogFactory.getLog(getClass());
     private Map<String, JPushClient> clients = new Hashtable<>();
 
     @Autowired
-    private AccountService accountService;
+    private AppConfigService appConfigService;
 
     @Override
     public void pushSingle(String appId, String id, Push push) {
@@ -130,15 +128,17 @@ public class JPushHandler implements IPushHandler {
     private JPushClient getPushClient(String appId) {
         JPushClient client = clients.get(appId);
         if (client == null) {
-            //获取推送所使用的账号
-            Account pushAccount = accountService.getAccount(appId, AccountType.PUSH);
-            if (pushAccount == null || StringUtils.isEmpty(pushAccount.getKey()) || StringUtils.isEmpty(pushAccount.getSecret())) {
-                throw new SimpleError(SimpleCode.APP_PUSH_ACCOUNT_ERROR);
-            }
-            client = new JPushClient(pushAccount.getSecret(), pushAccount.getKey());
+            client = new JPushClient(secret(appId), accessKey(appId));
             clients.put(appId, client);
         }
         return client;
     }
 
+    private String accessKey(String appId) {
+        return appConfigService.getString(appId, AppConfigEnum.PUSH_HANDLER_JPUSH_KEY);
+    }
+
+    private String secret(String appId) {
+        return appConfigService.getString(appId, AppConfigEnum.PUSH_HANDLER_JPUSH_SECRET);
+    }
 }

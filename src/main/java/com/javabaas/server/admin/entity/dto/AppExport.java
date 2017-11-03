@@ -1,6 +1,5 @@
 package com.javabaas.server.admin.entity.dto;
 
-import com.javabaas.server.admin.entity.AppAccounts;
 import com.javabaas.server.cloud.entity.CloudSetting;
 
 import java.util.List;
@@ -16,7 +15,6 @@ public class AppExport {
     private String masterKey;
     private CloudSetting cloudSetting;
     private List<ClazzExport> clazzs;
-    private AppAccounts appAccounts;
 
     public String getId() {
         return id;
@@ -66,11 +64,4 @@ public class AppExport {
         this.clazzs = clazzs;
     }
 
-    public AppAccounts getAppAccounts() {
-        return appAccounts;
-    }
-
-    public void setAppAccounts(AppAccounts appAccounts) {
-        this.appAccounts = appAccounts;
-    }
 }

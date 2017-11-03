@@ -4,9 +4,10 @@ import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.config.BaasConfig;
+import com.javabaas.server.config.entity.AppConfigEnum;
+import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.file.entity.BaasFile;
 import com.javabaas.server.file.entity.qiniu.PersistentResult;
-import com.javabaas.server.file.entity.qiniu.QiniuConfig;
 import com.javabaas.server.file.handler.IFileHandler;
 import com.javabaas.server.file.service.FileService;
 import com.javabaas.server.object.entity.BaasList;
@@ -39,7 +40,7 @@ import java.util.Map;
  * 七牛文件处理
  * Created by Staryet on 15/8/27.
  */
-@Component
+@Component("qiniu")
 public class QiniuFileHandler implements IFileHandler {
 
     private Log log = LogFactory.getLog(getClass());
@@ -51,7 +52,8 @@ public class QiniuFileHandler implements IFileHandler {
     private JSONUtil jsonUtil;
 
     @Autowired
-    private QiniuConfig qiniuConfig;
+    private AppConfigService appConfigService;
+
     @Autowired
     private BaasConfig baasConfig;
 
@@ -59,7 +61,7 @@ public class QiniuFileHandler implements IFileHandler {
     public Map<String, Object> getToken(String appId, String plat, String name, Map<String, Object> policy) {
         String callbackUrl = baasConfig.getHost() + "api/file/callback";
         String notifyUrl = baasConfig.getHost() + "api/file/notify/qiniu";
-        Auth auth = Auth.create(qiniuConfig.getAk(), qiniuConfig.getSk());
+        Auth auth = Auth.create(getAk(appId), getSk(appId));
         //获取文件唯一key
         String key = fileService.getFileKey();
         //文件名为 appId/key
@@ -77,7 +79,7 @@ public class QiniuFileHandler implements IFileHandler {
                     //处理多个策略并发的情况 为每一个处理策略添加文件存储地址
                     String persistentFileKey = fileService.getFileKey();
                     String persistentFileName = appId + "/" + persistentFileKey;
-                    persistentFileKey = "saveas/" + new String(Base64.encode((qiniuConfig.getBucket() + ":" + persistentFileName)
+                    persistentFileKey = "saveas/" + new String(Base64.encode((getBucket(appId) + ":" + persistentFileName)
                             .getBytes(), 0));
                     persistent.append(op).append("|").append(persistentFileKey).append(";");
                 }
@@ -86,14 +88,14 @@ public class QiniuFileHandler implements IFileHandler {
         }
         policyMap.put("callbackUrl", callbackUrl);
         policyMap.put("persistentNotifyUrl", notifyUrl);
-        if (!StringUtils.isEmpty(qiniuConfig.getPipeline())) {
-            policyMap.put("persistentPipeline", qiniuConfig.getPipeline());
+        if (!StringUtils.isEmpty(getPipeline(appId))) {
+            policyMap.put("persistentPipeline", getPipeline(appId));
         }
         String url = "platform=qiniu&key=" + key + "&source=" + name + "&app=" + appId + "&plat=" + plat + "&mimeType=$(mimeType)&size=$" +
                 "(fsize)&duration=$(avinfo.format.duration)&avinfo=$(avinfo)&persistentId=$(persistentId)";
         policyMap.put("callbackBody", url);
         policyMap.put("returnBody", url);
-        String token = auth.uploadToken(qiniuConfig.getBucket(), fileName, 60000, policyMap);
+        String token = auth.uploadToken(getBucket(appId), fileName, 60000, policyMap);
         Map<String, Object> result = new HashMap<>();
         result.put("token", token);
         result.put("name", fileName);
@@ -102,8 +104,10 @@ public class QiniuFileHandler implements IFileHandler {
 
     @Override
     public BaasFile callback(String body, HttpServletRequest request) {
+        Map<String, String> params = getParams(body);
+        String appId = params.get("app");
         //云存储回调 处理BaasFile的存储
-        Auth auth = Auth.create(qiniuConfig.getAk(), qiniuConfig.getSk());
+        Auth auth = Auth.create(getAk(appId), getSk(appId));
         boolean isValid = auth.isValidCallback(request.getHeader("Authorization"), request.getRequestURL().toString(), body.getBytes(),
                 request.getContentType());
         if (!isValid) {
@@ -123,19 +127,19 @@ public class QiniuFileHandler implements IFileHandler {
             throw new SimpleError(SimpleCode.FILE_NOT_EXIST);
         }
         BaasFile file = new BaasFile(object);
-        Auth auth = Auth.create(qiniuConfig.getAk(), qiniuConfig.getSk());
-        OperationManager operationManager = new OperationManager(auth, new Configuration(Zone.zone1()));
+        Auth auth = Auth.create(getAk(appId), getSk(appId));
+        OperationManager operationManager = new OperationManager(auth, new Configuration(getZone(appId)));
         StringMap policyMap = new StringMap();
         policyMap.putAll(policy);
         String notifyUrl = baasConfig.getHost() + "api/file/notify/qiniu";
         policyMap.put("notifyURL", notifyUrl);
-        if (!StringUtils.isEmpty(qiniuConfig.getPipeline())) {
-            policyMap.put("persistentPipeline", qiniuConfig.getPipeline());
+        if (!StringUtils.isEmpty(getPipeline(appId))) {
+            policyMap.put("persistentPipeline", getPipeline(appId));
         }
         String fileKey = appId + "/" + file.getKey();
         try {
             String fops = (String) policy.get("persistentOps");
-            String result = operationManager.pfop(qiniuConfig.getBucket(), fileKey, fops, policyMap);
+            String result = operationManager.pfop(getBucket(appId), fileKey, fops, policyMap);
             //将持久化id记录至持久化处理列表中
             BaasList persistentFiles = new BaasList();
             BaasObject persistentFile = new BaasObject();
@@ -176,7 +180,7 @@ public class QiniuFileHandler implements IFileHandler {
                     BaasFile persistentFile = new BaasFile();
                     String persistentFileKey = item.getKey().split("/")[1];
                     persistentFile.setKey(persistentFileKey);
-                    persistentFile.setUrl(qiniuConfig.getUrl() + item.getKey());
+                    persistentFile.setUrl(getUrl(appId) + item.getKey());
                     object.put("cmd", item.getCmd());
                     persistentFile = fileService.saveFile(appId, "admin", persistentFile);
                     object.put("_id", persistentFile.getId());
@@ -196,9 +200,9 @@ public class QiniuFileHandler implements IFileHandler {
     @Override
     public BaasFile fetch(String appId, String plat, BaasFile file, Map<String, Object> policy) {
         try {
-            Configuration cfg = new Configuration(Zone.zone1());
-            Auth auth = Auth.create(qiniuConfig.getAk(), qiniuConfig.getSk());
-            String bucket = qiniuConfig.getBucket();
+            Configuration cfg = new Configuration(getZone(appId));
+            Auth auth = Auth.create(getAk(appId), getSk(appId));
+            String bucket = getBucket(appId);
             String key = fileService.getFileKey();
             String name = appId + "/" + key;
             BucketManager bucketManager = new BucketManager(auth, cfg);
@@ -217,7 +221,7 @@ public class QiniuFileHandler implements IFileHandler {
         file.setName("fetch");
         file.setMimeType(fetchRet.mimeType);
         file.setSize(fetchRet.fsize);
-        file.setUrl(qiniuConfig.getUrl() + fetchRet.key);
+        file.setUrl(getUrl(appId) + fetchRet.key);
         file = fileService.saveFile(appId, plat, file);
         return file;
     }
@@ -236,7 +240,7 @@ public class QiniuFileHandler implements IFileHandler {
         file.setSize(Long.valueOf(params.get("size")));
         String plat = params.get("plat");
         String appId = params.get("app");
-        file.setUrl(qiniuConfig.getUrl() + appId + "/" + key);
+        file.setUrl(getUrl(appId) + appId + "/" + key);
         //处理metaData
         if (params.get("duration") != null || params.get("avinfo") != null) {
             BaasObject metaData = new BaasObject();
@@ -269,6 +273,48 @@ public class QiniuFileHandler implements IFileHandler {
             }
         }
         return params;
+    }
+
+    private String getAk(String appId) {
+        return appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_AK);
+    }
+
+    private String getSk(String appId) {
+        return appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_SK);
+    }
+
+    private String getBucket(String appId) {
+        return appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_BUCKET);
+    }
+
+    private String getPipeline(String appId) {
+        return appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_PIPELINE);
+    }
+
+    private String getUrl(String appId) {
+        return appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_URL);
+    }
+
+    private Zone getZone(String appId) {
+        String qiniuZone = appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_ZONE);
+        Zone zone;
+        switch (qiniuZone) {
+            case "huadong":
+                zone = Zone.zone0();
+                break;
+            case "huabei":
+                zone = Zone.zone1();
+                break;
+            case "huanan":
+                zone = Zone.zone2();
+                break;
+            case "beimei":
+                zone = Zone.zoneNa0();
+                break;
+            default:
+                zone = Zone.autoZone();
+        }
+        return zone;
     }
 
 }

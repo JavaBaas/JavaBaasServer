@@ -71,7 +71,7 @@ Server目录下的`JavaBaas.jar`为系统启动文件，系统依赖环境配置
 /\__/ /| (_| | \ V /| (_| || |_/ /| (_| || (_| |\__ \
 \____/  \__,_|  \_/  \__,_|\____/  \__,_| \__,_||___/
 Version:1.0.0
-Host:http://localhost:8080/api/
+Host:http://127.0.0.1:8080/api/
 AdminKey:JavaBaas
 BAAS>
 ```
@@ -80,7 +80,7 @@ BAAS>
 `JBShell.jar `为命令行工具执行文件。同目录下的`config.properties`为配置文件。内容如下：
 
 ```
-host = http://localhost:8080/api/
+host = http://127.0.0.1:8080/api/
 key = JavaBaas
 ```
 
