@@ -1,7 +1,10 @@
 # JavaBaas
-**JavaBaas** 是基于Java语言开发的后台服务框架，其核心设计目标是实现移动客户端的后台结构化数据存储、物理文件存储、消息推送等功能。极大的降低移动客户端的后台开发难度，实现快速开发。
+**JavaBaas** 是基于Java语言开发的后台服务框架，其核心设计目标是实现移动客户端、网页应用的后台数据存储、物理文件存储、消息推送等功能，极大的降低后台开发难度，实现快速开发。
+
+使用 **JavaBaas** 提供的工具进行简单的配置，即可完成后台搭建。后台搭建成功后，即可使用RestAPI、iOS/Android-SDK进行数据的操作。
 
 项目地址：
+
 * [码云](https://gitee.com/javabaas/JavaBaas)
 * [GitHub](https://github.com/JavaBaas/JavaBaasServer)
 
@@ -13,6 +16,8 @@
 
 ## 主要功能
 * 结构化数据存储
+* RestAPI接口
+* iOS/Android SDK
 * 物理文件存储
 * ACL权限管理机制
 * 用户系统
@@ -20,26 +25,49 @@
 
 ## 快速上手
 
-### 相关环境
-#### JDK
+### 一、安装
+#### 1.Docker方式
+
+JavaBaas提供了完整的Docker演示环境(包含数据库等)，需安装[Docker](https://www.docker.com)后使用。
+
+```
+docker pull javabaas/javabaas-starter
+docker run -p 8080:8080 javabaas/javabaas-starter
+```
+
+执行成功后，即可使用本地8080端口访问JavaBaas环境。
+
+以上的执行方式每次会创建全新的执行环境，如需要持久化数据，需使用`DockerVolume`。
+
+```
+docker run -p 8080:8080 -v /usr/javabaas:/data/db javabaas/javabaas-starter
+```
+
+其中`/usr/javabaas`为本地数据存储目录，请创建该目录或修改为你所需要的目录。
+
+#### 2.Jar包方式
+也可以选择使用jar包方式启动JavaBaas。
+
+##### JDK
 JavaBaas基于JDK1.8编写，编译及运行需要安装JDK1.8环境。
 
 提示: 在Oracle官网可以下载最新的[JDK安装包](http://www.oracle.com/technetwork/java/javase/downloads/index.html)。
 
-#### MongoDB
+##### MongoDB
 JavaBaas使用MongoDB作为存储数据库，请先正确安装并启动MongoDB数据库。
 
-提示: 在MongoDB官网可以下载最新的[MongoDB安装包](http://www.mongodb.com)。
+提示: 在MongoDB官网可以下载最新的[MongoDB官网](http://www.mongodb.com)。
 
-#### Redis
+##### Redis
 JavaBaas使用Redis作为缓存引擎，请先正确安装并启动Redis数据库。
 
-提示: 在Redis官网可以下载最新的[Redis安装包](http://redis.io/)。
+提示: 在Redis官网可以下载最新的[Redis官网](http://redis.io/)。
 
-### 启动
+##### 启动
 Server目录下的`JavaBaas.jar`为系统启动文件，系统依赖环境配置正确后，使用以下命令启动系统：
 
 `java -jar JavaBaas.jar`
+
 看到以下信息，表明系统启动成功。
 
 ```
@@ -47,19 +75,46 @@ Server目录下的`JavaBaas.jar`为系统启动文件，系统依赖环境配置
 [main] c.s.b.c.l.ApplicationEventListener       : JavaBaasServer started.
 [main] c.j.s.c.l.ApplicationEventListener       : Key: JavaBaas
 [main] c.j.s.c.l.ApplicationEventListener       : Timeout: 600000
+[main] c.s.b.c.l.ApplicationEventListener       : Host:127.0.0.1
+[main] c.j.s.c.l.ApplicationEventListener       : JavaBaas status at http://127.0.0.1:8080
+[main] c.j.s.c.l.ApplicationEventListener       : Browse REST API at http://127.0.0.1:8080/explorer.html
 [main] com.staryet.baas.Main                    : Started Main in 2.653 seconds (JVM running for 3.232)
 ```
 
-### 命令行工具
+### 二、命令行工具
 `JavaBaas`系统成功启动后，默认将在http 8080端口监听所有用户请求。此时首先要使用命令行工具`JBShell`创建应用。
 
 命令行工具`JBShell`是JavaBaas的配套工具，使用`JBShell`可以完成应用的创建删除、类的创建删除、字段的创建删除、对象的增删改查等操作，以及一些便捷的辅助功能。
 
 `JBShell`基于java编写，编译及运行需要安装JDK环境。
 
-使用以下命令启动命令行工具：
+#### Mac&Linux安装
+在命令行中执行
 
-`java -jar JBShell.jar`
+```
+curl -s "http://get.javabaas.com/jbshell.sh" | bash
+```
+
+安装成功后将看到以下信息
+
+```
+成功安装jbshell
+请打开一个新的终端，或者在当前终端执行下面命令:
+    source "/Users/staryet/.javabaas/jbshell/export/jbexport"
+开始造吧!!!
+```
+
+打开一个新窗口，或在当前窗口执行以上命令即可完成`JBShell`工具安装。
+
+#### Windows安装
+
+
+#### 启动
+在命令行中使用以下命令启动`JBShell`工具：
+
+```
+jb
+```
 
 启动成功后显示以下信息
 
@@ -71,31 +126,22 @@ Server目录下的`JavaBaas.jar`为系统启动文件，系统依赖环境配置
 /\__/ /| (_| | \ V /| (_| || |_/ /| (_| || (_| |\__ \
 \____/  \__,_|  \_/  \__,_|\____/  \__,_| \__,_||___/
 Version:1.0.0
-Host:http://127.0.0.1:8080/api/
+Host:http://localhost:8080/api/
 AdminKey:JavaBaas
 BAAS>
 ```
 
-### 配置
-`JBShell.jar `为命令行工具执行文件。同目录下的`config.properties`为配置文件。内容如下：
+### 三、构建数据
 
-```
-host = http://127.0.0.1:8080/api/
-key = JavaBaas
-```
-
-其中`host`为`JavaBaas`服务器所在的地址，本地调用`JBShell`默认使用localhost即可，远程管理需设置正确的远程服务器地址。
-
-`key`为`JavaBaas`超级密钥，不设置默认为JavaBaas。
-
-### 创建应用
-在`JavaBaas`中，最高层的组织结构为应用系统，各应用之间权限、用户、数据相互隔离。为了开始使用`JavaBaas`，我们首先需要创建一个应用。
+#### 创建应用
+在`JavaBaas`中，最高层的组织结构为`应用`，各应用之间权限、用户、数据相互隔离。为了开始使用`JavaBaas`，我们首先需要创建一个应用。
 
 首先启动命令行工具，在命令行工具中，使用命令`app add Blog`，创建一个博客应用。
 
 ```bash
 BAAS>app add Blog
-App added.
+应用创建成功
+设置当前应用为 Blog
 ```
 现在，我们成功创建了一个名为`Blog`的应用。
 
@@ -115,18 +161,18 @@ Blog
 
 ```
 BAAS>use Blog
-Set current app to Blog
+设置当前应用为 Blog
 ```
 现在我们的应用即切换为刚刚创建的`Blog`。
 
 #### 创建类
-在`JavaBaas`中，数据使用类进行组织。用户可以自由创建类，类名需使用英文字母开头且名称中只能包含数字与英文字母。类创建后，需要在类中创建字段以存储数据。同时、系统初始化后会自动创建用户类、设备类、文件类等系统内建类，内建类名使用下划线`_`开头，系统内建类禁止删除或修改。
+在`JavaBaas`中，数据使用`类`进行组织。用户可以自由创建类，类名需使用英文字母开头且名称中只能包含数字与英文字母。类创建后，需要在类中创建字段以存储数据。同时、系统初始化后会自动创建用户类、设备类、文件类等系统内建类，内建类名使用下划线`_`开头，系统内建类禁止删除或修改。
 
 现在我们使用命令`class add Article`创建一个类用于存储博客中的文章信息。
 
 ```
 Blog>class add Article
-Class added.
+类创建成功
 ```
 现在我们便在`Blog`应用中创建了名为`Article`的类。
 
@@ -152,29 +198,49 @@ Article(0)
 
 ```
 Blog>set Article
-Set current class to Article
+设置当前类为 Article
 Blog Article>
 ```
 切换完成后，光标变为`Blog Article>`，表示当前应用为`Blog`，当前类为`Article`。
 
-### 创建字段
+#### 创建字段
 使用`field add title`命令，在`Article`类中创建一个用于存储文章标题的字符型字段。
 
 ```
 Blog Article>field add title
-Field added.
-Blog Article>
+请选择FieldType 默认为STRING
+1 STRING
+2 NUMBER
+3 BOOLEAN
+4 DATE
+5 FILE
+6 OBJECT
+7 ARRAY
+8 POINTER
+0 取消
+>1
+创建字段成功
 ```
-现在我们在类`Article`中创建了名为`title`的字符型字段。
+创建字段时，需要选择[数据类型](/overview/object.md#数据类型)。此处我们选择1(字符型)。现在我们就在类`Article`中创建了名为`title`的字符型字段。
 
-使用`field add author`命令，在`Article`类中创建一个用于存储文章作者的字符型字段。
+使用`field add read`命令，在`Article`类中创建一个用于存储文章浏览次数的数值型字段。
 
 ```
-Blog Article>field add author
-Field added.
-Blog Article>
+Blog Article>field add read
+请选择FieldType 默认为STRING
+1 STRING
+2 NUMBER
+3 BOOLEAN
+4 DATE
+5 FILE
+6 OBJECT
+7 ARRAY
+8 POINTER
+0 取消
+>2
+创建字段成功
 ```
-现在我们在类`Article`中创建了名为`author`的字符型字段。
+现在我们在类`Article`中创建了名为`read`的数值型字段。
 
 提示: 一般情况下建议使用小写字母开头做为字段名称
 
@@ -183,20 +249,20 @@ Blog Article>
 
 ```
 Blog Article>fields
-<STRING>  author
-<STRING>  title
+   <NUMBER>  read
+   <STRING>  title
 ```
-可以看到，当前类中存在两个我们刚创建的字符型字段。
+可以看到，当前类中存在我们刚创建的两个字段。
 
-### 存储数据
-成功创建类并添加字段后，我们可以开始存储数据。使用命令行工具即可以进行基本的增删改查操作。
+#### 存储数据
+成功创建类并添加字段后，我们就可以开始存储数据操作了(包括使用`RestAPI`以及`iOS/Android-SDK`)。此处我们先使用命令行工具进行基本的增删改查操作。
 
 #### 插入数据
 使用命令`add`在`Article`类中插入数据。
 
 ```
-Blog Article>add {"title":"StarWars","author":"Lucas"}
-Object added.
+Blog Article>add {"title":"StarWars","read":10}
+对象创建.
 ```
 
 现在我们便在`Article`类中插入了一条数据记录。
@@ -208,7 +274,7 @@ Object added.
 
 ```
 Blog Article>list
-{"_id":"f2e88fd91c3a49c988901f774cc9e879","createdAt":1471335596116,"updatedAt":1471335596116,"createdPlat":"admin","updatedPlat":"admin","acl":{"*":{"read":true,"write":true}},"author":"Lucas","title":"StarWars"}
+{"className":"Article", "objectId":"06904d004d2d462b888800abb9d03a8b", "updatedAt":"1509953994688", "createdAt":"1509953994688", "serverData":{"read":10,"title":"StarWars"}}
 ```
 
 可以看到，现在`Article`类中只有一条刚刚创建的数据。
@@ -219,10 +285,10 @@ Blog Article>list
 ```
 Blog Article>table
 ┌──────────────────────────────────┬────────────────────┬────────────────────┐
-│ id                               │ author             │ title              │
-│ <STRING>                         │ <STRING>           │ <STRING>           │
+│ id                               │ read               │ title              │
+│ <STRING>                         │ <NUMBER>           │ <STRING>           │
 ├──────────────────────────────────┼────────────────────┼────────────────────┤
-│ f2e88fd91c3a49c988901f774cc9e879 │ Lucas              │ StarWars           │
+│ 06904d004d2d462b888800abb9d03a8b │ 10                 │ StarWars           │
 └──────────────────────────────────┴────────────────────┴────────────────────┘
 ```
 
@@ -230,12 +296,43 @@ Blog Article>table
 使用命令`del id`，删除指定数据，其中 `id` 为刚才查询结果中的id。
 
 ```
-Blog Article>del f2e88fd91c3a49c988901f774cc9e879
-Object deleted.
+Blog Article>del 06904d004d2d462b888800abb9d03a8b
+对象删除.
 ```
 
-### 使用客户端SDK
-我们已经成功创建了应用，构建了数据结构，并存储了一些数据。现在我们可以使用`客户端SDK`、`REST API`存取数据了。详见`客户端SDK`以及`REST API`相关文档。
+### 四、使用RestAPI测试工具
+我们已经成功创建了应用，构建了数据结构，并存储了一些数据。我们可以使用`客户端SDK`、`REST API`存取数据了。
+
+为了方便测试API接口，`JavaBaas`内建了`RestAPI测试工具`。启动成功后，使用浏览器访问`http://127.0.0.1:8080/explorer.html`页面即可看到API测试工具。
+
+<img src="http://oyzzvjk5k.bkt.clouddn.com/17-11-6/32511675.jpg" width="60%">
+
+在文本框输中输入AdminKey(默认为JavaBaas)并回车，然后在下拉菜单中选择应用，此处我们选择刚刚创建的博客应用Blog。
+
+<img src="http://oyzzvjk5k.bkt.clouddn.com/17-11-6/29899411.jpg" width="60%">
+
+此时会显示应用中所有类的列表，此处可以看到我们已经创建的Article类，点击后，会展示对应类的数据操作接口(增删改查、计数等)。
+
+<img src="http://oyzzvjk5k.bkt.clouddn.com/17-11-6/54361529.jpg" width="60%">
+
+展开GET方法，点击测试按钮，即可请求查询接口。
+
+<img src="http://oyzzvjk5k.bkt.clouddn.com/17-11-6/36465067.jpg" width="60%">
+
+测试后，可以看到请求结果，此处看到的数据即为我们刚才使用命令行工具添加的数据。
+
+<img src="http://oyzzvjk5k.bkt.clouddn.com/17-11-6/96312821.jpg" width="60%">
+
+提示: API测试工具中会显示完整的请求结构，可以参照此处显示的请求构建http请求。
+
+下面我们使用`RestAPI测试工具`向`JavaBaas`中添加一条数据。选择POST方法，并按照Article类的数据格式构建一条新数据，然后点击测试按钮。
+
+<img src="http://oyzzvjk5k.bkt.clouddn.com/17-11-6/16742048.jpg" width="60%">
+
+现在我们再调用GET方法，查询表中的数据，可以看到，此时表中已经有了两条记录。
+
+### 五、使用客户端SDK
+在生产环境中，我们可以使用`客户端SDK`、`REST API`存取数据。详见`客户端SDK`以及`REST API`相关文档。
 
 
 ## 自定义配置
@@ -268,9 +365,9 @@ server.port = 8080
 ```
 
 ### 超级密钥
-超级密钥用于鉴定管理员的超级权限，系统的核心管理接口需要使用此权限进行调用。超级密钥可以自行设置，建议使用32位随机字符串。如：`c3ca79cca3c24147902c1114640268a5`。
+超级密钥用于鉴定管理员的超级权限，系统的核心管理接口需要使用此权限进行调用，默认密钥为`JavaBaas`。超级密钥可以自行设置，建议使用32位随机字符串。如：`c3ca79cca3c24147902c1114640268a5`。
 
-在`application.properties`中配置超级密钥，不设置默认为JavaBaas。
+在`application.properties`中配置超级密钥，不设置默认为`JavaBaas`。
 
 注意: 为了保障数据安全，强烈建议不要使用默认密钥！
 
