@@ -12,6 +12,8 @@ import io.swagger.models.*;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.In;
 import io.swagger.models.properties.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +32,7 @@ import static com.javabaas.server.admin.util.swagger.ParameterUtil.*;
 @RestController
 @RequestMapping(value = "/swagger")
 public class SwaggerController {
-
+    private Log log = LogFactory.getLog(getClass());
     @Autowired
     private AppService appService;
     @Autowired
@@ -39,6 +41,7 @@ public class SwaggerController {
     private FieldService fieldService;
     @Autowired
     JSONUtil mapper;
+
 
     /**
      * 获取指定名称app的swagger数据
@@ -66,7 +69,12 @@ public class SwaggerController {
     private Swagger initSwagger(App app, HttpServletRequest request) {
         Swagger swagger = new Swagger();
         //生成本地地址
-        swagger.setHost(request.getLocalAddr() + ":" + request.getLocalPort());
+        StringBuffer url = request.getRequestURL();
+        String uri = request.getRequestURI();
+        String host = url.substring(0, url.indexOf(uri));
+        host = host.replace("http://", "");
+        //设置host
+        swagger.setHost(host);
         swagger.setBasePath("/api/");
         Info info = new Info();
         info.setTitle(app.getName());
