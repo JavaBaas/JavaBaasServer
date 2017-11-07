@@ -116,7 +116,7 @@ public class JPushHandler implements IPushHandler {
             Message.Builder messageBuilder = Message.newBuilder();
             messageBuilder.setTitle(message.getTitle());
             messageBuilder.setContentType(message.getContentType());
-            messageBuilder.setMsgContent(message.getMsgContent());
+            messageBuilder.setMsgContent(message.getAlert());
             if (message.getExtras() != null) {
                 messageBuilder.addExtras(message.getExtras());
             }

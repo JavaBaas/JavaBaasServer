@@ -250,6 +250,14 @@ public class AppService {
         Field pushTimeField = new Field(FieldType.DATE, "pushTime");
         pushTimeField.setInternal(true);
         fieldService.insert(appId, PushService.PUSH_LOG_CLASS_NAME, pushTimeField);
+        //透传contentType
+        Field contentTypeField = new Field(FieldType.STRING, "contentType");
+        contentTypeField.setInternal(true);
+        fieldService.insert(appId, PushService.PUSH_LOG_CLASS_NAME, contentTypeField);
+        //推送或透传type 1为推送 2位透传
+        Field pushTypeField = new Field(FieldType.NUMBER, "pushType");
+        pushTypeField.setInternal(true);
+        fieldService.insert(appId, PushService.PUSH_LOG_CLASS_NAME, pushTypeField);
         log.info("App:" + appId + " 推送日志类初始化成功.");
     }
 

@@ -45,9 +45,14 @@ public class AppConfigController {
      */
     @RequestMapping(value = "/app", method = RequestMethod.GET)
     @ResponseBody
-    public String getAppConfig(@RequestHeader(value = "JB-AppId") String appId,
+    public SimpleResult getAppConfig(@RequestHeader(value = "JB-AppId") String appId,
                                @RequestParam String key) {
-        return appConfigService.getString(appId, key);
+        String value = appConfigService.getString(appId, key);
+        Map<String, Object> config = new HashMap<>();
+        config.put(key, value);
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", config);
+        return result;
     }
 
     /**
@@ -57,14 +62,16 @@ public class AppConfigController {
      */
     @RequestMapping(value = "app/configs", method = RequestMethod.GET)
     @ResponseBody
-    public List<Map<String, String>> getAppConfigs() {
-        List<Map<String, String>> result = new LinkedList<>();
+    public SimpleResult getAppConfigs() {
+        List<Map<String, String>> list = new LinkedList<>();
         for (AppConfigEnum appConfigEnum : AppConfigEnum.values()) {
             Map<String, String> map = new HashMap<>();
             map.put("key", appConfigEnum.getKey());
             map.put("name", appConfigEnum.getName());
-            result.add(map);
+            list.add(map);
         }
+        SimpleResult result = SimpleResult.success();
+        result.putData("result", list);
         return result;
     }
 

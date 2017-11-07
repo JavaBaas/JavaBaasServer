@@ -32,6 +32,7 @@ public enum SimpleCode {
     APP_ACCOUNT_ERROR(1004, "应用账号配置错误"),
     APP_WEBAPP_ACCOUNT_ERROR(1005, "应用小程序账号配置错误"),
     APP_PUSH_ACCOUNT_ERROR(1006, "应用推送账号配置错误"),
+    APP_CONFIG_KEY_NOT_EXIST(1007, "应用Config Key不存在"),
     //11xx 类相关
     CLAZZ_NOT_FOUND(1101, "类不存在"),
     CLAZZ_ALREADY_EXIST(1102, "类已经存在"),

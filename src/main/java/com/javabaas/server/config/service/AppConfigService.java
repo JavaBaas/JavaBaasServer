@@ -2,6 +2,8 @@ package com.javabaas.server.config.service;
 
 import com.javabaas.server.admin.entity.App;
 import com.javabaas.server.admin.service.AppService;
+import com.javabaas.server.common.entity.SimpleCode;
+import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.config.entity.AppConfigEnum;
 import com.javabaas.server.config.entity.AppConfigs;
 import com.javabaas.server.config.repository.AppConfigRepository;
@@ -45,6 +47,7 @@ public class AppConfigService {
     }
 
     public void setConfig(String appId, String key, String value) {
+        checkConfigKey(key);
         AppConfigs config = appConfigRepository.findByAppId(appId);
         if (config == null) {
             //配置不存在 创建配置
@@ -54,7 +57,7 @@ public class AppConfigService {
         }
         config.setParam(key, value);
         appConfigRepository.save(config);
-        //清除缓存
+        //清楚缓存
         clearCache(appId, key);
     }
 
@@ -62,7 +65,14 @@ public class AppConfigService {
         setConfig(appId, config.getKey(), value);
     }
 
+    private void checkConfigKey(String key) {
+        if (AppConfigEnum.getConfig(key) == null) {
+            throw new SimpleError(SimpleCode.APP_CONFIG_KEY_NOT_EXIST);
+        }
+    }
+
     public Object getConfig(String appId, String key) {
+        checkConfigKey(key);
         //获取缓存的配置
         String config = configMap.get(getName(appId, key));
         if (config == null) {

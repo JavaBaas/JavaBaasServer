@@ -13,7 +13,7 @@ public class PushMessage {
     // 消息标题
     private String title;
     // 消息内容本身
-    private String msgContent;
+    private String alert;
     // 消息内容类型, 例如text
     private String contentType;
     // 扩展参数
@@ -28,12 +28,12 @@ public class PushMessage {
         this.title = title;
     }
 
-    public String getMsgContent() {
-        return msgContent;
+    public String getAlert() {
+        return alert;
     }
 
-    public void setMsgContent(String msgContent) {
-        this.msgContent = msgContent;
+    public void setAlert(String alert) {
+        this.alert = alert;
     }
 
     public String getContentType() {
@@ -56,7 +56,7 @@ public class PushMessage {
     public String toString() {
         return "PushMessage{" +
                 "title='" + title + '\'' +
-                ", msgContent='" + msgContent + '\'' +
+                ", alert='" + alert + '\'' +
                 ", contentType='" + contentType + '\'' +
                 ", extras=" + extras +
                 '}';

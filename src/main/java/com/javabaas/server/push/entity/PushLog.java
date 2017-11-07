@@ -58,12 +58,12 @@ public class PushLog extends BaasObject {
         return getString("sound");
     }
 
-    public void setParams(BaasObject params) {
+    public void setParams(Map<String, String> params) {
         put("params", params);
     }
 
-    public BaasObject getParams() {
-        return (BaasObject) get("params");
+    public Map<String, String> getParams() {
+        return (Map<String, String>) get("params");
     }
 
     public void setPushTime(long time) {
@@ -72,6 +72,22 @@ public class PushLog extends BaasObject {
 
     public long getPushTime() {
         return getLong("pushTime");
+    }
+
+    public void setContentType(String contentType) {
+        put("contentType", contentType);
+    }
+
+    public String getContentType() {
+        return getString("contentType");
+    }
+
+    public void setPushType(int type) {
+        put("pushType", type);
+    }
+
+    public int getPushType() {
+        return getInt("pushType");
     }
 
 }

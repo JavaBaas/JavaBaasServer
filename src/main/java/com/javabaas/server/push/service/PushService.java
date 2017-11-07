@@ -47,27 +47,36 @@ public class PushService {
             devices.forEach(device -> ids.add(device.getId()));
             pushHandler.pushMulti(appId, ids, push);
         }
+        PushLog pushLog = new PushLog();
         //记录推送日志
         if (push.getNotification() != null) {
-            PushLog pushLog = new PushLog();
+            pushLog.setPushType(1);
             pushLog.setTitle(push.getNotification().getTitle());
             pushLog.setAlert(push.getNotification().getAlert());
             if (push.getNotification().getBadge() != 0) {
                 pushLog.setBadge(push.getNotification().getBadge());
             }
             pushLog.setSound(push.getNotification().getSound());
-            pushLog.setWhere(query);
-            pushLog.setPushTime(new Date().getTime());
-            pushLog = new PushLog(objectService.insert(appId, plat, PUSH_LOG_CLASS_NAME, pushLog, true, null, true));
-            logger.debug("App:" + appId
-                    + " 推送成功 id:" + pushLog.getId()
-                    + " title:" + pushLog.getTitle()
-                    + " alert:" + pushLog.getAlert()
-                    + " badge:" + pushLog.getBadge()
-                    + " sound:" + pushLog.getSound()
-                    + " where:" + pushLog.getWhere());
         } else if (push.getMessage() != null) {
-            //TODO 加透传日志
+            pushLog.setPushType(2);
+            pushLog.setTitle(push.getMessage().getTitle());
+            pushLog.setAlert(push.getMessage().getAlert());
+            pushLog.setContentType(push.getMessage().getContentType());
+            if (push.getMessage().getExtras() != null) {
+                pushLog.setParams(push.getMessage().getExtras());
+            }
         }
+        pushLog.setPushTime(new Date().getTime());
+        if (query != null) {
+            pushLog.setWhere(query);
+        }
+        pushLog = new PushLog(objectService.insert(appId, plat, PUSH_LOG_CLASS_NAME, pushLog, true, null, true));
+        logger.debug("App:" + appId
+                + " 推送成功 id:" + pushLog.getId()
+                + " title:" + pushLog.getTitle()
+                + " alert:" + pushLog.getAlert()
+                + " badge:" + pushLog.getBadge()
+                + " sound:" + pushLog.getSound()
+                + " where:" + pushLog.getWhere());
     }
 }
