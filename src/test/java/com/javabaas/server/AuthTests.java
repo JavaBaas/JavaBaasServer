@@ -115,10 +115,12 @@ public class AuthTests {
     @Test
     public void testAdminKey() throws Exception {
         client.getMockMvc().perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/api/admin/app")
+                .header("Content-Type", "application/json")
                 .header("JB-Plat", "cloud")
                 .header("JB-AdminKey", authConfig.getAdminKey()))
                 .andExpect(status().isOk());
         client.getMockMvc().perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/api/admin/app")
+                .header("Content-Type", "application/json")
                 .header("JB-Plat", "cloud")
                 .header("JB-AdminKey", "JavaNotBaas"))
                 .andExpect(status().is4xxClientError())
@@ -132,11 +134,13 @@ public class AuthTests {
     @Test
     public void testMasterKey() throws Exception {
         client.getMockMvc().perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/api/master/clazz")
+                .header("Content-Type", "application/json")
                 .header("JB-AppId", app.getId())
                 .header("JB-Plat", "cloud")
                 .header("JB-MasterKey", app.getMasterKey()))
                 .andExpect(status().isOk());
         client.getMockMvc().perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/api/master/clazz")
+                .header("Content-Type", "application/json")
                 .header("JB-AppId", app.getId())
                 .header("JB-Plat", "cloud")
                 .header("JB-MasterKey", "wrongKey"))
@@ -148,11 +152,13 @@ public class AuthTests {
     @Test
     public void testUserKey() throws Exception {
         client.getMockMvc().perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/api/object/Book")
+                .header("Content-Type", "application/json")
                 .header("JB-Plat", "cloud")
                 .header("JB-AppId", app.getId())
                 .header("JB-Key", app.getKey()))
                 .andExpect(status().isOk());
         client.getMockMvc().perform(MockMvcRequestBuilders.request(HttpMethod.GET, "/api/master/clazz")
+                .header("Content-Type", "application/json")
                 .header("JB-Plat", "cloud")
                 .header("JB-AppId", app.getId())
                 .header("JB-key", "wrongKey"))
@@ -170,6 +176,7 @@ public class AuthTests {
         String sign = getSign(app.getKey(), timestampStr);
         String url = "/api/object/Book";
         client.getMockMvc().perform(get(url).header("JB-Plat", "cloud")
+                .header("Content-Type", "application/json")
                 .header("JB-Timestamp", timestampStr)
                 .header("JB-AppId", app.getId())
                 .header("JB-Sign", sign)
@@ -179,6 +186,7 @@ public class AuthTests {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8));
         //重放攻击请求被拒绝
         client.getMockMvc().perform(get(url).header("JB-Plat", "cloud")
+                .header("Content-Type", "application/json")
                 .header("JB-Timestamp", timestampStr)
                 .header("JB-AppId", app.getId())
                 .header("JB-Sign", sign)
