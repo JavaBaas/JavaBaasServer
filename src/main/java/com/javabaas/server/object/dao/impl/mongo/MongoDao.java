@@ -65,6 +65,18 @@ public class MongoDao implements IDao {
     }
 
     @Override
+    public void update(String appId, String className, BaasQuery query, BaasObject object) {
+        DBCollection c = getCollection(appId, className);
+        DBObject dbo = obj2dbo(object, true);
+        try {
+            c.update(new BasicDBObject(query), dbo);
+        } catch (DuplicateKeyException e) {
+            //唯一索引字段重复
+            throw new DuplicateKeyError("");
+        }
+    }
+
+    @Override
     public BaasObject findOne(String appId, String className, BaasQuery query) {
         DBCollection c = getCollection(appId, className);
         BasicDBObject queryObject = new BasicDBObject(query);
@@ -111,18 +123,6 @@ public class MongoDao implements IDao {
             }
         }
         return results;
-    }
-
-    @Override
-    public void update(String appId, String className, BaasQuery query, BaasObject object) {
-        DBCollection c = getCollection(appId, className);
-        DBObject dbo = obj2dbo(object, true);
-        try {
-            c.update(new BasicDBObject(query), dbo);
-        } catch (DuplicateKeyException e) {
-            //唯一索引字段重复
-            throw new DuplicateKeyError("");
-        }
     }
 
     @Override
@@ -238,37 +238,30 @@ public class MongoDao implements IDao {
                     }
                 } else {
                     //非操作符
-                    if (isUpdate) {
-                        //更新时将数据放入$set中
-                        set.put(key, value);
-                    } else {
-                        dbo.put(key, value);
-                    }
+                    set.put(key, value);
                 }
             }
         }
-        if (isUpdate) {
-            if (set.size() > 0) {
-                dbo.put("$set", set);
-            }
-            if (unset.size() > 0) {
-                dbo.put("$unset", unset);
-            }
-            if (inc.size() > 0) {
-                dbo.put("$inc", inc);
-            }
-            if (mul.size() > 0) {
-                dbo.put("$mul", mul);
-            }
-            if (add.size() > 0) {
-                dbo.put("$pushAll", add);
-            }
-            if (addUnique.size() > 0) {
-                dbo.put("$addToSet", addUnique);
-            }
-            if (remove.size() > 0) {
-                dbo.put("$pullAll", remove);
-            }
+        if (set.size() > 0) {
+            dbo.put("$set", set);
+        }
+        if (unset.size() > 0) {
+            dbo.put("$unset", unset);
+        }
+        if (inc.size() > 0) {
+            dbo.put("$inc", inc);
+        }
+        if (mul.size() > 0) {
+            dbo.put("$mul", mul);
+        }
+        if (add.size() > 0) {
+            dbo.put("$pushAll", add);
+        }
+        if (addUnique.size() > 0) {
+            dbo.put("$addToSet", addUnique);
+        }
+        if (remove.size() > 0) {
+            dbo.put("$pullAll", remove);
         }
         return dbo;
     }
