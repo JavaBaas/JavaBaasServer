@@ -82,20 +82,12 @@ public class ObjectChecker {
                     }
                 }
                 if (value != null) {
-                    if (isUpdate) {
-                        //更新字段
-                        //检查是否有操作符 如果有操作符 用BaasOperator替换原value
-                        BaasOperator operator = BaasOperatorUtil.getOperator(key, type, value);
-                        if (operator != null) {
-                            verified.put(key, operator);
-                        } else {
-                            //非操作符 检查字段值是否合法
-                            Object checked = checkField(appId, type, key, value);
-                            //验证成功 将字段写入
-                            verified.put(key, checked);
-                        }
+                    //检查是否有操作符 如果有操作符 用BaasOperator替换原value
+                    BaasOperator operator = BaasOperatorUtil.getOperator(key, type, value);
+                    if (operator != null) {
+                        verified.put(key, operator);
                     } else {
-                        //插入字段
+                        //非操作符 检查字段值是否合法
                         Object checked = checkField(appId, type, key, value);
                         //验证成功 将字段写入
                         verified.put(key, checked);

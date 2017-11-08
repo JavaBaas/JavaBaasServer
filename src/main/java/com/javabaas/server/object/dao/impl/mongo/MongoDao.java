@@ -56,7 +56,7 @@ public class MongoDao implements IDao {
         DBCollection c = getCollection(appId, className);
         DBObject dbo = obj2dbo(object, false);
         try {
-            c.insert(dbo);
+            c.update(new BasicDBObject("_id", object.getId()), dbo, true, false);
         } catch (DuplicateKeyException e) {
             //唯一索引字段重复
             throw new DuplicateKeyError("");
