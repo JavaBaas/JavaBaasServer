@@ -33,7 +33,7 @@ public class SmsController {
                              @RequestHeader(value = "JB-Plat") String plat,
                              @RequestParam String phone,
                              @RequestParam String templateId,
-                             @RequestParam(required = false) String params) {
+                             @RequestBody(required = false) String params) {
         BaasObject paramsObject = StringUtils.isEmpty(params) ? null : jsonUtil.readValue(params, BaasObject.class);
         SmsSendResult sendResult = smsService.sendSms(appId, plat, phone, templateId, paramsObject);
         return SimpleResult.success().putData("sendResult", sendResult);
@@ -45,13 +45,15 @@ public class SmsController {
      * @param phone 手机号码
      * @param ttl   失效时间
      */
-    @RequestMapping(value = "/smsCode", method = RequestMethod.GET)
+    @RequestMapping(value = "/smsCode", method = RequestMethod.POST)
     @ResponseBody
     public SimpleResult smsCode(@RequestHeader(value = "JB-AppId") String appId,
                                 @RequestHeader(value = "JB-Plat") String plat,
                                 @RequestParam String phone,
-                                @RequestParam long ttl) {
-        SmsSendResult sendResult = smsService.sendSmsCode(appId, plat, phone, ttl);
+                                @RequestParam long ttl,
+                                @RequestBody(required = false) String params) {
+        BaasObject paramsObject = StringUtils.isEmpty(params) ? null : jsonUtil.readValue(params, BaasObject.class);
+        SmsSendResult sendResult = smsService.sendSmsCode(appId, plat, phone, ttl, paramsObject);
         return SimpleResult.success().putData("sendResult", sendResult);
     }
 

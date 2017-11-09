@@ -89,7 +89,8 @@ public class UserTests {
 
         //配置短信发送器为测试发送器
         appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_HANDLER, "mockSmsHandler");
-
+        appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_SIGN_NAME, "JavaBaas");
+        appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_CODE_TEMPLATE_ID, "JavaBaas");
     }
 
     @After
@@ -130,7 +131,7 @@ public class UserTests {
     @Test
     public void testGet() {
         //测试普通权限无法读取保密字段
-        List<BaasObject> users = objectService.find(app.getId(), "admin", UserService.USER_CLASS_NAME, null,null, null, null, 100, 0, null,
+        List<BaasObject> users = objectService.find(app.getId(), "admin", UserService.USER_CLASS_NAME, null, null, null, null, 100, 0, null,
                 false);
         Assert.assertThat(users.size(), equalTo(2));
 

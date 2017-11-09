@@ -450,7 +450,7 @@ public class UserService {
      */
     public void getSmsCode(String appId, String plat, String phone) {
         //发送短信验证码
-        smsService.sendSmsCode(appId, plat, phone, 600);//短信验证码默认十分钟内有效
+        smsService.sendSmsCode(appId, plat, phone, 600, null);//短信验证码默认十分钟内有效
     }
 
     private BaasUser trimUser(BaasObject object) {

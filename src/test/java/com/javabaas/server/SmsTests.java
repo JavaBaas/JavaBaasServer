@@ -48,6 +48,8 @@ public class SmsTests {
         appService.insert(app);
         //配置短信发送器
         appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_HANDLER, "mockSmsHandler");
+        appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_SIGN_NAME, "JavaBaas");
+        appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_CODE_TEMPLATE_ID, "JavaBaas");
     }
 
     @After
@@ -69,7 +71,7 @@ public class SmsTests {
      */
     @Test
     public void testSendSmsCode() {
-        SmsSendResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10);
+        SmsSendResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10, null);
         Assert.assertThat(result.getCode(), equalTo(SmsSendResultCode.SUCCESS.getCode()));
         String code = mockSmsHandler.getSms(PHONE_NUMBER);
         //验证短信验证码正确
@@ -86,7 +88,7 @@ public class SmsTests {
     @Test
     public void testSendSmsCodeTimeout() {
         //验证码超时时间为1秒
-        SmsSendResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 1);
+        SmsSendResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 1, null);
         Assert.assertThat(result.getCode(), equalTo(SmsSendResultCode.SUCCESS.getCode()));
         String code = mockSmsHandler.getSms(PHONE_NUMBER);
         //1100毫秒后验证码失效
@@ -104,7 +106,7 @@ public class SmsTests {
     @Test
     public void testSendSmsCodeTryTimesSuccess() {
         //短信验证码错误验证 第5次有效
-        SmsSendResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10);
+        SmsSendResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10, null);
         Assert.assertThat(result.getCode(), equalTo(SmsSendResultCode.SUCCESS.getCode()));
         String code = mockSmsHandler.getSms(PHONE_NUMBER);
         for (int i = 0; i < 5; i++) {
@@ -118,7 +120,7 @@ public class SmsTests {
     @Test
     public void testSmsCodeTryTimesFail() {
         //短信验证码错误验证 5次后失效
-        SmsSendResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10);
+        SmsSendResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10, null);
         Assert.assertThat(result.getCode(), equalTo(SmsSendResultCode.SUCCESS.getCode()));
         String code = mockSmsHandler.getSms(PHONE_NUMBER);
         for (int i = 0; i < 6; i++) {

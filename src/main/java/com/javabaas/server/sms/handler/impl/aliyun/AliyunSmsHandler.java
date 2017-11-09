@@ -5,18 +5,25 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import com.javabaas.server.common.entity.SimpleCode;
+import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.config.entity.AppConfigEnum;
 import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.sms.entity.SmsSendResult;
+import com.javabaas.server.sms.entity.SmsSendResultCode;
 import com.javabaas.server.sms.handler.ISmsHandler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component("aliyun")
 public class AliyunSmsHandler implements ISmsHandler {
 
+    private Log log = LogFactory.getLog(getClass());
     @Autowired
     private AppConfigService appConfigService;
     @Autowired
@@ -33,27 +40,52 @@ public class AliyunSmsHandler implements ISmsHandler {
             SendSmsRequest request = new SendSmsRequest();
             request.setPhoneNumbers(phone);
             request.setSignName(signName);
-            request.setTemplateCode("SMS_73090044");
-            params.put("product", "测试短信");
+            request.setTemplateCode(templateId);
             request.setTemplateParam(jsonUtil.writeValueAsString(params));
             //流水号
             request.setOutId(id);
-
-            //此处可能会抛出异常，注意catch
-            SendSmsResponse sendSmsResponse = acsClient.getAcsResponse(request);
+            SendSmsResponse response = acsClient.getAcsResponse(request);
+            if (response.getCode().equals("OK")) {
+                //发送成功
+                return SmsSendResult.success();
+            } else {
+                //发送失败
+                log.warn("阿里云短信发送失败 code:" + response.getCode() + " message:" + response.getMessage());
+                switch (response.getCode()) {
+                    case "isv.AMOUNT_NOT_ENOUGH":
+                        return SmsSendResult.error(SmsSendResultCode.AMOUNT_NOT_ENOUGH);
+                    case "isv.MOBILE_NUMBER_ILLEGAL":
+                        return SmsSendResult.error(SmsSendResultCode.ILLEGAL_PHONE_NUMBER);
+                    case "isv.INVALID_PARAMETERS":
+                        return SmsSendResult.error(SmsSendResultCode.INVALID_PARAM);
+                    case "isv.TEMPLATE_MISSING_PARAMETERS":
+                        return SmsSendResult.error(SmsSendResultCode.TEMPLATE_MISSING_PARAMETERS);
+                    default:
+                        return new SmsSendResult(SmsSendResultCode.OTHER_ERRORS.getCode(), response.getMessage());
+                }
+            }
         } catch (ClientException e) {
             //发送失败
-            e.printStackTrace();
+            log.error(e, e);
+            return SmsSendResult.error(SmsSendResultCode.OTHER_ERRORS);
         }
-        return null;
+
     }
 
     private String accessKey(String appId) {
-        return appConfigService.getString(appId, AppConfigEnum.SMS_HANDLER_ALIYUN_KEY);
+        String ak = appConfigService.getString(appId, AppConfigEnum.SMS_HANDLER_ALIYUN_KEY);
+        if (StringUtils.isEmpty(ak)) {
+            throw new SimpleError(SimpleCode.SMS_NO_KEY);
+        }
+        return ak;
     }
 
     private String secret(String appId) {
-        return appConfigService.getString(appId, AppConfigEnum.SMS_HANDLER_ALIYUN_SECRET);
+        String sk = appConfigService.getString(appId, AppConfigEnum.SMS_HANDLER_ALIYUN_SECRET);
+        if (StringUtils.isEmpty(sk)) {
+            throw new SimpleError(SimpleCode.SMS_NO_SECRET);
+        }
+        return sk;
     }
 
 }

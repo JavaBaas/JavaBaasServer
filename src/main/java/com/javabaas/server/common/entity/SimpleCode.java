@@ -91,10 +91,15 @@ public enum SimpleCode {
     //6xxx 推送相关
     PUSH_ERROR(6001, "推送失败"),
     //7xxx 短信相关
-    SMS_RATE_LIMET(7001, "短信发送频率超过限制"),
+    SMS_RATE_LIMIT(7001, "短信发送频率超过限制"),
     SMS_SEND_INTERVAL_LIMIT(7002, "禁止连续发送"),
     SMS_HANDLER_NOT_DEFINE(7002, "短信处理器为定义"),
-    SMS_HANDLER_NOT_FOUND(7003, "短信处理器未找到");
+    SMS_HANDLER_NOT_FOUND(7003, "短信处理器未找到"),
+    SMS_NO_KEY(7004, "短信发送未设置key"),
+    SMS_NO_SECRET(7005, "短信发送未设置Secret"),
+    SMS_NO_SIGN_NAME(7006, "短信发送必须配置签名"),
+    SMS_SEND_ERROR(7007, "短信发送失败"),
+    SMS_CODE_TEMPLATE(7008, "短信验证码对应模版未设置");
 
     private int code;
     private String message;

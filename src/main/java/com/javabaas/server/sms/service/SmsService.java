@@ -11,6 +11,8 @@ import com.javabaas.server.sms.entity.SmsSendResult;
 import com.javabaas.server.sms.entity.SmsSendResultCode;
 import com.javabaas.server.sms.entity.SmsSendState;
 import com.javabaas.server.sms.handler.ISmsHandler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -29,6 +31,7 @@ public class SmsService {
 
     public static final String SMS_LOG_CLASS_NAME = "_SmsLog";
     private static final String SMS_CODE_NAME = "_SMS_CODE";
+    private Log log = LogFactory.getLog(getClass());
     @Autowired
     private Map<String, ISmsHandler> handlers;
     @Autowired
@@ -45,6 +48,10 @@ public class SmsService {
         rateLimiter.rate(appId, phone, templateId, params);
         //获取短信签名
         String signName = appConfigService.getString(appId, AppConfigEnum.SMS_SIGN_NAME);
+        if (StringUtils.isEmpty(signName)) {
+            log.warn(SimpleCode.SMS_NO_SIGN_NAME.getMessage() + " phone:" + phone + " template:" + templateId);
+            throw new SimpleError(SimpleCode.SMS_NO_SIGN_NAME);
+        }
         //记录发送日志
         SmsLog smsLog = new SmsLog();
         smsLog.setPhone(phone);
@@ -70,20 +77,28 @@ public class SmsService {
     /**
      * 发送手机验证码
      *
-     * @param phone 电话号码
-     * @param ttl   失效时间(秒)
+     * @param phone  电话号码
+     * @param ttl    失效时间(秒)
+     * @param params
      */
-    public SmsSendResult sendSmsCode(String appId, String plat, String phone, long ttl) {
+    public SmsSendResult sendSmsCode(String appId, String plat, String phone, long ttl, BaasObject params) {
+        //获取短信验证码对应模版
+        String templateId = appConfigService.getString(appId, AppConfigEnum.SMS_CODE_TEMPLATE_ID);
+        if (StringUtils.isEmpty(templateId)) {
+            throw new SimpleError(SimpleCode.SMS_CODE_TEMPLATE);
+        }
         //生成六位随机数字验证码
         String code = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
         //记录验证码
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
         ops.set(getKey(appId, phone), code, ttl, TimeUnit.SECONDS);
         //发送短信
-        BaasObject params = new BaasObject();
+        if (params == null) {
+            params = new BaasObject();
+        }
         //短信验证码参数固定为code
         params.put("code", code);
-        return sendSms(appId, plat, phone, appConfigService.getString(appId, AppConfigEnum.SMS_CODE_TEMPLATE_ID), params);
+        return sendSms(appId, plat, phone, templateId, params);
     }
 
     /**

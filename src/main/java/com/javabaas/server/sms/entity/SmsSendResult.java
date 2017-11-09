@@ -8,7 +8,7 @@ public class SmsSendResult {
     private int Code;
     private String message;
 
-    private SmsSendResult(int code, String message) {
+    public SmsSendResult(int code, String message) {
         Code = code;
         this.message = message;
     }
