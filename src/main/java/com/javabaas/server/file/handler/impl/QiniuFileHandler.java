@@ -276,15 +276,27 @@ public class QiniuFileHandler implements IFileHandler {
     }
 
     private String getAk(String appId) {
-        return appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_AK);
+        String ak = appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_AK);
+        if (StringUtils.isEmpty(ak)) {
+            throw new SimpleError(SimpleCode.FILE_NO_AK);
+        }
+        return ak;
     }
 
     private String getSk(String appId) {
-        return appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_SK);
+        String sk = appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_SK);
+        if (StringUtils.isEmpty(sk)) {
+            throw new SimpleError(SimpleCode.FILE_NO_SK);
+        }
+        return sk;
     }
 
     private String getBucket(String appId) {
-        return appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_BUCKET);
+        String bucket = appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_BUCKET);
+        if (StringUtils.isEmpty(bucket)) {
+            throw new SimpleError(SimpleCode.FILE_NO_BUCKET);
+        }
+        return bucket;
     }
 
     private String getPipeline(String appId) {
@@ -292,7 +304,11 @@ public class QiniuFileHandler implements IFileHandler {
     }
 
     private String getUrl(String appId) {
-        return appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_URL);
+        String url = appConfigService.getString(appId, AppConfigEnum.FILE_HANDLER_QINIU_URL);
+        if (StringUtils.isEmpty(url)) {
+            throw new SimpleError(SimpleCode.FILE_NO_URL);
+        }
+        return url;
     }
 
     private Zone getZone(String appId) {

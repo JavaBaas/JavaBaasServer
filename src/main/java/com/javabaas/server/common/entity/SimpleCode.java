@@ -82,6 +82,11 @@ public enum SimpleCode {
     FILE_NOT_EXIST(3004, "文件不存在"),
     FILE_PROCESS_FAILED(3005, "文件持久化处理失败"),
     FILE_PLATFORM_ERROR(3006, "错误的文件存储平台"),
+    FILE_PLATFORM_EMPTY(3007, "未指定文件存储平台"),
+    FILE_NO_AK(3008, "未设置文件存储AK"),
+    FILE_NO_SK(3009, "未设置文件存储SK"),
+    FILE_NO_BUCKET(3010, "未设置文件存储Bucket"),
+    FILE_NO_URL(3011, "文件存储未设置url"),
     //4xxx 云代码相关
     CLOUD_NOT_DEPLOYED(4001, "云代码未部署"),
     CLOUD_FUNCTION_NOT_FOUND(4002, "云方法未配置"),
@@ -90,6 +95,9 @@ public enum SimpleCode {
     HOOK_INTERCEPTION(5001, "钩子中断"),
     //6xxx 推送相关
     PUSH_ERROR(6001, "推送失败"),
+    PUSH_NO_AK(6002, "未设置推送AK"),
+    PUSH_NO_SK(6003, "未设置推送SK"),
+    PUSH_EMPTY(6004, "推送信息不能为空"),
     //7xxx 短信相关
     SMS_RATE_LIMIT(7001, "短信发送频率超过限制"),
     SMS_SEND_INTERVAL_LIMIT(7002, "禁止连续发送"),

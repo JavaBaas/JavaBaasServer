@@ -71,8 +71,8 @@ public class FileController {
     @ResponseBody
     public SimpleResult getToken(@RequestHeader(value = "JB-AppId") String appId,
                                  @RequestHeader(value = "JB-Plat") String plat,
-                                 @RequestParam(required = true) String fileName,
-                                 @RequestParam(required = true) String platform,
+                                 @RequestParam String fileName,
+                                 @RequestParam String platform,
                                  @RequestParam(required = false) String policy) {
         FileStoragePlatform filePlat = FileStoragePlatform.get(platform);
         SimpleResult result = SimpleResult.success();
@@ -112,8 +112,8 @@ public class FileController {
     @ResponseBody
     public SimpleResult process(@RequestHeader(value = "JB-AppId") String appId,
                                 @RequestHeader(value = "JB-Plat") String plat,
-                                @RequestParam(required = true) String fileId,
-                                @RequestParam(required = true) String platform,
+                                @RequestParam String fileId,
+                                @RequestParam String platform,
                                 @RequestParam(required = false) String policy) {
         FileStoragePlatform filePlat = FileStoragePlatform.get(platform);
         Map<String, Object> policyMap = null;
