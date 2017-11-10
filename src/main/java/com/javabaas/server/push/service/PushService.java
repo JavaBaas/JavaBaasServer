@@ -1,5 +1,7 @@
 package com.javabaas.server.push.service;
 
+import com.javabaas.server.common.entity.SimpleCode;
+import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.config.entity.AppConfigEnum;
 import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.object.entity.BaasObject;
@@ -34,6 +36,9 @@ public class PushService {
     private AppConfigService appConfigService;
 
     public void sendPush(String appId, String plat, BaasQuery query, Push push) {
+        if (push.getNotification() == null && push.getMessage() == null) {
+            throw new SimpleError(SimpleCode.PUSH_EMPTY);
+        }
         String handlerName = appConfigService.getString(appId, AppConfigEnum.PUSH_HANDLER);
         IPushHandler pushHandler = handlers.get(handlerName);
         if (query == null) {

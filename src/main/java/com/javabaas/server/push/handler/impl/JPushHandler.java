@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -135,10 +136,18 @@ public class JPushHandler implements IPushHandler {
     }
 
     private String accessKey(String appId) {
-        return appConfigService.getString(appId, AppConfigEnum.PUSH_HANDLER_JPUSH_KEY);
+        String ak = appConfigService.getString(appId, AppConfigEnum.PUSH_HANDLER_JPUSH_KEY);
+        if (StringUtils.isEmpty(ak)) {
+            throw new SimpleError(SimpleCode.PUSH_NO_AK);
+        }
+        return ak;
     }
 
     private String secret(String appId) {
-        return appConfigService.getString(appId, AppConfigEnum.PUSH_HANDLER_JPUSH_SECRET);
+        String sk = appConfigService.getString(appId, AppConfigEnum.PUSH_HANDLER_JPUSH_SECRET);
+        if (StringUtils.isEmpty(sk)) {
+            throw new SimpleError(SimpleCode.PUSH_NO_SK);
+        }
+        return sk;
     }
 }
