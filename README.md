@@ -6,13 +6,10 @@
 项目地址：
 
 * [码云](https://gitee.com/javabaas/JavaBaas)
-* [GitHub](https://github.com/JavaBaas/JavaBaasServer)
 
 技术讨论群：479167886
 
 完整文档参见：[www.javabaas.com](http://www.javabaas.com/)
-
-备注: [JavaBaas稳定版下载地址](http://7xr649.dl1.z0.glb.clouddn.com/JavaBaas.zip)
 
 ## 主要功能
 * 结构化数据存储
