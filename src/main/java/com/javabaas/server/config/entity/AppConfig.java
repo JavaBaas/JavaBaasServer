@@ -12,8 +12,17 @@ public class AppConfig {
     @NotEmpty
     private String value;
 
+    public AppConfig(String key, String value) {
+        this.key = key;
+        this.value = value;
+    }
+
     public String getKey() {
         return key;
+    }
+
+    public String getNoDotKey() {
+        return key.replaceAll("\\.", "");
     }
 
     public void setKey(String key) {

@@ -15,13 +15,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.mapping.context.MappingContext;
-import org.springframework.data.mongodb.MongoDbFactory;
-import org.springframework.data.mongodb.core.convert.DbRefResolver;
-import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
-import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
-import org.springframework.data.mongodb.core.mapping.MongoPersistentEntity;
-import org.springframework.data.mongodb.core.mapping.MongoPersistentProperty;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -63,16 +56,6 @@ public class Main extends WebMvcConfigurerAdapter {
     @Bean
     public RestTemplate getRest() {
         return new RestTemplate();
-    }
-
-    @Bean
-    public MappingMongoConverter mongoConverter(MongoDbFactory mongoFactory, MappingContext<? extends MongoPersistentEntity<?>,
-            MongoPersistentProperty> mongoMappingContext) throws Exception {
-        //自动将mongoDB中存储的key中的.替换为_
-        DbRefResolver dbRefResolver = new DefaultDbRefResolver(mongoFactory);
-        MappingMongoConverter mongoConverter = new MappingMongoConverter(dbRefResolver, mongoMappingContext);
-        mongoConverter.setMapKeyDotReplacement("_");
-        return mongoConverter;
     }
 
     @Bean(name = "baasMapper")

@@ -4,6 +4,7 @@ import com.javabaas.server.admin.entity.App;
 import com.javabaas.server.admin.service.AppService;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
+import com.javabaas.server.config.entity.AppConfig;
 import com.javabaas.server.config.entity.AppConfigEnum;
 import com.javabaas.server.config.entity.AppConfigs;
 import com.javabaas.server.config.repository.AppConfigRepository;
@@ -46,8 +47,8 @@ public class AppConfigService {
         return Long.valueOf(getString(appId, config));
     }
 
-    public void setConfig(String appId, String key, String value) {
-        checkConfigKey(key);
+    public void setConfig(String appId, AppConfig appConfig) {
+        checkConfigKey(appConfig.getKey());
         AppConfigs config = appConfigRepository.findByAppId(appId);
         if (config == null) {
             //配置不存在 创建配置
@@ -55,14 +56,14 @@ public class AppConfigService {
             App app = appService.get(appId);
             config.setApp(app);
         }
-        config.setParam(key, value);
+        config.setParam(appConfig);
         appConfigRepository.save(config);
         //清楚缓存
-        clearCache(appId, key);
+        clearCache(appId, appConfig.getKey());
     }
 
     public void setConfig(String appId, AppConfigEnum config, String value) {
-        setConfig(appId, config.getKey(), value);
+        setConfig(appId, new AppConfig(config.getKey(), value));
     }
 
     private void checkConfigKey(String key) {
@@ -104,7 +105,7 @@ public class AppConfigService {
         if (appConfigs == null) {
             return null;
         } else {
-            return appConfigs.getParam(key);
+            return appConfigs.getParam(key.replaceAll("\\.", ""));
         }
     }
 

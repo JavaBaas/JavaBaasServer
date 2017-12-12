@@ -17,7 +17,7 @@ public class AppConfigs {
     private String id;
     @DBRef
     private App app;
-    private Map<String, String> params;
+    private Map<String, AppConfig> params;
 
     public String getId() {
         return id;
@@ -35,26 +35,26 @@ public class AppConfigs {
         this.app = app;
     }
 
-    public Map<String, String> getParams() {
+    public Map<String, AppConfig> getParams() {
         return params;
     }
 
-    public void setParams(Map<String, String> params) {
+    public void setParams(Map<String, AppConfig> params) {
         this.params = params;
     }
 
-    public void setParam(String key, String value) {
+    public void setParam(AppConfig config) {
         if (params == null) {
             params = new HashMap<>();
         }
-        params.put(key, value);
+        params.put(config.getNoDotKey(), config);
     }
 
     public String getParam(String key) {
-        if (params == null) {
+        if (params == null || params.get(key) == null) {
             return null;
         } else {
-            return params.get(key);
+            return params.get(key).getValue();
         }
     }
 

@@ -34,7 +34,7 @@ public class AppConfigController {
     @ResponseBody
     public SimpleResult setAppConfig(@RequestHeader(value = "JB-AppId") String appId,
                                      @Valid @RequestBody AppConfig config) {
-        appConfigService.setConfig(appId, config.getKey(), config.getValue());
+        appConfigService.setConfig(appId, config);
         return SimpleResult.success();
     }
 
