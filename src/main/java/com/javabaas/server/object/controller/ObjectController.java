@@ -110,7 +110,7 @@ public class ObjectController {
      */
     @RequestMapping(value = "/{name}", method = RequestMethod.GET)
     @ResponseBody
-    public SimpleResult find(@RequestHeader(value = "JB-AppId") String appId,
+    public SimpleResult findByGet(@RequestHeader(value = "JB-AppId") String appId,
                              @RequestHeader(value = "JB-Plat") String plat,
                              @PathVariable String name,
                              @RequestParam(required = false) String where,
@@ -119,6 +119,33 @@ public class ObjectController {
                              @RequestParam(required = false) String keys,
                              @RequestParam(required = false, defaultValue = "100") int limit,
                              @RequestParam(required = false, defaultValue = "0") int skip) {
+        return query(appId, plat, name, where, order, include, keys, limit, skip);
+    }
+
+    /**
+     * 查询对象
+     *
+//     * @param name  类名
+     * @param body 查询条件
+     * @return 对象列表
+     */
+    @RequestMapping(value = "/{name}/find", method = RequestMethod.POST)
+    @ResponseBody
+    public SimpleResult findByPost(@RequestHeader(value = "JB-AppId") String appId,
+                             @RequestHeader(value = "JB-Plat") String plat,
+                             @PathVariable String name,
+                             @RequestBody String body) {
+        BaasObject object = jsonUtil.readBaas(body, BaasObject.class);
+        String where = object.getString("where");
+        String order = object.getString("order");
+        String include = object.getString("include");
+        String keys = object.getString("keys");
+        int limit = object.getInt("limit");
+        int skip = object.getInt("skip");
+        return query(appId, plat, name, where, order, include, keys, limit, skip);
+    }
+
+    private SimpleResult query(String appId, String plat, String name, String where, String order, String include, String keys, int limit, int skip) {
         //处理查询字段
         BaasQuery query = StringUtils.isEmpty(where) ? null : jsonUtil.readBaas(where, BaasQuery.class);
         //处理排序字段
