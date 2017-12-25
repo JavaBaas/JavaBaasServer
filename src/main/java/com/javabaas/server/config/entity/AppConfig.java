@@ -12,6 +12,9 @@ public class AppConfig {
     @NotEmpty
     private String value;
 
+    public AppConfig() {
+    }
+
     public AppConfig(String key, String value) {
         this.key = key;
         this.value = value;
