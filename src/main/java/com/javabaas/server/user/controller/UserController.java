@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.entity.SimpleResult;
-import com.javabaas.server.common.service.MasterService;
+import com.javabaas.server.common.sign.AuthChecker;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.user.entity.*;
@@ -28,7 +28,7 @@ public class UserController {
     @Autowired
     private UserService userService;
     @Autowired
-    private MasterService masterService;
+    private AuthChecker authChecker;
     @Autowired
     private HttpServletRequest request;
     @Autowired
@@ -79,7 +79,7 @@ public class UserController {
             throw new SimpleError(SimpleCode.USER_AUTH_PLATFORM_MISSING);
         }
         //处理权限
-        boolean isMaster = masterService.isMaster(request);
+        boolean isMaster = authChecker.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         BaasAuth auth = jsonUtil.readValue(authData, BaasAuth.class);
         userService.bindingSns(appId, plat, id, baasSnsType, auth, currentUser, isMaster);
@@ -102,7 +102,7 @@ public class UserController {
                                    @PathVariable String id,
                                    @PathVariable String platform) {
         //处理权限
-        boolean isMaster = masterService.isMaster(request);
+        boolean isMaster = authChecker.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         userService.releaseSns(appId, plat, id, platform, currentUser, isMaster);
         return SimpleResult.success();
@@ -123,7 +123,7 @@ public class UserController {
                                @PathVariable String id) {
         BaasUser user = jsonUtil.readValue(body, BaasUser.class);
         //处理权限
-        boolean isMaster = masterService.isMaster(request);
+        boolean isMaster = authChecker.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         userService.update(appId, plat, id, user, currentUser, isMaster);
         return SimpleResult.success();
@@ -156,9 +156,9 @@ public class UserController {
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     @ResponseBody
     public SimpleResult login(@RequestHeader(value = "JB-AppId") String appId,
-                          @RequestHeader(value = "JB-Plat") String plat,
-                          @RequestParam(required = true) String username,
-                          @RequestParam(required = true) String password) {
+                              @RequestHeader(value = "JB-Plat") String plat,
+                              @RequestParam(required = true) String username,
+                              @RequestParam(required = true) String password) {
         BaasUser user = userService.login(appId, plat, username, password);
         SimpleResult result = SimpleResult.success();
         result.putData("result", user);
@@ -174,9 +174,9 @@ public class UserController {
     @RequestMapping(value = "/loginWithSns/{platform}", method = RequestMethod.POST)
     @ResponseBody
     public SimpleResult loginWithSns(@RequestHeader(value = "JB-AppId") String appId,
-                                 @RequestHeader(value = "JB-Plat") String plat,
-                                 @RequestBody String authData,
-                                 @PathVariable int platform) {
+                                     @RequestHeader(value = "JB-Plat") String plat,
+                                     @RequestBody String authData,
+                                     @PathVariable int platform) {
         BaasSnsType baasSnsType = BaasSnsType.getType(platform);
         if (baasSnsType == null) {
             throw new SimpleError(SimpleCode.USER_AUTH_PLATFORM_MISSING);
@@ -197,9 +197,9 @@ public class UserController {
     @RequestMapping(value = "/registerWithSns/{platform}", method = RequestMethod.POST)
     @ResponseBody
     public SimpleResult registerWithSns(@RequestHeader(value = "JB-AppId") String appId,
-                                    @RequestHeader(value = "JB-Plat") String plat,
-                                    @Valid @RequestBody BaasSnsRegister register,
-                                    @PathVariable int platform) {
+                                        @RequestHeader(value = "JB-Plat") String plat,
+                                        @Valid @RequestBody BaasSnsRegister register,
+                                        @PathVariable int platform) {
         BaasSnsType baasSnsType = BaasSnsType.getType(platform);
         if (baasSnsType == null) {
             throw new SimpleError(SimpleCode.USER_AUTH_PLATFORM_MISSING);
@@ -216,8 +216,8 @@ public class UserController {
     @RequestMapping(value = "/loginWithPhone", method = RequestMethod.POST)
     @ResponseBody
     public SimpleResult loginWithPhone(@RequestHeader(value = "JB-AppId") String appId,
-                                   @RequestHeader(value = "JB-Plat") String plat,
-                                   @Valid @RequestBody BaasPhoneRegister register) {
+                                       @RequestHeader(value = "JB-Plat") String plat,
+                                       @Valid @RequestBody BaasPhoneRegister register) {
         BaasUser user = userService.loginWithPhone(appId, plat, register);
         SimpleResult result = SimpleResult.success();
         result.putData("result", user);

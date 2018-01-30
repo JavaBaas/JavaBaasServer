@@ -2,7 +2,7 @@ package com.javabaas.server.cloud.controller;
 
 import com.javabaas.server.cloud.service.CloudService;
 import com.javabaas.server.common.entity.SimpleResult;
-import com.javabaas.server.common.service.MasterService;
+import com.javabaas.server.common.sign.AuthChecker;
 import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class CloudController {
     @Autowired
     private CloudService cloudService;
     @Autowired
-    private MasterService masterService;
+    private AuthChecker authChecker;
     @Autowired
     private UserService userService;
     @Autowired
@@ -36,7 +36,7 @@ public class CloudController {
                               @PathVariable String name,
                               @RequestBody(required = false) String body) {
         //获取登录用户
-        boolean isMaster = masterService.isMaster(request);
+        boolean isMaster = authChecker.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         //整理请求参数
         Map<String, String> requestParams = new HashMap<>();

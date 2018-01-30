@@ -60,12 +60,19 @@ public class AuthChecker {
      * 校验工作由权限检查完成
      */
     public void masterCheck(HttpServletRequest httpServletRequest) {
-        String masterSign = httpServletRequest.getHeader("JB-MasterSign");
-        String masterKey = httpServletRequest.getHeader("JB-MasterKey");
-        if (StringUtils.isEmpty(masterSign) && StringUtils.isEmpty(masterKey)) {
+        if (!isMaster(httpServletRequest)) {
             //缺少管理员权限
             throw new SimpleError(SimpleCode.AUTH_NEED_MASTER_AUTH);
         }
+    }
+
+    /**
+     * 判断是否有管理权限
+     */
+    public boolean isMaster(HttpServletRequest request) {
+        String masterSign = request.getHeader("JB-MasterSign");
+        String masterKey = request.getHeader("JB-MasterKey");
+        return !StringUtils.isEmpty(masterSign) || !StringUtils.isEmpty(masterKey);
     }
 
     /**

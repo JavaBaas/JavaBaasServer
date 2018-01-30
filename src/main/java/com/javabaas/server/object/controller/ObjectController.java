@@ -4,7 +4,7 @@ import com.javabaas.server.admin.service.ClazzService;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.entity.SimpleResult;
-import com.javabaas.server.common.service.MasterService;
+import com.javabaas.server.common.sign.AuthChecker;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.object.entity.*;
 import com.javabaas.server.object.service.ObjectService;
@@ -31,7 +31,7 @@ public class ObjectController {
     @Autowired
     private ClazzService clazzService;
     @Autowired
-    private MasterService masterService;
+    private AuthChecker authChecker;
     @Autowired
     private UserService userService;
     @Autowired
@@ -54,7 +54,7 @@ public class ObjectController {
                                @RequestBody String body,
                                @PathVariable String name) {
         //处理权限
-        boolean isMaster = masterService.isMaster(request);
+        boolean isMaster = authChecker.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         //非master权限禁止操作内部类数据
         if (!isMaster && !clazzService.isNameValid(name)) {
@@ -89,7 +89,7 @@ public class ObjectController {
         //处理keys
         BaasList keyList = getKeys(keys);
         //处理权限
-        boolean isMaster = masterService.isMaster(request);
+        boolean isMaster = authChecker.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         //获取数据
         BaasObject object = objectService.get(appId, plat, name, id, bassInclude, keyList, currentUser, isMaster);
@@ -111,30 +111,31 @@ public class ObjectController {
     @RequestMapping(value = "/{name}", method = RequestMethod.GET)
     @ResponseBody
     public SimpleResult findByGet(@RequestHeader(value = "JB-AppId") String appId,
-                             @RequestHeader(value = "JB-Plat") String plat,
-                             @PathVariable String name,
-                             @RequestParam(required = false) String where,
-                             @RequestParam(required = false) String order,
-                             @RequestParam(required = false) String include,
-                             @RequestParam(required = false) String keys,
-                             @RequestParam(required = false, defaultValue = "100") int limit,
-                             @RequestParam(required = false, defaultValue = "0") int skip) {
+                                  @RequestHeader(value = "JB-Plat") String plat,
+                                  @PathVariable String name,
+                                  @RequestParam(required = false) String where,
+                                  @RequestParam(required = false) String order,
+                                  @RequestParam(required = false) String include,
+                                  @RequestParam(required = false) String keys,
+                                  @RequestParam(required = false, defaultValue = "100") int limit,
+                                  @RequestParam(required = false, defaultValue = "0") int skip) {
         return query(appId, plat, name, where, order, include, keys, limit, skip);
     }
 
     /**
      * 查询对象
+     * <p>
+     * //     * @param name  类名
      *
-//     * @param name  类名
      * @param body 查询条件
      * @return 对象列表
      */
     @RequestMapping(value = "/{name}/find", method = RequestMethod.POST)
     @ResponseBody
     public SimpleResult findByPost(@RequestHeader(value = "JB-AppId") String appId,
-                             @RequestHeader(value = "JB-Plat") String plat,
-                             @PathVariable String name,
-                             @RequestBody String body) {
+                                   @RequestHeader(value = "JB-Plat") String plat,
+                                   @PathVariable String name,
+                                   @RequestBody String body) {
         BaasObject object = jsonUtil.readBaas(body, BaasObject.class);
         String where = object.getString("where");
         String order = object.getString("order");
@@ -145,7 +146,8 @@ public class ObjectController {
         return query(appId, plat, name, where, order, include, keys, limit, skip);
     }
 
-    private SimpleResult query(String appId, String plat, String name, String where, String order, String include, String keys, int limit, int skip) {
+    private SimpleResult query(String appId, String plat, String name, String where, String order, String include, String keys, int
+            limit, int skip) {
         //处理查询字段
         BaasQuery query = StringUtils.isEmpty(where) ? null : jsonUtil.readBaas(where, BaasQuery.class);
         //处理排序字段
@@ -155,7 +157,7 @@ public class ObjectController {
         //处理keys
         BaasList keyList = getKeys(keys);
         //处理权限
-        boolean isMaster = masterService.isMaster(request);
+        boolean isMaster = authChecker.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         List<BaasObject> list = objectService.find(appId, plat, name, query, sort, bassInclude, keyList, limit, skip, currentUser,
                 isMaster);
@@ -179,7 +181,7 @@ public class ObjectController {
                               @RequestParam(required = false) String where) {
         BaasQuery query = StringUtils.isEmpty(where) ? null : jsonUtil.readBaas(where, BaasQuery.class);
         //处理权限
-        boolean isMaster = masterService.isMaster(request);
+        boolean isMaster = authChecker.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         return SimpleResult.success().putData("count", objectService.count(appId, name, query, currentUser, isMaster));
     }
@@ -202,7 +204,7 @@ public class ObjectController {
         //处理查询字段
         BaasQuery query = StringUtils.isEmpty(where) ? null : jsonUtil.readBaas(where, BaasQuery.class);
         //处理权限
-        boolean isMaster = masterService.isMaster(request);
+        boolean isMaster = authChecker.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         //非master权限禁止操作内部类对象
         if (!isMaster && !clazzService.isNameValid(name)) {
@@ -227,7 +229,7 @@ public class ObjectController {
                                @PathVariable String name,
                                @PathVariable String id) {
         //处理权限
-        boolean isMaster = masterService.isMaster(request);
+        boolean isMaster = authChecker.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         //非master权限禁止操作内部类对象
         if (!isMaster && !clazzService.isNameValid(name)) {
@@ -251,7 +253,7 @@ public class ObjectController {
         //处理查询字段
         BaasQuery query = StringUtils.isEmpty(where) ? null : jsonUtil.readBaas(where, BaasQuery.class);
         //处理权限
-        boolean isMaster = masterService.isMaster(request);
+        boolean isMaster = authChecker.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
         //非master权限禁止操作内部类对象
         if (!isMaster && !clazzService.isNameValid(name)) {
