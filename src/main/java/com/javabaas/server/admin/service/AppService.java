@@ -27,6 +27,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -71,6 +72,8 @@ public class AppService {
                 //初始化key masterKey
                 app.setKey(getKey());
                 app.setMasterKey(getKey());
+                //设置创建时间
+                app.setCreatedTime(new Date());
                 //存储
                 appRepository.insert(app);
                 //初始化应用

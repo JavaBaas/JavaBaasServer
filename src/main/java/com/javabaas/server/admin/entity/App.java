@@ -3,6 +3,8 @@ package com.javabaas.server.admin.entity;
 import com.javabaas.server.cloud.entity.CloudSetting;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Date;
+
 /**
  * Created by Staryet on 15/9/17.
  */
@@ -14,6 +16,7 @@ public class App {
     private String key;
     private String masterKey;
     private CloudSetting cloudSetting;
+    private Date createdTime;
 
     public String getId() {
         return id;
@@ -55,4 +58,11 @@ public class App {
         this.cloudSetting = cloudSetting;
     }
 
+    public Date getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(Date createdTime) {
+        this.createdTime = createdTime;
+    }
 }
