@@ -117,9 +117,10 @@ public class ObjectController {
                                   @RequestParam(required = false) String order,
                                   @RequestParam(required = false) String include,
                                   @RequestParam(required = false) String keys,
+                                  @RequestParam(required = false) boolean count,
                                   @RequestParam(required = false, defaultValue = "100") int limit,
                                   @RequestParam(required = false, defaultValue = "0") int skip) {
-        return query(appId, plat, name, where, order, include, keys, limit, skip);
+        return query(appId, plat, name, where, order, include, keys, limit, skip, count);
     }
 
     /**
@@ -141,13 +142,14 @@ public class ObjectController {
         String order = object.getString("order");
         String include = object.getString("include");
         String keys = object.getString("keys");
+        boolean count = object.getBoolean("count");
         int limit = object.getInt("limit");
         int skip = object.getInt("skip");
-        return query(appId, plat, name, where, order, include, keys, limit, skip);
+        return query(appId, plat, name, where, order, include, keys, limit, skip, count);
     }
 
     private SimpleResult query(String appId, String plat, String name, String where, String order, String include, String keys, int
-            limit, int skip) {
+            limit, int skip, boolean count) {
         //处理查询字段
         BaasQuery query = StringUtils.isEmpty(where) ? null : jsonUtil.readBaas(where, BaasQuery.class);
         //处理排序字段
@@ -163,6 +165,10 @@ public class ObjectController {
                 isMaster);
         SimpleResult result = SimpleResult.success();
         result.putData("result", list);
+        if (count) {
+            long totalCount = objectService.count(appId, name, query, currentUser, isMaster);
+            result.putData("count", totalCount);
+        }
         return result;
     }
 
