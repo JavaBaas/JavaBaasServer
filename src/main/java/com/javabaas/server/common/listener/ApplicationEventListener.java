@@ -6,7 +6,7 @@ import com.javabaas.server.config.BaasConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
+import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -21,7 +21,7 @@ import java.util.Date;
  * Created by Codi on 15/10/30.
  */
 @Component
-public class ApplicationEventListener implements ApplicationListener<EmbeddedServletContainerInitializedEvent> {
+public class ApplicationEventListener implements ApplicationListener<ServletWebServerInitializedEvent> {
 
     public static boolean error;
     private static boolean ready;
@@ -38,9 +38,9 @@ public class ApplicationEventListener implements ApplicationListener<EmbeddedSer
     private MongoTemplate mongoTemplate;
 
     @Override
-    public void onApplicationEvent(EmbeddedServletContainerInitializedEvent applicationReadyEvent) {
+    public void onApplicationEvent(ServletWebServerInitializedEvent applicationReadyEvent) {
         //启动端口
-        int port = applicationReadyEvent.getEmbeddedServletContainer().getPort();
+        int port = applicationReadyEvent.getWebServer().getPort();
         //记录启动时间
         timeService.setStartedTime(new Date());
         ready = true;

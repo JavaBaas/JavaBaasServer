@@ -5,7 +5,15 @@ import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.object.dao.IDao;
 import com.javabaas.server.object.entity.*;
 import com.javabaas.server.object.entity.error.DuplicateKeyError;
-import com.mongodb.*;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoException;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.UpdateOptions;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.stereotype.Component;
@@ -13,13 +21,12 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
- * mongoDb的对象存储实现
+ * Created by Codi on 2018/4/7.
  */
 @Component
 public class MongoDao implements IDao {
-
     private MongoDbFactory mongo;
-    private Map<String, DB> dbMap;
+    private Map<String, MongoDatabase> dbMap;
 
     @Autowired
     public MongoDao(MongoDbFactory mongo) {
@@ -27,9 +34,9 @@ public class MongoDao implements IDao {
         dbMap = new Hashtable<>();
     }
 
-    private DB db(String appId) {
+    private MongoDatabase db(String appId) {
         String name = getDbName(appId);
-        DB db = dbMap.get(name);
+        MongoDatabase db = dbMap.get(name);
         if (db == null) {
             db = mongo.getDb(name);
             dbMap.put(name, db);
@@ -47,16 +54,16 @@ public class MongoDao implements IDao {
      * @param className 类名
      * @return DBCollection
      */
-    private DBCollection getCollection(String appId, String className) {
+    private MongoCollection<Document> getCollection(String appId, String className) {
         return db(appId).getCollection("data_" + className);
     }
 
     @Override
     public BaasObject insert(String appId, String className, BaasObject object) {
-        DBCollection c = getCollection(appId, className);
-        DBObject dbo = obj2dbo(object, false);
+        MongoCollection<Document> c = getCollection(appId, className);
+        Document dbo = obj2dbo(object);
         try {
-            c.update(new BasicDBObject("_id", object.getId()), dbo, true, false);
+            c.updateOne(new Document("_id", object.getId()), dbo, new UpdateOptions().upsert(true));
         } catch (DuplicateKeyException e) {
             //唯一索引字段重复
             throw new DuplicateKeyError("");
@@ -66,10 +73,10 @@ public class MongoDao implements IDao {
 
     @Override
     public void update(String appId, String className, BaasQuery query, BaasObject object) {
-        DBCollection c = getCollection(appId, className);
-        DBObject dbo = obj2dbo(object, true);
+        MongoCollection<Document> c = getCollection(appId, className);
+        Document dbo = obj2dbo(object);
         try {
-            c.update(new BasicDBObject(query), dbo);
+            c.updateMany(new BasicDBObject(query), dbo);
         } catch (DuplicateKeyException e) {
             //唯一索引字段重复
             throw new DuplicateKeyError("");
@@ -78,9 +85,9 @@ public class MongoDao implements IDao {
 
     @Override
     public BaasObject findOne(String appId, String className, BaasQuery query) {
-        DBCollection c = getCollection(appId, className);
+        MongoCollection<Document> c = getCollection(appId, className);
         BasicDBObject queryObject = new BasicDBObject(query);
-        BasicDBObject dbo = (BasicDBObject) c.findOne(queryObject);
+        Document dbo = c.find(queryObject).first();
         if (dbo != null) {
             return dbo2obj(dbo);
         } else {
@@ -91,14 +98,15 @@ public class MongoDao implements IDao {
     @Override
     public List<BaasObject> find(String appId, String className, BaasQuery query, BaasList keys, BaasSort sort, Integer limit, Integer
             skip) {
-        DBCollection c = getCollection(appId, className);
-        DBCursor cursor;
+        MongoCollection<Document> c = getCollection(appId, className);
+        FindIterable<Document> cursor;
         BasicDBObject queryObject = new BasicDBObject(query);
         if (keys != null && keys.size() > 0) {
             //筛选返回字段
             BasicDBObject projection = new BasicDBObject();
             keys.forEach(key -> projection.put((String) key, 1));
-            cursor = c.find(queryObject, projection);
+            cursor = c.find(queryObject);
+            cursor.projection(projection);
         } else {
             //返回所有字段
             cursor = c.find(queryObject);
@@ -113,7 +121,9 @@ public class MongoDao implements IDao {
         }
         List<BaasObject> results = new LinkedList<>();
         try {
-            cursor.forEach(dbo -> results.add(dbo2obj((BasicDBObject) dbo)));
+            for (Document document : cursor) {
+                results.add(dbo2obj(document));
+            }
         } catch (MongoException exception) {
             if (exception.getCode() == 17287) {
                 //排序字段错误
@@ -127,10 +137,10 @@ public class MongoDao implements IDao {
 
     @Override
     public void findAndModify(String appId, String className, BaasQuery query, BaasObject object) {
-        DBCollection c = getCollection(appId, className);
-        DBObject dbo = obj2dbo(object, true);
+        MongoCollection<Document> c = getCollection(appId, className);
+        Document dbo = obj2dbo(object);
         try {
-            DBObject result = c.findAndModify(new BasicDBObject(query), dbo);
+            Document result = c.findOneAndUpdate(new Document(query), dbo);
             if (result == null) {
                 //更新失败 条件不满足 抛出异常
                 SimpleError.e(SimpleCode.OBJECT_FIND_AND_MODIFY_FAILED);
@@ -143,14 +153,14 @@ public class MongoDao implements IDao {
 
     @Override
     public void remove(String appId, String className, BaasQuery query) {
-        DBCollection c = getCollection(appId, className);
+        MongoCollection c = getCollection(appId, className);
         BasicDBObject queryObject = new BasicDBObject(query);
-        c.remove(queryObject);
+        c.deleteMany(queryObject);
     }
 
     @Override
     public void removeApp(String appId) {
-        db(appId).dropDatabase();
+        db(appId).drop();
     }
 
     /**
@@ -161,14 +171,14 @@ public class MongoDao implements IDao {
      */
     @Override
     public void removeClass(String appId, String className) {
-        DBCollection c = getCollection(appId, className);
+        MongoCollection c = getCollection(appId, className);
         c.drop();
     }
 
     @Override
     public void removeField(String appId, String className, String fieldName) {
-        DBCollection c = getCollection(appId, className);
-        c.updateMulti(new BasicDBObject(), new BasicDBObject().append("$unset", new BasicDBObject(fieldName, "")));
+        MongoCollection c = getCollection(appId, className);
+        c.updateMany(new Document(), new Document().append(("$unset"), new BasicDBObject(fieldName, "")));
     }
 
     @Override
@@ -178,7 +188,7 @@ public class MongoDao implements IDao {
         if (query != null) {
             queryObject = new BasicDBObject(query);
         }
-        DBCollection c = getCollection(appId, className);
+        MongoCollection c = getCollection(appId, className);
         long count;
         if (queryObject == null) {
             count = c.count();
@@ -188,8 +198,8 @@ public class MongoDao implements IDao {
         return count;
     }
 
-    private DBObject obj2dbo(BaasObject object, boolean isUpdate) {
-        BasicDBObject dbo = new BasicDBObject();
+    private Document obj2dbo(BaasObject object) {
+        Document dbo = new Document();
         //存储所有操作符
         BasicDBObject set = new BasicDBObject();
         BasicDBObject unset = new BasicDBObject();
@@ -266,41 +276,21 @@ public class MongoDao implements IDao {
         return dbo;
     }
 
-    private DBObject obj2inc(BaasObject object) {
-        BasicDBObject dbo = new BasicDBObject();
-        BasicDBObject set = new BasicDBObject();
-        BasicDBObject inc = new BasicDBObject();
-        Set<Map.Entry<String, Object>> entries = object.entrySet();
-        for (Map.Entry<String, Object> entry : entries) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (value != null && !key.equals("updatedAt") && !key.equals("updatedPlat")) {
-                inc.put(key, value);
-            }
-        }
-        set.put("updatedAt", object.get("updatedAt"));
-        set.put("updatedPlat", object.getUpdatedPlatform());
-        dbo.put("$set", set);
-        dbo.put("$inc", inc);
-        return dbo;
-    }
-
-    private BaasObject dbo2obj(BasicDBObject dbo) {
+    private BaasObject dbo2obj(Document dbo) {
         //简单的拷贝数据至BaasObject
         BaasObject object = new BaasObject();
         Set<Map.Entry<String, Object>> entries = dbo.entrySet();
         for (Map.Entry<String, Object> entry : entries) {
             String key = entry.getKey();
             Object value = entry.getValue();
-            if (value instanceof BasicDBObject) {
-                object.put(key, new BaasObject((BasicDBObject) value));
-            } else if (value instanceof BasicDBList) {
-                object.put(key, new BaasList((BasicDBList) value));
+            if (value instanceof Document) {
+                object.put(key, new BaasObject((Document) value));
+            } else if (value instanceof ArrayList) {
+                object.put(key, new BaasList((ArrayList) value));
             } else {
                 object.put(key, value);
             }
         }
         return object;
     }
-
 }

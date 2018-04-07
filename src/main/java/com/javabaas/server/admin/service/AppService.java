@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -99,7 +100,7 @@ public class AppService {
         //删除配置
         appConfigService.deleteConfig(id);
         //删除自己
-        appRepository.delete(id);
+        appRepository.deleteById(id);
         //删除缓存
         deleteCache(id);
         //删除DB
@@ -110,9 +111,11 @@ public class AppService {
         App app = getCache(id);
         if (app == null) {
             //未找到缓存
-            app = appRepository.findOne(id);
-            if (app == null) {
+            Optional<App> exist = appRepository.findById(id);
+            if (!exist.isPresent()) {
                 throw new SimpleError(SimpleCode.APP_NOT_FOUND);
+            }else{
+                app = exist.get();
             }
             setCache(id, app);
         }
@@ -175,7 +178,7 @@ public class AppService {
      * 初始化应用
      *
      * @param appId 应用id
-     * @throws SimpleError
+     * @throws SimpleError 错误
      */
     private void init(String appId) {
         //初始化内建类
