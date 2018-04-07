@@ -43,6 +43,11 @@ public class BaasObject extends LinkedHashMap<String, Object> {
         return (String) get(key);
     }
 
+    public boolean getBoolean(String key) {
+        Boolean b = (Boolean) get(key);
+        return b == null ? false : b;
+    }
+
     public long getLong(String key) {
         Object value = get(key);
         return value == null ? 0 : Long.valueOf(value.toString());
