@@ -1,5 +1,6 @@
 package com.javabaas.server.object.entity;
 
+import com.javabaas.server.role.entity.BaasRole;
 import com.javabaas.server.user.entity.BaasUser;
 
 import java.util.HashMap;
@@ -33,41 +34,31 @@ public class BaasAcl extends BaasObject {
         put("*", accessMap);
     }
 
-    public void setReadAccess(String userId, boolean access) {
-        Map<String, Boolean> accessMap = getAccessMap(userId);
+    public void setReadAccess(BaasUser user, boolean access) {
+        Map<String, Boolean> accessMap = getAccessMap(user.getId());
         accessMap.put("read", access);
-        put(userId, accessMap);
+        put(user.getId(), accessMap);
     }
 
-    public void setWriteAccess(String userId, boolean access) {
-        Map<String, Boolean> accessMap = getAccessMap(userId);
+    public void setReadAccess(BaasRole role, boolean access) {
+        Map<String, Boolean> accessMap = getAccessMap("role:" + role.getName());
+        accessMap.put("read", access);
+        put("role:" + role.getName(), accessMap);
+    }
+
+    public void setWriteAccess(BaasUser user, boolean access) {
+        Map<String, Boolean> accessMap = getAccessMap(user.getId());
         accessMap.put("write", access);
-        put(userId, accessMap);
+        put(user.getId(), accessMap);
     }
 
-    public boolean hasWriteAccess(BaasUser user) {
-        if (user == null) {
-            return hasPublicWriteAccess();
-        } else {
-            return hasPublicWriteAccess() || hasWriteAccess(user.getId());
-        }
+    public void setWriteAccess(BaasRole role, boolean access) {
+        Map<String, Boolean> accessMap = getAccessMap("role:" + role.getName());
+        accessMap.put("write", access);
+        put("role:" + role.getName(), accessMap);
     }
 
-    public boolean hasWriteAccess(String name) {
-        Map<String, Boolean> map = getAccessMap(name);
-        Boolean write = map.get("write");
-        if (write == null) {
-            return false;
-        } else {
-            return write;
-        }
-    }
-
-    public boolean hasPublicWriteAccess() {
-        return hasWriteAccess("*");
-    }
-
-    private Map<String, Boolean> getAccessMap(String name) {
+    public Map<String, Boolean> getAccessMap(String name) {
         Map<String, Boolean> accessMap = (Map<String, Boolean>) get(name);
         if (accessMap == null) {
             accessMap = new HashMap<>();

@@ -127,7 +127,7 @@ public class AppTests {
     public void testExport() {
         AppExport appExport = appService.export(app.getId());
         Assert.assertThat(appExport.getName(), equalTo("AppTest1"));
-        Assert.assertThat(appExport.getClazzs().size(), equalTo(6));
+        Assert.assertThat(appExport.getClazzs().size(), equalTo(7));
         ClazzExport clazz1 = appExport.getClazzs().get(appExport.getClazzs().size() - 1);
         Assert.assertThat(clazz1.getName(), equalTo("clazz1"));
         Assert.assertThat(clazz1.getFields().size(), equalTo(2));
@@ -149,7 +149,7 @@ public class AppTests {
         //验证导入结果
         appExport = appService.export(app2.getId());
         Assert.assertThat(appExport.getName(), equalTo("AppTest2"));
-        Assert.assertThat(appExport.getClazzs().size(), equalTo(6));
+        Assert.assertThat(appExport.getClazzs().size(), equalTo(7));
         ClazzExport clazz1 = appExport.getClazzs().get(appExport.getClazzs().size() - 1);
         Assert.assertThat(clazz1.getName(), equalTo("clazz1"));
         Assert.assertThat(clazz1.getFields().size(), equalTo(2));

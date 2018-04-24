@@ -15,6 +15,7 @@ import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.file.service.FileService;
 import com.javabaas.server.object.dao.impl.mongo.MongoDao;
 import com.javabaas.server.push.service.PushService;
+import com.javabaas.server.role.service.RoleService;
 import com.javabaas.server.sms.service.SmsService;
 import com.javabaas.server.user.service.InstallationService;
 import com.javabaas.server.user.service.UserService;
@@ -184,6 +185,8 @@ public class AppService {
         //初始化内建类
         //初始化用户类
         initUserClass(appId);
+        //初始化角色类
+        initRoleClass(appId);
         //初始化设备类
         initInstallationClass(appId);
         //初始化文件类
@@ -350,6 +353,24 @@ public class AppService {
         auth.setSecurity(true);
         fieldService.insert(appId, UserService.USER_CLASS_NAME, auth);
         log.info("App:" + appId + " 用户类初始化成功.");
+    }
+
+    private void initRoleClass(String appId) {
+        Clazz clazzRole = new Clazz();
+        clazzRole.setName(RoleService.ROLE_CLASS_NAME);
+        clazzRole.setInternal(true);
+        clazzService.insert(appId, clazzRole, false);
+        // 初始化角色字段
+        Field name = new Field(FieldType.STRING, "name");
+        name.setInternal(true);
+        fieldService.insert(appId, RoleService.ROLE_CLASS_NAME, name);
+        Field roles = new Field(FieldType.ARRAY, "roles");
+        roles.setInternal(true);
+        fieldService.insert(appId, RoleService.ROLE_CLASS_NAME, roles);
+        Field users = new Field(FieldType.ARRAY, "users");
+        users.setInternal(true);
+        fieldService.insert(appId, RoleService.ROLE_CLASS_NAME, users);
+        log.info("App:" + appId + " 角色类初始化成功.");
     }
 
     private String getKey() {

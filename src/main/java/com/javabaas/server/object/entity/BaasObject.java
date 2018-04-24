@@ -32,7 +32,7 @@ public class BaasObject extends LinkedHashMap<String, Object> {
     }
 
     public BaasAcl getAcl() {
-        return (BaasAcl) get("acl");
+        return get("acl") == null ? null : new BaasAcl((BaasObject)get("acl"));
     }
 
     public void setAcl(BaasAcl acl) {

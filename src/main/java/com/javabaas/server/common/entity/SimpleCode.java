@@ -58,6 +58,13 @@ public enum SimpleCode {
     USER_SESSION_TOKEN_ERROR(1310, "SessionToken已失效"),
     USER_INVALID_USERNAME(1311, "用户名非法 用户名只能包含数字字母 _ @ ."),
     USER_AUTH_PLATFORM_MISSING(1312, "第三方登录平台错误"),
+    //14XX 角色相关
+    ROLE_NOT_EXIST(1401, "角色不存在"),
+    ROLE_EMPTY_NAME(1402, "角色名不能为空"),
+    ROLE_EMPTY_ACL(1403, "角色acl不能为空"),
+    ROLE_ALREADY_EXIST(1404, "角色已存在"),
+    ROLE_NAME_CANNOT_MODIFY(1405, "角色名不允许修改"),
+    ROLE_INVALID_NAME(1406, "角色名只能包含数字、字母和下划线"),
     //2XXX 对象存储相关
     OBJECT_FIELD_TYPE_ERROR(2001, "字段类型错误"),
     OBJECT_FIELD_REQUIRED(2002, "字段不能为空"),

@@ -115,13 +115,10 @@ public class ObjectService {
         //验证表级ACL
         clazzAclChecker.verifyClazzAccess(appId, ClazzAclMethod.DELETE, className, currentUser, isMaster);
         //验证对象ACL权限
-        if (!isMaster) {
-            //非master权限验证acl
-            BaasAcl acl = exist.getAcl();
-            if (!acl.hasWriteAccess(currentUser)) {
-                //无操作权限
-                throw new SimpleError(SimpleCode.OBJECT_NO_ACCESS);
-            }
+        BaasAcl acl = exist.getAcl();
+        if (!aclHandler.checkWriteAccess(appId, acl, currentUser, isMaster)) {
+            //无操作权限
+            throw new SimpleError(SimpleCode.OBJECT_NO_ACCESS);
         }
         //钩子处理
         hookService.beforeDelete(appId, className, exist, currentUser);
@@ -174,13 +171,10 @@ public class ObjectService {
         //验证表级ACL
         clazzAclChecker.verifyClazzAccess(appId, ClazzAclMethod.UPDATE, className, currentUser, isMaster);
         //验证对象ACL权限
-        if (!isMaster) {
-            //非master权限验证acl
-            BaasAcl acl = exist.getAcl();
-            if (!acl.hasWriteAccess(currentUser)) {
-                //无操作权限
-                throw new SimpleError(SimpleCode.OBJECT_NO_ACCESS);
-            }
+        BaasAcl acl = exist.getAcl();
+        if (!aclHandler.checkWriteAccess(appId, acl, currentUser, isMaster)) {
+            //无操作权限
+            throw new SimpleError(SimpleCode.OBJECT_NO_ACCESS);
         }
         //钩子处理
         hookService.beforeUpdate(appId, className, object, currentUser);
@@ -451,7 +445,7 @@ public class ObjectService {
             return null;
         }
         //处理ACL权限
-        query = aclHandler.handleAcl(query, user, isMaster);
+        query = aclHandler.handleAcl(appId, query, user, isMaster);
         if (keys != null) {
             //处理keys 添加默认字段
             keys.addAll(InternalFields.fields());
@@ -467,7 +461,7 @@ public class ObjectService {
         clazzAclChecker.verifyClazzAccess(appId, ClazzAclMethod.FIND, className, currentUser, isMaster);
         //处理子查询
         handleSubQuery(appId, currentUser, isMaster, query);
-        query = aclHandler.handleAcl(query, currentUser, isMaster);
+        query = aclHandler.handleAcl(appId, query, currentUser, isMaster);
         return dao.count(appId, className, query);
     }
 

@@ -1,7 +1,6 @@
 package com.javabaas.server.object.service;
 
 import com.javabaas.server.admin.entity.Field;
-import com.javabaas.server.object.entity.BaasAcl;
 import com.javabaas.server.object.entity.BaasObject;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +45,7 @@ public class ObjectExtractor {
         if (acl == null) {
             return null;
         }
-        extracted.put("acl", new BaasAcl((BaasObject) acl));
+        extracted.put("acl", object.get("acl"));
         //自定义字段
         fields.forEach(field -> {
             if (!field.isSecurity() || isMaster) {

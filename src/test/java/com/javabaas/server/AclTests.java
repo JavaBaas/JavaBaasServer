@@ -10,6 +10,8 @@ import com.javabaas.server.object.entity.BaasAcl;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.service.ObjectService;
+import com.javabaas.server.role.entity.BaasRole;
+import com.javabaas.server.role.service.RoleService;
 import com.javabaas.server.user.entity.BaasUser;
 import com.javabaas.server.user.service.UserService;
 import org.junit.After;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -40,6 +43,8 @@ public class AclTests {
     private UserService userService;
     @Autowired
     private FieldService fieldService;
+    @Autowired
+    private RoleService roleService;
     @Autowired
     private AppService appService;
     private App app;
@@ -61,6 +66,54 @@ public class AclTests {
         user2.setUsername("user2");
         user2.setPassword("aaaaaa");
         String user2Id = userService.register(app.getId(), "cloud", user2).getId();
+
+        BaasUser user3 = new BaasUser();
+        user3.setUsername("user3");
+        user3.setPassword("aaaaaa");
+        String user3Id = userService.register(app.getId(), "cloud", user3).getId();
+
+        // 测试角色
+        // 角色1只有用户1
+        BaasRole role1 = new BaasRole();
+        BaasAcl roleAcl = new BaasAcl();
+        roleAcl.setPublicReadAccess(true);
+        role1.setAcl(roleAcl);
+        role1.setName("role1");
+        List<String> users = new ArrayList<>();
+        users.add(user1Id);
+        role1.put("users", users);
+        role1 = roleService.insert(app.getId(), "cloud", role1, null, true);
+
+        // 角色2包含有用户1和2
+        BaasRole role2 = new BaasRole();
+        role2.setAcl(roleAcl);
+        role2.setName("role2");
+        users = new ArrayList<>();
+        users.add(user1Id);
+        users.add(user2Id);
+        role2.put("users", users);
+        role2 = roleService.insert(app.getId(), "cloud", role2, null, true);
+
+        // 角色3包含角色1
+        BaasRole role3 = new BaasRole();
+        role3.setAcl(roleAcl);
+        role3.setName("role3");
+        List<String> roles = new ArrayList<>();
+        roles.add(role1.getId());
+        role3.put("roles", roles);
+        role3 = roleService.insert(app.getId(), "cloud", role3, null, true);
+
+        // 角色4包含角色3和用户3
+        BaasRole role4 = new BaasRole();
+        role4.setAcl(roleAcl);
+        role4.setName("role4");
+        roles = new ArrayList<>();
+        roles.add(role3.getId());
+        role4.put("roles", roles);
+        users = new ArrayList<>();
+        users.add(user3Id);
+        role4.put("users", users);
+        role4 = roleService.insert(app.getId(), "cloud", role4, null, true);
 
         //创建测试用类Master 用户无任何权限 禁止增删改查
         Clazz clazzMaster = new Clazz();
@@ -259,7 +312,7 @@ public class AclTests {
      * @throws SimpleError
      */
     @Test
-    public void testObjectAcl() {
+    public void testObjectAclWithUser() {
         BaasUser user1 = userService.get(app.getId(), "admin", "user1", null, true);
         BaasUser user2 = userService.get(app.getId(), "admin", "user2", null, true);
         //测试对象 全局可读 user1可写
@@ -267,7 +320,7 @@ public class AclTests {
         o1.put("string", "old");
         BaasAcl acl = new BaasAcl();
         acl.setPublicReadAccess(true);
-        acl.setWriteAccess(user1.getId(), true);
+        acl.setWriteAccess(user1, true);
         o1.setAcl(acl);
         String o1Id = objectService.insert(app.getId(), "cloud", "objectAcl", o1, null, false).getId();
 
@@ -295,7 +348,7 @@ public class AclTests {
         BaasObject o2 = new BaasObject();
         o2.put("string", "old");
         acl = new BaasAcl();
-        acl.setReadAccess(user1.getId(), true);
+        acl.setReadAccess(user1, true);
         acl.setPublicWriteAccess(false);
         o2.setAcl(acl);
         String o2Id = objectService.insert(app.getId(), "cloud", "objectAcl", o2, null, false).getId();
@@ -331,7 +384,145 @@ public class AclTests {
         objects = objectService.find(app.getId(), "admin", "objectAcl", null, null, null, null, 100, 0, null, true);
         Assert.assertThat(objects.size(), equalTo(2));
         Assert.assertThat(objects.get(0).getId(), equalTo(o2Id));
+    }
 
+    @Test
+    public void testObjectAclWithRole() {
+        BaasUser user1 = userService.get(app.getId(), "admin", "user1", null, true);
+        BaasUser user2 = userService.get(app.getId(), "admin", "user2", null, true);
+        BaasUser user3 = userService.get(app.getId(), "admin", "user3", null, true);
+
+        BaasRole role1 = roleService.get(app.getId(),"cloud", "role1", null, true);
+        BaasRole role2 = roleService.get(app.getId(),"cloud", "role2", null, true);
+        BaasRole role3 = roleService.get(app.getId(),"cloud", "role3", null, true);
+        BaasRole role4 = roleService.get(app.getId(),"cloud", "role4", null, true);
+
+        // 全局可读, 角色1可写
+        BaasObject o1 = new BaasObject();
+        o1.put("string", "old");
+        BaasAcl acl = new BaasAcl();
+        acl.setPublicReadAccess(true);
+        acl.setWriteAccess(role1, true);
+        o1.setAcl(acl);
+        o1 = objectService.insert(app.getId(), "cloud", "objectAcl", o1, null, false);
+        o1 = objectService.get(app.getId(), "plat", "objectAcl", o1.getId(), null, null, null, true);
+        Assert.assertThat(o1.get("string"), equalTo("old"));
+        o1.put("string", "new");
+        // user2无改权限
+        try {
+            objectService.update(app.getId(), "admin", "objectAcl", o1.getId(), o1, user2, false);
+            Assert.fail("user2无修改权限");
+        } catch (SimpleError e) {
+            Assert.assertThat(e.getCode(), equalTo(SimpleCode.OBJECT_NO_ACCESS.getCode()));
+        }
+        // user1有改权限
+        objectService.update(app.getId(), "admin", "objectAcl", o1.getId(), o1, user1, false);
+        o1 = objectService.get(app.getId(), "admin", "objectAcl", o1.getId(), null, null, null, true);
+        Assert.assertThat(o1.get("string"), equalTo("new"));
+        // master权限可以修改
+        o1.put("string", "master");
+        objectService.update(app.getId(), "admin", "objectAcl", o1.getId(), o1, null, true);
+        o1 = objectService.get(app.getId(), "admin", "objectAcl", o1.getId(), null, null, null, true);
+        Assert.assertThat(o1.get("string"), equalTo("master"));
+
+        // 测试对象 role1可读
+        BaasObject o2 = new BaasObject();
+        o2.put("string", "old");
+        acl = new BaasAcl();
+        acl.setReadAccess(user1, true);
+        o2.setAcl(acl);
+        o2 = objectService.insert(app.getId(), "admin", "objectAcl", o2, null, false);
+
+        // 无用户身份无法获取到o2
+        BaasObject object = objectService.get(app.getId(), "admin", "objectAcl", o2.getId(), null, null, null, false);
+        Assert.assertThat(object, equalTo(null));
+        // 无用户身份可以查询到o1,无法查询到o2
+        List<BaasObject>  objects = objectService.find(app.getId(), "admin", "objectAcl", null, null, null, null, 100, 0, null, false);
+        Assert.assertThat(objects.size(), equalTo(1));
+        Assert.assertThat(objects.get(0).getId(), equalTo(o1.getId()));
+
+        // user2无法获取到o2
+        object = objectService.get(app.getId(),"admin", "objectAcl", o2.getId(), null, null, user2, false);
+        Assert.assertThat(object, equalTo(null));
+        // user2可以查询到o1,无法查询到o2
+        objects = objectService.find(app.getId(), "admin", "objectAcl", null, null, null, null, 100, 0, user2, false);
+        Assert.assertThat(objects.size(), equalTo(1));
+        Assert.assertThat(objects.get(0).getId(), equalTo(o1.getId()));
+
+        // user1可以获取到o2
+        o2 = objectService.get(app.getId(), "admin", "objectAcl", o2.getId(), null, null, user1, false);
+        Assert.assertThat(o2.get("string"), equalTo("old"));
+        //user1 可以查询到o2 可以查询到o1
+        objects = objectService.find(app.getId(), "admin", "objectAcl", null, null, null, null, 100, 0, user1, false);
+        Assert.assertThat(objects.size(), equalTo(2));
+        List<String> ids = new ArrayList<>();
+        objects.forEach(o -> ids.add(o.getId()));
+        Assert.assertTrue("user2不能同时查询到o1和o2", ids.contains(o1.getId()) && ids.contains(o2.getId()));
+
+        // master权限 可以获取到o2
+        o2 = objectService.get(app.getId(), "admin", "objectAcl", o2.getId(), null, null, null, true);
+        Assert.assertThat(o2.get("string"), equalTo("old"));
+        //master权限 可以查询到o2 可以查询到o1
+        objects = objectService.find(app.getId(), "admin", "objectAcl", null, null, null, null, 100, 0, null, true);
+        Assert.assertThat(objects.size(), equalTo(2));
+        Assert.assertTrue("master不能同时查询到o1和o2", ids.contains(o1.getId()) && ids.contains(o2.getId()));
+
+        // 测试对象 角色3可写
+        BaasObject o3 = new BaasObject();
+        o3.put("string", "old");
+        acl = new BaasAcl();
+        acl.setPublicReadAccess(true);
+        acl.setWriteAccess(role3, true);
+        o3.setAcl(acl);
+        o3 = objectService.insert(app.getId(), "admin", "objectAcl", o3, null, false);
+
+        // user2 无法修改o3
+        o3.put("string", "user2write");
+        try {
+            objectService.update(app.getId(), "admin", "objectAcl", o3.getId(), o3, user2, false);
+            Assert.fail("user2无修改权限");
+        } catch (SimpleError e) {
+            Assert.assertThat(e.getCode(), equalTo(SimpleCode.OBJECT_NO_ACCESS.getCode()));
+        }
+        // user1 可以修改o3
+        o3.put("string", "user1write");
+        objectService.update(app.getId(), "admin", "objectAcl", o3.getId(), o3, user1, false);
+        o3 = objectService.get(app.getId(), "admin", "objectAcl", o3.getId(), null, null, null, true);
+        Assert.assertThat(o3.get("string"), equalTo("user1write"));
+
+        // 测试对象 角色4可以读取和修改
+        BaasObject o4 = new BaasObject();
+        o4.put("string", "old");
+        acl = new BaasAcl();
+        acl.setReadAccess(role4, true);
+        acl.setWriteAccess(role4, true);
+        o4.setAcl(acl);
+        o4 = objectService.insert(app.getId(), "admin", "objectAcl", o4, null, false);
+
+        // user2无法读取和修改o4
+        object = objectService.get(app.getId(), "admin", "objectAcl", o4.getId(), null, null, user2, false);
+        Assert.assertThat(object, equalTo(null));
+        o4.put("string", "user2write");
+        try {
+            objectService.update(app.getId(), "admin", "objectAcl", o4.getId(), o4, user2, false);
+            Assert.fail("user2无修改权限");
+        } catch (SimpleError e) {
+            Assert.assertThat(e.getCode(), equalTo(SimpleCode.OBJECT_NO_ACCESS.getCode()));
+        }
+        // user1可以获取和修改o4
+        object = objectService.get(app.getId(), "admin", "objectAcl", o4.getId(), null, null, user1, false);
+        Assert.assertThat(object.getId(), equalTo(o4.getId()));
+        o4.put("string", "user1write");
+        objectService.update(app.getId(), "admin", "objectAcl", o4.getId(), o4, user1, false);
+        o4 = objectService.get(app.getId(), "admin", "objectAcl", o4.getId(), null, null, null, true);
+        Assert.assertThat(o4.get("string"), equalTo("user1write"));
+        // user3可以获取和修改o4
+        object = objectService.get(app.getId(), "admin", "objectAcl", o4.getId(), null, null, user3, false);
+        Assert.assertThat(object.getId(), equalTo(o4.getId()));
+        o4.put("string", "user3write");
+        objectService.update(app.getId(), "admin", "objectAcl", o4.getId(), o4, user3, false);
+        o4 = objectService.get(app.getId(), "admin", "objectAcl", o4.getId(), null, null, null, true);
+        Assert.assertThat(o4.get("string"), equalTo("user3write"));
 
     }
 

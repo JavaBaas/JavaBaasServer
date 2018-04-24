@@ -18,13 +18,13 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 import java.util.Map;
 
 @SpringBootApplication
-public class Main extends WebMvcConfigurerAdapter {
+public class Main implements WebMvcConfigurer {
 
     @Autowired
     private HeaderInterceptor contentTypeInterceptor;
