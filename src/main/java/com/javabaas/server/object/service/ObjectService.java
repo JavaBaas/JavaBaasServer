@@ -322,7 +322,7 @@ public class ObjectService {
             Object targetClass = sub.get("targetClass");
             //查询目标字段
             Object searchKey = sub.get("searchKey");
-            if (searchKey == null || targetClass == null) {
+            if (searchKey == null && targetClass == null) {
                 //子查询
                 Set<String> keys = subs.keySet();
                 //直接将查询结果的id添加至主查询
@@ -333,6 +333,11 @@ public class ObjectService {
                     object.setId(key);
                     list.add(object);
                 }
+            } else if (searchKey != null && targetClass == null) {
+                subs.forEach((key, value) -> {
+                    BaasObject targetObject = (BaasObject) value.get(searchKey.toString());
+                    list.add(targetObject.getId());
+                });
             } else {
                 //匹配查询
                 for (Map.Entry<String, BaasObject> resultEntry : subs.entrySet()) {
