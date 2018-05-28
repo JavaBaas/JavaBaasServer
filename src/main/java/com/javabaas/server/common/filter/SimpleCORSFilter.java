@@ -18,7 +18,7 @@ public class SimpleCORSFilter implements Filter {
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "content-type,JB-Plat,JB-AppId,JB-Key,JB-AdminKey,JB-MasterKey,JB-Sign," +
-                "JB-AdminSign,JB-MasterSign,JB-Timestamp,JB-Nonce");
+                "JB-AdminSign,JB-MasterSign,JB-Timestamp,JB-Nonce,JB-SessionToken");
         chain.doFilter(req, res);
     }
 

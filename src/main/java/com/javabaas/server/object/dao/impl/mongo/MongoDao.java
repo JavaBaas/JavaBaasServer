@@ -231,7 +231,7 @@ public class MongoDao implements IDao {
                             BaasList addList = (BaasList) operator.getValue();
                             BasicDBList dbList = new BasicDBList();
                             dbList.addAll(addList);
-                            add.put(key, dbList);
+                            add.put(key, new BasicDBObject("$each", dbList));
                             break;
                         case ADD_UNIQUE:
                             BaasList uniqueList = (BaasList) operator.getValue();
@@ -265,7 +265,7 @@ public class MongoDao implements IDao {
             dbo.put("$mul", mul);
         }
         if (add.size() > 0) {
-            dbo.put("$pushAll", add);
+            dbo.put("$push", add);
         }
         if (addUnique.size() > 0) {
             dbo.put("$addToSet", addUnique);
