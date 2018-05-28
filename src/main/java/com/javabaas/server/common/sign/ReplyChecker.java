@@ -46,7 +46,7 @@ public class ReplyChecker {
      */
     public void recordSign(String appId, String sign) {
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
-        ops.set(getKey(appId, sign), "1", authConfig.getTimeout(), TimeUnit.SECONDS);
+        ops.set(getKey(appId, sign), "1", authConfig.getTimeout(), TimeUnit.MICROSECONDS);
     }
 
     private String getKey(String appId, String sign) {
