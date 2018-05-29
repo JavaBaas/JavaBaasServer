@@ -82,6 +82,7 @@ public enum SimpleCode {
     OBJECT_OPERATOR_NOT_EXIST(2014, "对象操作符不存在"),
     OBJECT_OPERATOR_WRONG_TYPE(2015, "对象操作符类型错误"),
     OBJECT_OPERATOR_WRONG_VALUE(2016, "对象操作符取值错误"),
+    OBJECT_SUB_QUERY_WRONG_SORT(2017, "子查询sort字段不是map"),
     //3XXX 文件存储相关
     FILE_NO_HANDLER(3001, "无对应的物理文件处理器"),
     FILE_CALLBACK_NO_VALID(3002, "回调授权失败"),

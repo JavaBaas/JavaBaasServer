@@ -308,12 +308,24 @@ public class ObjectService {
         if (where == null || !(where instanceof Map)) {
             throw new SimpleError(SimpleCode.OBJECT_SUB_QUERY_EMPTY_WHERE);
         }
+        int limit = sub.get("limit") == null ? 1000 : (int) sub.get("limit");
+        int skip = sub.get("skip") == null ? 0 : (int) sub.get("skip");
+
+        Object sortObject = sub.get("order");
+        BaasSort sort = null;
+        if (sortObject != null ) {
+            if (!(sortObject instanceof Map)) {
+                throw new SimpleError(SimpleCode.OBJECT_SUB_QUERY_WRONG_SORT);
+            } else {
+                sort = new BaasSort((Map)sortObject);
+            }
+        }
         //子查询的类
         Object searchClass = sub.get("searchClass");
         if (StringUtils.isEmpty(searchClass) || !(searchClass instanceof String)) {
             throw new SimpleError(SimpleCode.OBJECT_SUB_QUERY_EMPTY_SEARCH_CLASS);
         }
-        Map<String, BaasObject> subs = getObjects(appId, (String) searchClass, new BaasQuery((Map) where), null, null, 1000, null, user,
+        Map<String, BaasObject> subs = getObjects(appId, (String) searchClass, new BaasQuery((Map) where), null, sort, limit, skip, user,
                 isMaster);
         if (subs != null) {
             //用查询结果$in替换$sub
