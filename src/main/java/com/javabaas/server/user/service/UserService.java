@@ -190,7 +190,9 @@ public class UserService {
         user.remove("acl");
         objectService.update(appId, plat, UserService.USER_CLASS_NAME, id, user, null, true);
         //更新成功 清除用户缓存
-        deleteUserCache(appId, user.getSessionToken());
+        BaasObject object = objectService.get(appId, plat, UserService.USER_CLASS_NAME, id, null, null, null, true);
+        BaasUser baasUser = new BaasUser(object);
+        deleteUserCache(appId, baasUser.getSessionToken());
     }
 
     public BaasUser updatePassword(String appId, String plat, String id, String oldPassword, String newPassword, BaasUser currentUser) {
