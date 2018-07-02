@@ -10,6 +10,6 @@ build:
   script: 
     - DATE=`date +%Y%m%d`
     - TAG=$DATE-$CI_JOB_ID
-    - echo $TAG
-    - docker build -t store:$TAG .
-    - docker images
+    - docker login -u admin -p SaE-WAS-8bJ-rHG kerust.net:8088
+    - docker build -t kerust.net:8088/javabaas:$TAG .
+    - docker push kerust.net:8088/javabaas:$TAG
