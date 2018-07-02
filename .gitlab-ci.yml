@@ -1,0 +1,15 @@
+image: docker
+
+stages:
+  # - test
+  - build
+  # - deploy
+
+build:
+  stage: build
+  script: 
+    - DATE=`date +%Y%m%d`
+    - TAG=$DATE-$CI_JOB_ID
+    - echo $TAG
+    - docker build -t store:$TAG .
+    - docker images
