@@ -16,6 +16,6 @@ build:
   script: 
     - DATE=`date +%Y%m%d`
     - TAG=$DATE-$CI_JOB_ID
-    - docker login -u admin -p SaE-WAS-8bJ-rHG kerust.net:8088
-    - docker build -t kerust.net:8088/javabaas:$TAG .
-    - docker push kerust.net:8088/javabaas:$TAG
+    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${DOCKER_REGISTER}
+    - docker build -t ${DOCKER_REGISTER}/javabaas:$TAG .
+    - docker push ${DOCKER_REGISTER}/javabaas:$TAG
