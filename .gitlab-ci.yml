@@ -1,9 +1,15 @@
 image: docker
 
 stages:
-  # - test
+  - test
   - build
   # - deploy
+
+test:
+  stage: test
+  image: maven:alpine
+  script:
+    - echo 'test'
 
 build:
   stage: build
