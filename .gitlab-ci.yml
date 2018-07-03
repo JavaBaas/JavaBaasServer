@@ -1,8 +1,7 @@
 image: docker
 services:
-  - postgres
+  - mongo
   - redis
-
 
 stages:
   - test
@@ -13,7 +12,9 @@ test:
   stage: test
   image: maven:alpine
   script:
-    - echo 'test'
+  	- spring_data_mongodb_host=mongo
+  	- spring_redis_host=redis
+    - mvn test
 
 build:
   stage: build
