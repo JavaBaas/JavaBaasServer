@@ -12,8 +12,8 @@ test:
   stage: test
   image: maven:alpine
   script:
-  	- export spring_data_mongodb_host=mongo
-  	- export spring_redis_host=redis
+    - export spring_data_mongodb_host=mongo
+    - export spring_redis_host=redis
     - mvn test
 
 build:
