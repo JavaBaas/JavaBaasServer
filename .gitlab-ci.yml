@@ -19,3 +19,5 @@ build:
     - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${DOCKER_REGISTER}
     - docker build -t ${DOCKER_REGISTER}/javabaas:$TAG .
     - docker push ${DOCKER_REGISTER}/javabaas:$TAG
+    - docker tag ${DOCKER_REGISTER}/javabaas:$TAG ${DOCKER_REGISTER}/javabaas:latest
+    - docker push ${DOCKER_REGISTER}/javabaas:latest
