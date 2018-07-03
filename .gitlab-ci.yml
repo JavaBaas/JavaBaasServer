@@ -1,4 +1,8 @@
 image: docker
+services:
+  - postgres
+  - redis
+
 
 stages:
   - test
