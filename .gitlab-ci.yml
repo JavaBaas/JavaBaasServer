@@ -33,6 +33,6 @@ docker:
     - TAG=$DATE-$CI_JOB_ID
     - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${DOCKER_REGISTER}
     - docker build -t ${DOCKER_REGISTER}/${PROJECT_NAME}:$TAG .
-    - docker push ${DOCKER_REGISTER}/{PROJECT_NAME}:$TAG
-    - docker tag ${DOCKER_REGISTER}/{PROJECT_NAME}:$TAG ${DOCKER_REGISTER}/{PROJECT_NAME}:latest
-    - docker push ${DOCKER_REGISTER}/{PROJECT_NAME}:latest
+    - docker push ${DOCKER_REGISTER}/${PROJECT_NAME}:$TAG
+    - docker tag ${DOCKER_REGISTER}/${PROJECT_NAME}:$TAG ${DOCKER_REGISTER}/${PROJECT_NAME}:latest
+    - docker push ${DOCKER_REGISTER}/${PROJECT_NAME}:latest
