@@ -1,0 +1,28 @@
+image: docker
+services:
+  - mongo
+  - redis
+
+stages:
+  - test
+  - build
+  # - deploy
+
+test:
+  stage: test
+  image: maven:alpine
+  script:
+    - export spring_data_mongodb_host=mongo
+    - export spring_redis_host=redis
+    - mvn test
+
+build:
+  stage: build
+  script: 
+    - DATE=`date +%Y%m%d`
+    - TAG=$DATE-$CI_JOB_ID
+    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${DOCKER_REGISTER}
+    - docker build -t ${DOCKER_REGISTER}/javabaas:$TAG .
+    - docker push ${DOCKER_REGISTER}/javabaas:$TAG
+    - docker tag ${DOCKER_REGISTER}/javabaas:$TAG ${DOCKER_REGISTER}/javabaas:latest
+    - docker push ${DOCKER_REGISTER}/javabaas:latest
