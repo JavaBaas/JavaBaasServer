@@ -18,7 +18,7 @@ test:
 build:
   stage: build
   script:
-    - docker run -it --rm -v "$PWD":/usr/src/mymaven -v "$HOME/.m2":/root/.m2 -v "$PWD/target:/usr/src/mymaven/target" -w /usr/src/mymaven maven:alpine mvn package -DskipTests
+    - docker run --rm -v "$PWD":/usr/src/mymaven -v "$HOME/.m2":/root/.m2 -v "$PWD/target:/usr/src/mymaven/target" -w /usr/src/mymaven maven:alpine mvn package -DskipTests
     - DATE=`date +%Y%m%d`
     - TAG=$DATE-$CI_JOB_ID
     - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${DOCKER_REGISTER}
