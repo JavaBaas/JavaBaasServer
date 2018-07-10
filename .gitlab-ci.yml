@@ -23,7 +23,7 @@ build:
     - mvn package -DskipTests
   artifacts:
     paths:
-    - target/JavaBaas-boot.jar
+    - target
 
 docker:
   stage: docker
