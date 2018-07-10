@@ -1,8 +1,8 @@
-[36m
+${AnsiColor.BRIGHT_GREEN}
    ___                     ______
   |_  |                    | ___ \
     | |  __ _ __   __ __ _ | |_/ /  __ _   __ _  ___
     | | / _` |\ \ / // _` || ___ \ / _` | / _` |/ __|
 /\__/ /| (_| | \ V /| (_| || |_/ /| (_| || (_| |\__ \
 \____/  \__,_|  \_/  \__,_|\____/  \__,_| \__,_||___/
- [32m :: JavaBaasServer ::[0m               ( v2.0.1 )
+${AnsiColor.BRIGHT_RED} :: ${spring.application.name} ::     ${AnsiColor.BRIGHT_YELLOW} ${application.formatted-version}

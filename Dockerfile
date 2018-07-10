@@ -1,9 +1,8 @@
-FROM maven:alpine
+FROM java:8-alpine
 
-WORKDIR /code
+WORKDIR /
+ADD target /target
 
-ADD pom.xml /code/pom.xml
-ADD src /code/src
-RUN mvn package -DskipTests
-
-CMD java -jar target/JavaBaas-2.0.0.jar
+HEALTHCHECK --interval=5s --timeout=3s CMD curl --fail http://localhost:8080/ || exit 1
+EXPOSE 8080
+CMD java -jar target/JavaBaas-boot.jar
