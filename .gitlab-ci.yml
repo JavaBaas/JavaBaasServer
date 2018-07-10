@@ -6,7 +6,6 @@ services:
 stages:
   - test
   - build
-  # - deploy
 
 test:
   stage: test
@@ -18,11 +17,12 @@ test:
 
 build:
   stage: build
-  script: 
+  script:
+    - docker run -it --rm -v "$PWD":/usr/src/mymaven -v "$HOME/.m2":/root/.m2 -v "$PWD/target:/usr/src/mymaven/target" -w /usr/src/mymaven maven:alpine mvn package -DskipTests
     - DATE=`date +%Y%m%d`
     - TAG=$DATE-$CI_JOB_ID
     - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${DOCKER_REGISTER}
-    - docker build -t ${DOCKER_REGISTER}/javabaas:$TAG .
-    - docker push ${DOCKER_REGISTER}/javabaas:$TAG
-    - docker tag ${DOCKER_REGISTER}/javabaas:$TAG ${DOCKER_REGISTER}/javabaas:latest
-    - docker push ${DOCKER_REGISTER}/javabaas:latest
+    - docker build -t ${DOCKER_REGISTER}/${PROJECT_NAME}:$TAG .
+    - docker push ${DOCKER_REGISTER}/{PROJECT_NAME}:$TAG
+    - docker tag ${DOCKER_REGISTER}/{PROJECT_NAME}:$TAG ${DOCKER_REGISTER}/{PROJECT_NAME}:latest
+    - docker push ${DOCKER_REGISTER}/{PROJECT_NAME}:latest
