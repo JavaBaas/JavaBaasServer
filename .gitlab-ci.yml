@@ -38,8 +38,8 @@ docker:
     - docker tag ${DOCKER_REGISTER}/${PROJECT_NAME}:$TAG ${DOCKER_REGISTER}/${PROJECT_NAME}:latest
     - docker push ${DOCKER_REGISTER}/${PROJECT_NAME}:latest
 
-docker:
-  stage: docker
+deploy:
+  stage: deploy
   image: docker
   script:
     - curl -u 5D18812F9BF3C863FFA4:CpeUKSyJzShZEa4ceJGaQuSvnW38KJjcaJ9F7UFn \
