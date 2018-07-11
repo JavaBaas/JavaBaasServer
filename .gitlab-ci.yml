@@ -40,9 +40,9 @@ docker:
 
 deploy:
   stage: deploy
-  image: docker
+  image: maven:alpine
   script:
-    - curl -u 5D18812F9BF3C863FFA4:CpeUKSyJzShZEa4ceJGaQuSvnW38KJjcaJ9F7UFn \
+    - curl -u ${CATTLE_ACCESS_KEY}:${CATTLE_SECRET_KEY} \
       -X POST \
       -H 'Accept:application/json' \
       -H 'Content-Type:application/json' \
