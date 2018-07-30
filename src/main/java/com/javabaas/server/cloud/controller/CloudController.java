@@ -41,7 +41,6 @@ public class CloudController {
         //整理请求参数
         Map<String, String> requestParams = new HashMap<>();
         Set<String> keys = request.getParameterMap().keySet();
-
         for (String key : keys) {
             requestParams.put(key, request.getParameter(key));
         }

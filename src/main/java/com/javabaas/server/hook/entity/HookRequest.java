@@ -1,31 +1,22 @@
 package com.javabaas.server.hook.entity;
 
+import com.javabaas.server.cloud.entity.JBRequest;
 import com.javabaas.server.object.entity.BaasObject;
-import com.javabaas.server.user.entity.BaasUser;
 
 /**
  * Created by Staryet on 15/9/24.
  */
-public class HookRequest {
+public class HookRequest extends JBRequest {
 
-    private String appId;
-    private BaasUser user;
+    private HookEvent event;
     private BaasObject object;
 
-    public String getAppId() {
-        return appId;
+    public HookEvent getEvent() {
+        return event;
     }
 
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    public BaasUser getUser() {
-        return user;
-    }
-
-    public void setUser(BaasUser user) {
-        this.user = user;
+    public void setEvent(HookEvent event) {
+        this.event = event;
     }
 
     public BaasObject getObject() {

@@ -5,7 +5,7 @@ import com.javabaas.server.admin.service.AppService;
 import com.javabaas.server.cloud.entity.CloudRequest;
 import com.javabaas.server.cloud.entity.CloudResponse;
 import com.javabaas.server.cloud.entity.CloudSetting;
-import com.javabaas.server.cloud.util.SignUtil;
+import com.javabaas.server.cloud.entity.JBRequest;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.entity.SimpleResult;
@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -28,8 +29,6 @@ public class CloudService {
     private RestTemplate rest;
     @Autowired
     private AppService appService;
-    @Autowired
-    private SignUtil signUtil;
 
     public SimpleResult cloud(String appId, String plat, String functionName, BaasUser user, boolean isMaster, Map<String, String>
             requestParams, String body) {
@@ -43,7 +42,11 @@ public class CloudService {
         if (plat != null) {
             cloudRequest.setPlat(plat);
         }
-        //设置请求参数
+        //准备请求参数
+        Map<String, Object> uriParams = new HashMap<>();
+        uriParams.put("requestType", "1");
+        //准备云方法请求体
+        cloudRequest.setName(functionName);
         cloudRequest.setAppId(appId);
         cloudRequest.setParams(requestParams);
         cloudRequest.setBody(body);
@@ -61,16 +64,14 @@ public class CloudService {
                 long timestamp = new Date().getTime();
                 String timestampStr = String.valueOf(timestamp);
                 cloudRequest.setTimestamp(timestampStr);
-                if (isMaster) {
-                    cloudRequest.setMasterSign(signUtil.getMasterSign(app.getId(), timestampStr));
-                } else {
-                    cloudRequest.setSign(signUtil.getSign(app.getId(), timestampStr));
-                }
                 //发送请求
                 CloudResponse response;
                 try {
-                    response = rest.postForObject(app.getCloudSetting().getCustomerHost() + "/cloud/" + functionName,
-                            cloudRequest, CloudResponse.class);
+                    response = rest.postForObject(app.getCloudSetting().getCustomerHost() + "?requestType={requestType}",
+                            cloudRequest, CloudResponse.class, JBRequest.REQUEST_CLOUD);
+                    if (response == null) {
+                        throw new SimpleError(SimpleCode.CLOUD_FUNCTION_EXECUTE_FAILED);
+                    }
                 } catch (Exception e) {
                     //请求执行异常
                     throw new SimpleError(SimpleCode.CLOUD_FUNCTION_EXECUTE_FAILED);

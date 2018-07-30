@@ -4,6 +4,7 @@ import com.javabaas.server.admin.entity.App;
 import com.javabaas.server.admin.service.AppService;
 import com.javabaas.server.cloud.entity.CloudSetting;
 import com.javabaas.server.cloud.entity.HookSetting;
+import com.javabaas.server.cloud.entity.JBRequest;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.hook.entity.HookEvent;
@@ -74,19 +75,19 @@ public class HookService {
             request.setAppId(appId);
             request.setUser(user);
             request.setObject(object);
+            request.setEvent(event);
+            request.setName(className);
             try {
-                HookResponse response = rest.postForObject(app.getCloudSetting().getCustomerHost() + "/hook/" + className + "/" + event
-                        .getName(), request, HookResponse.class);
-                if (response != null) {
-                    //执行成功
-                    if (response.getCode() == HookResponseCode.ERROR) {
-                        //钩子中断
-                        throw new SimpleError(SimpleCode.HOOK_INTERCEPTION);
-                    } else {
-                        //成功
-                        if (response.getObject() != null) {
-                            object.putAll(response.getObject());
-                        }
+                HookResponse response = rest.postForObject(app.getCloudSetting().getCustomerHost() + "?requestType={requestType}",
+                        request, HookResponse.class, JBRequest.REQUEST_HOOK);
+                //执行成功
+                if (response.getCode() == HookResponseCode.ERROR) {
+                    //钩子中断
+                    throw new SimpleError(SimpleCode.HOOK_INTERCEPTION);
+                } else {
+                    //成功
+                    if (response.getObject() != null) {
+                        object.putAll(response.getObject());
                     }
                 }
             } catch (RestClientException e) {
@@ -106,9 +107,11 @@ public class HookService {
             request.setAppId(appId);
             request.setUser(user);
             request.setObject(object);
+            request.setEvent(event);
+            request.setName(className);
             try {
-                rest.postForObject(app.getCloudSetting().getCustomerHost() + "/hook/" + className + "/" + event.getName(), request,
-                        HookResponse.class);
+                rest.postForObject(app.getCloudSetting().getCustomerHost() + "?requestType={requestType}", request,
+                        HookResponse.class, JBRequest.REQUEST_HOOK);
             } catch (RestClientException e) {
                 //执行失败直接返回
                 log.debug("App:" + appId + " HookFail:" + event.getName() + " class:" + className + " _id:" + object.getId());
