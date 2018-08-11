@@ -1,7 +1,7 @@
 package com.javabaas.server.sms.handler.impl;
 
+import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.object.entity.BaasObject;
-import com.javabaas.server.sms.entity.SmsSendResult;
 import com.javabaas.server.sms.handler.ISmsHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,14 +26,14 @@ public class MockSmsHandler implements ISmsHandler {
     }
 
     @Override
-    public SmsSendResult sendSms(String appId, String id, String phone, String signName, String templateId, BaasObject params) {
+    public SimpleResult sendSms(String appId, String id, String phone, String signName, String templateId, BaasObject params) {
         StringBuilder sms = new StringBuilder();
         if (params != null) {
             params.forEach((k, v) -> sms.append(v));
         }
         map.put(phone, sms.toString());
         log.info("Mock短信 phone:" + phone + " sms:" + sms);
-        return SmsSendResult.success();
+        return SimpleResult.success();
     }
 
 }

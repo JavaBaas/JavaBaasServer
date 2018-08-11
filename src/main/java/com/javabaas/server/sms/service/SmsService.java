@@ -2,13 +2,12 @@ package com.javabaas.server.sms.service;
 
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
+import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.config.entity.AppConfigEnum;
 import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.service.ObjectService;
 import com.javabaas.server.sms.entity.SmsLog;
-import com.javabaas.server.sms.entity.SmsSendResult;
-import com.javabaas.server.sms.entity.SmsSendResultCode;
 import com.javabaas.server.sms.entity.SmsSendState;
 import com.javabaas.server.sms.handler.ISmsHandler;
 import org.apache.commons.logging.Log;
@@ -43,7 +42,7 @@ public class SmsService {
     @Autowired
     private SmsRateLimiter rateLimiter;
 
-    public SmsSendResult sendSms(String appId, String plat, String phone, String templateId, BaasObject params) {
+    public SimpleResult sendSms(String appId, String plat, String phone, String templateId, BaasObject params) {
         //请求频率限制
         rateLimiter.rate(appId, phone, templateId, params);
         //获取短信签名
@@ -61,17 +60,19 @@ public class SmsService {
         smsLog.setState(SmsSendState.WAIT.getCode());
         smsLog = new SmsLog(objectService.insert(appId, plat, SMS_LOG_CLASS_NAME, smsLog, true, null, true));
         //发送
-        SmsSendResult smsSendResult = getSmsHandler(appId).sendSms(appId, smsLog.getId(), phone, signName, templateId, params);
-        if (smsSendResult == null || smsSendResult.getCode() != SmsSendResultCode.SUCCESS.getCode()) {
+        SimpleResult sendResult = getSmsHandler(appId).sendSms(appId, smsLog.getId(), phone, signName, templateId, params);
+        if (sendResult.getCode() != SimpleCode.SUCCESS.getCode()) {
             //发送失败
             smsLog.setState(SmsSendState.FAIL.getCode());
             objectService.update(appId, plat, SMS_LOG_CLASS_NAME, smsLog.getId(), smsLog, null, true);
+            //抛出发送失败异常
+            throw new SimpleError(sendResult.getCode(), sendResult.getMessage());
         } else {
             //发送成功
             smsLog.setState(SmsSendState.SUCCESS.getCode());
             objectService.update(appId, plat, SMS_LOG_CLASS_NAME, smsLog.getId(), smsLog, null, true);
         }
-        return smsSendResult;
+        return sendResult;
     }
 
     /**
@@ -81,7 +82,7 @@ public class SmsService {
      * @param ttl    失效时间(秒)
      * @param params
      */
-    public SmsSendResult sendSmsCode(String appId, String plat, String phone, long ttl, BaasObject params) {
+    public SimpleResult sendSmsCode(String appId, String plat, String phone, long ttl, BaasObject params) {
         //获取短信验证码对应模版
         String templateId = appConfigService.getString(appId, AppConfigEnum.SMS_CODE_TEMPLATE_ID);
         if (StringUtils.isEmpty(templateId)) {

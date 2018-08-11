@@ -7,12 +7,11 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
+import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.config.entity.AppConfigEnum;
 import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.object.entity.BaasObject;
-import com.javabaas.server.sms.entity.SmsSendResult;
-import com.javabaas.server.sms.entity.SmsSendResultCode;
 import com.javabaas.server.sms.handler.ISmsHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,7 +29,7 @@ public class AliyunSmsHandler implements ISmsHandler {
     private JSONUtil jsonUtil;
 
     @Override
-    public SmsSendResult sendSms(String appId, String id, String phone, String signName, String templateId, BaasObject params) {
+    public SimpleResult sendSms(String appId, String id, String phone, String signName, String templateId, BaasObject params) {
         try {
             //初始化acsClient
             IClientProfile profile = DefaultProfile.getProfile("cn-hangzhou", accessKey(appId), secret(appId));
@@ -47,29 +46,30 @@ public class AliyunSmsHandler implements ISmsHandler {
             SendSmsResponse response = acsClient.getAcsResponse(request);
             if (response.getCode().equals("OK")) {
                 //发送成功
-                return SmsSendResult.success();
+                return SimpleResult.success();
             } else {
                 //发送失败
                 log.warn("阿里云短信发送失败 code:" + response.getCode() + " message:" + response.getMessage());
                 switch (response.getCode()) {
                     case "isv.AMOUNT_NOT_ENOUGH":
-                        return SmsSendResult.error(SmsSendResultCode.AMOUNT_NOT_ENOUGH);
+                        return SimpleResult.error(SimpleCode.SMS_AMOUNT_NOT_ENOUGH);
                     case "isv.MOBILE_NUMBER_ILLEGAL":
-                        return SmsSendResult.error(SmsSendResultCode.ILLEGAL_PHONE_NUMBER);
+                        return SimpleResult.error(SimpleCode.SMS_ILLEGAL_PHONE_NUMBER);
                     case "isv.INVALID_PARAMETERS":
-                        return SmsSendResult.error(SmsSendResultCode.INVALID_PARAM);
+                        return SimpleResult.error(SimpleCode.SMS_INVALID_PARAM);
                     case "isv.TEMPLATE_MISSING_PARAMETERS":
-                        return SmsSendResult.error(SmsSendResultCode.TEMPLATE_MISSING_PARAMETERS);
+                        return SimpleResult.error(SimpleCode.SMS_TEMPLATE_MISSING_PARAMETERS);
+                    case "isv.BUSINESS_LIMIT_CONTROL":
+                        return SimpleResult.error(SimpleCode.SMS_LIMIT_CONTROL);
                     default:
-                        return new SmsSendResult(SmsSendResultCode.OTHER_ERRORS.getCode(), response.getMessage());
+                        return new SimpleResult(SimpleCode.SMS_OTHER_ERRORS.getCode(), response.getMessage());
                 }
             }
         } catch (ClientException e) {
-            //发送失败
+            //客户端错误
             log.error(e, e);
-            return SmsSendResult.error(SmsSendResultCode.OTHER_ERRORS);
+            return SimpleResult.error(SimpleCode.SMS_SEND_ERROR);
         }
-
     }
 
     private String accessKey(String appId) {

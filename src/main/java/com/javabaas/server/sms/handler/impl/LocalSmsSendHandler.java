@@ -1,7 +1,7 @@
 package com.javabaas.server.sms.handler.impl;
 
+import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.object.entity.BaasObject;
-import com.javabaas.server.sms.entity.SmsSendResult;
 import com.javabaas.server.sms.handler.ISmsHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
@@ -15,7 +15,7 @@ public class LocalSmsSendHandler implements ISmsHandler {
     private RestTemplate rest;
 
     @Override
-    public SmsSendResult sendSms(String appId, String id, String phone, String signName, String templateId, BaasObject params) {
+    public SimpleResult sendSms(String appId, String id, String phone, String signName, String templateId, BaasObject params) {
         return null;
     }
 

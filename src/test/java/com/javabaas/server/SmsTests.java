@@ -2,11 +2,11 @@ package com.javabaas.server;
 
 import com.javabaas.server.admin.entity.App;
 import com.javabaas.server.admin.service.AppService;
+import com.javabaas.server.common.entity.SimpleCode;
+import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.config.entity.AppConfigEnum;
 import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.object.entity.BaasObject;
-import com.javabaas.server.sms.entity.SmsSendResult;
-import com.javabaas.server.sms.entity.SmsSendResultCode;
 import com.javabaas.server.sms.handler.impl.MockSmsHandler;
 import com.javabaas.server.sms.service.SmsService;
 import org.junit.After;
@@ -71,8 +71,8 @@ public class SmsTests {
      */
     @Test
     public void testSendSmsCode() {
-        SmsSendResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10, null);
-        Assert.assertThat(result.getCode(), equalTo(SmsSendResultCode.SUCCESS.getCode()));
+        SimpleResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10, null);
+        Assert.assertThat(result.getCode(), equalTo(SimpleCode.SUCCESS.getCode()));
         String code = mockSmsHandler.getSms(PHONE_NUMBER);
         //验证短信验证码正确
         boolean verifyResult = smsService.verifySmsCode(app.getId(), PHONE_NUMBER, code);
@@ -88,8 +88,8 @@ public class SmsTests {
     @Test
     public void testSendSmsCodeTimeout() {
         //验证码超时时间为1秒
-        SmsSendResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 1, null);
-        Assert.assertThat(result.getCode(), equalTo(SmsSendResultCode.SUCCESS.getCode()));
+        SimpleResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 1, null);
+        Assert.assertThat(result.getCode(), equalTo(SimpleCode.SUCCESS.getCode()));
         String code = mockSmsHandler.getSms(PHONE_NUMBER);
         //1100毫秒后验证码失效
         try {
@@ -106,8 +106,8 @@ public class SmsTests {
     @Test
     public void testSendSmsCodeTryTimesSuccess() {
         //短信验证码错误验证 第5次有效
-        SmsSendResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10, null);
-        Assert.assertThat(result.getCode(), equalTo(SmsSendResultCode.SUCCESS.getCode()));
+        SimpleResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10, null);
+        Assert.assertThat(result.getCode(), equalTo(SimpleCode.SUCCESS.getCode()));
         String code = mockSmsHandler.getSms(PHONE_NUMBER);
         for (int i = 0; i < 5; i++) {
             boolean verifyResult = smsService.verifySmsCode(app.getId(), PHONE_NUMBER, "xxxx");
@@ -120,8 +120,8 @@ public class SmsTests {
     @Test
     public void testSmsCodeTryTimesFail() {
         //短信验证码错误验证 5次后失效
-        SmsSendResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10, null);
-        Assert.assertThat(result.getCode(), equalTo(SmsSendResultCode.SUCCESS.getCode()));
+        SimpleResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10, null);
+        Assert.assertThat(result.getCode(), equalTo(SimpleCode.SUCCESS.getCode()));
         String code = mockSmsHandler.getSms(PHONE_NUMBER);
         for (int i = 0; i < 6; i++) {
             boolean verifyResult = smsService.verifySmsCode(app.getId(), PHONE_NUMBER, "xxxx");

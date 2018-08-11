@@ -3,7 +3,6 @@ package com.javabaas.server.sms.controller;
 import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.object.entity.BaasObject;
-import com.javabaas.server.sms.entity.SmsSendResult;
 import com.javabaas.server.sms.service.SmsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -35,8 +34,7 @@ public class SmsController {
                              @RequestParam String templateId,
                              @RequestBody(required = false) String params) {
         BaasObject paramsObject = StringUtils.isEmpty(params) ? null : jsonUtil.readValue(params, BaasObject.class);
-        SmsSendResult sendResult = smsService.sendSms(appId, plat, phone, templateId, paramsObject);
-        return SimpleResult.success().putData("sendResult", sendResult);
+        return smsService.sendSms(appId, plat, phone, templateId, paramsObject);
     }
 
     /**
@@ -53,8 +51,7 @@ public class SmsController {
                                 @RequestParam long ttl,
                                 @RequestBody(required = false) String params) {
         BaasObject paramsObject = StringUtils.isEmpty(params) ? null : jsonUtil.readValue(params, BaasObject.class);
-        SmsSendResult sendResult = smsService.sendSmsCode(appId, plat, phone, ttl, paramsObject);
-        return SimpleResult.success().putData("sendResult", sendResult);
+        return smsService.sendSmsCode(appId, plat, phone, ttl, paramsObject);
     }
 
     /**
@@ -65,10 +62,10 @@ public class SmsController {
      */
     @RequestMapping(value = "/verifyCode", method = RequestMethod.GET)
     @ResponseBody
-    public SimpleResult smsCode(@RequestHeader(value = "JB-AppId") String appId,
-                                @RequestHeader(value = "JB-Plat") String plat,
-                                @RequestParam String phone,
-                                @RequestParam String code) {
+    public SimpleResult verifyCode(@RequestHeader(value = "JB-AppId") String appId,
+                                   @RequestHeader(value = "JB-Plat") String plat,
+                                   @RequestParam String phone,
+                                   @RequestParam String code) {
         boolean result = smsService.verifySmsCode(appId, phone, code);
         return SimpleResult.success().putData("verifyResult", result);
     }

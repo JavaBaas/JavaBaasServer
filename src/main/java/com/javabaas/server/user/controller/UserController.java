@@ -235,8 +235,7 @@ public class UserController {
     public SimpleResult getSmsCode(@RequestHeader(value = "JB-AppId") String appId,
                                    @RequestHeader(value = "JB-Plat") String plat,
                                    @PathVariable String phone) {
-        userService.getSmsCode(appId, plat, phone);
-        return SimpleResult.success();
+        return userService.getSmsCode(appId, plat, phone);
     }
 
     /**

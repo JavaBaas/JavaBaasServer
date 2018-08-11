@@ -2,6 +2,7 @@ package com.javabaas.server.user.service;
 
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
+import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.common.util.JSONUtil;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.entity.BaasQuery;
@@ -450,9 +451,9 @@ public class UserService {
      *
      * @param phone 手机号
      */
-    public void getSmsCode(String appId, String plat, String phone) {
+    public SimpleResult getSmsCode(String appId, String plat, String phone) {
         //发送短信验证码
-        smsService.sendSmsCode(appId, plat, phone, 600, null);//短信验证码默认十分钟内有效
+        return smsService.sendSmsCode(appId, plat, phone, 600, null);//短信验证码默认十分钟内有效
     }
 
     private BaasUser trimUser(BaasObject object) {

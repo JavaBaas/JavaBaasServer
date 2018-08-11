@@ -109,13 +109,19 @@ public enum SimpleCode {
     //7xxx 短信相关
     SMS_RATE_LIMIT(7001, "短信发送频率超过限制"),
     SMS_SEND_INTERVAL_LIMIT(7002, "禁止连续发送"),
-    SMS_HANDLER_NOT_DEFINE(7002, "短信处理器为定义"),
-    SMS_HANDLER_NOT_FOUND(7003, "短信处理器未找到"),
-    SMS_NO_KEY(7004, "短信发送未设置key"),
-    SMS_NO_SECRET(7005, "短信发送未设置Secret"),
-    SMS_NO_SIGN_NAME(7006, "短信发送必须配置签名"),
-    SMS_SEND_ERROR(7007, "短信发送失败"),
-    SMS_CODE_TEMPLATE(7008, "短信验证码对应模版未设置");
+    SMS_HANDLER_NOT_DEFINE(7003, "短信处理器未定义"),
+    SMS_HANDLER_NOT_FOUND(7004, "短信处理器未找到"),
+    SMS_NO_KEY(7005, "短信发送未设置key"),
+    SMS_NO_SECRET(7006, "短信发送未设置Secret"),
+    SMS_NO_SIGN_NAME(7007, "短信发送必须配置签名"),
+    SMS_SEND_ERROR(7008, "短信发送失败"),
+    SMS_CODE_TEMPLATE(7009, "短信验证码对应模版未设置"),
+    SMS_ILLEGAL_PHONE_NUMBER(7011, "手机号不合法"),
+    SMS_AMOUNT_NOT_ENOUGH(7012, "余额不足"),
+    SMS_INVALID_PARAM(7013, "短信传入参数不合法"),
+    SMS_TEMPLATE_MISSING_PARAMETERS(7014, "模版缺少变量"),
+    SMS_LIMIT_CONTROL(7015, "超出短信供应商发送频率限制"),
+    SMS_OTHER_ERRORS(7099, "其他错误 请查看日志");
 
     private int code;
     private String message;
