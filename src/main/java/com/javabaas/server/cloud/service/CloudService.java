@@ -16,7 +16,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -42,9 +41,6 @@ public class CloudService {
         if (plat != null) {
             cloudRequest.setPlat(plat);
         }
-        //准备请求参数
-        Map<String, Object> uriParams = new HashMap<>();
-        uriParams.put("requestType", "1");
         //准备云方法请求体
         cloudRequest.setName(functionName);
         cloudRequest.setAppId(appId);
@@ -64,7 +60,7 @@ public class CloudService {
                 long timestamp = new Date().getTime();
                 String timestampStr = String.valueOf(timestamp);
                 cloudRequest.setTimestamp(timestampStr);
-                //发送请求
+                //发送请求x
                 CloudResponse response;
                 try {
                     response = rest.postForObject(app.getCloudSetting().getCustomerHost() + "?requestType={requestType}",
