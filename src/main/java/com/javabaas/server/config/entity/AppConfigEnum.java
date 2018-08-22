@@ -12,14 +12,16 @@ public enum AppConfigEnum {
     SMS_HANDLER_ALIYUN_KEY("baas.sms.handler.aliyun.key", "阿里云key", ""),
     SMS_HANDLER_ALIYUN_SECRET("baas.sms.handler.aliyun.secret", "阿里云secret", ""),
     SMS_CODE_TEMPLATE_ID("baas.sms.codeTemplateId", "短信验证码模版id", ""),
+    SMS_REGISTER_TEMPLATE_ID("baas.sms.registerTemplateId", "登录注册验证码模版id", ""),
+    SMS_BIND_TEMPLATE_ID("baas.sms.bindTemplateId", "绑定手机号验证码模版id", ""),
     SMS_SIGN_NAME("baas.sms.signName", "短信签名", ""),
     SMS_SEND_INTERVAL("baas.sms.interval", "短信发送间隔", "60"),
     // 推送相关
-    PUSH_HANDLER("baas.push.handler","推送处理","jpush"),
+    PUSH_HANDLER("baas.push.handler", "推送处理", "jpush"),
     PUSH_HANDLER_JPUSH_KEY("baas.push.handler.jpush.key", "极光推送key", ""),
     PUSH_HANDLER_JPUSH_SECRET("baas.push.handler.jpush.secret", "极光推送secret", ""),
     // 文件存储相关
-    FILE_HANDLER("baas.file.handler","推送处理","qiniu"),
+    FILE_HANDLER("baas.file.handler", "推送处理", "qiniu"),
     FILE_HANDLER_QINIU_AK("baas.file.handler.qiniu.ak", "七牛ak", ""),
     FILE_HANDLER_QINIU_SK("baas.file.handler.qiniu.sk", "七牛sk", ""),
     FILE_HANDLER_QINIU_BUCKET("baas.file.handler.qiniu.bucket", "七牛bucket", ""),

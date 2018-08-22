@@ -121,6 +121,7 @@ public enum SimpleCode {
     SMS_INVALID_PARAM(7013, "短信传入参数不合法"),
     SMS_TEMPLATE_MISSING_PARAMETERS(7014, "模版缺少变量"),
     SMS_LIMIT_CONTROL(7015, "超出短信供应商发送频率限制"),
+    SMS_CODE_WRONG(7016, "短信验证码错误"),
     SMS_OTHER_ERRORS(7099, "其他错误 请查看日志");
 
     private int code;

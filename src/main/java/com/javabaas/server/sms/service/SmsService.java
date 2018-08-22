@@ -82,17 +82,15 @@ public class SmsService {
      * @param ttl    失效时间(秒)
      * @param params
      */
-    public SimpleResult sendSmsCode(String appId, String plat, String phone, long ttl, BaasObject params) {
-        //获取短信验证码对应模版
-        String templateId = appConfigService.getString(appId, AppConfigEnum.SMS_CODE_TEMPLATE_ID);
+    public SimpleResult sendSmsCode(String appId, String plat, String templateId, String phone, long ttl, BaasObject params) {
         if (StringUtils.isEmpty(templateId)) {
-            throw new SimpleError(SimpleCode.SMS_CODE_TEMPLATE);
+            templateId = getSmsCodeTemplateId(appId);
         }
         //生成六位随机数字验证码
         String code = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
         //记录验证码
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
-        ops.set(getKey(appId, phone), code, ttl, TimeUnit.SECONDS);
+        ops.set(getKey(appId, templateId, phone), code, ttl, TimeUnit.SECONDS);
         //发送短信
         if (params == null) {
             params = new BaasObject();
@@ -102,15 +100,19 @@ public class SmsService {
         return sendSms(appId, plat, phone, templateId, params);
     }
 
+    public SimpleResult sendSmsCode(String appId, String plat, String phone, long ttl, BaasObject params) {
+        return sendSmsCode(appId, plat, getSmsCodeTemplateId(appId), phone, ttl, params);
+    }
+
     /**
      * 验证手机验证码
      *
      * @param phone 电话号码
      * @param code  验证码
      */
-    public boolean verifySmsCode(String appId, String phone, String code) {
+    public boolean verifySmsCode(String appId, String templateId, String phone, String code) {
         //获取已缓存的手机验证码
-        String key = getKey(appId, phone);
+        String key = getKey(appId, templateId, phone);
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
         String rightCode = ops.get(key);
         if (StringUtils.isEmpty(rightCode)) {
@@ -134,6 +136,18 @@ public class SmsService {
         }
     }
 
+    public boolean verifySmsCode(String appId, String phone, String code) {
+        return verifySmsCode(appId, getSmsCodeTemplateId(appId), phone, code);
+    }
+
+    private String getSmsCodeTemplateId(String appId) {
+        String templateId = appConfigService.getString(appId, AppConfigEnum.SMS_CODE_TEMPLATE_ID);
+        if (StringUtils.isEmpty(templateId)) {
+            throw new SimpleError(SimpleCode.SMS_CODE_TEMPLATE);
+        }
+        return templateId;
+    }
+
     /**
      * 选择短信处理器
      */
@@ -151,8 +165,8 @@ public class SmsService {
         return handler;
     }
 
-    private String getKey(String appId, String phone) {
-        return "App_" + appId + SMS_CODE_NAME + "_" + phone;
+    private String getKey(String appId, String templateId, String phone) {
+        return "App_" + appId + SMS_CODE_NAME + "_" + templateId + "_" + phone;
     }
 
 }

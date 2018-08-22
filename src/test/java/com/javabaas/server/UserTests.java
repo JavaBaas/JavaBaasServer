@@ -251,7 +251,7 @@ public class UserTests {
     @Test
     public void testRegisterByPhone() throws Exception {
         //获取短信验证码
-        mockClient.user(app, HttpMethod.GET, "/api/user/getSmsCode/13800138000", null)
+        mockClient.user(app, HttpMethod.GET, "/api/user/getRegisterSmsCode/13800138000", null)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code", is(SimpleCode.SUCCESS.getCode())));
         String code = smsHandler.getSms("13800138000");
@@ -272,7 +272,7 @@ public class UserTests {
     @Test
     public void testLoginByPhone() throws Exception {
         //获取短信验证码
-        mockClient.user(app, HttpMethod.GET, "/api/user/getSmsCode/13813813838", null)
+        mockClient.user(app, HttpMethod.GET, "/api/user/getRegisterSmsCode/13813813838", null)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.password").doesNotExist())
                 .andExpect(jsonPath("$.code", is(SimpleCode.SUCCESS.getCode())));

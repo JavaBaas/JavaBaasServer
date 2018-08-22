@@ -14,7 +14,7 @@ import java.util.Map;
  * 用于测试的短信发送器
  * Created by Codi on 2017/6/28.
  */
-@Component
+@Component("mock")
 public class MockSmsHandler implements ISmsHandler {
 
     private Log log = LogFactory.getLog(getClass());
@@ -32,7 +32,7 @@ public class MockSmsHandler implements ISmsHandler {
             params.forEach((k, v) -> sms.append(v));
         }
         map.put(phone, sms.toString());
-        log.info("Mock短信 phone:" + phone + " sms:" + sms);
+        log.info("Mock短信 template:" + templateId + " phone:" + phone + " sms:" + sms);
         return SimpleResult.success();
     }
 

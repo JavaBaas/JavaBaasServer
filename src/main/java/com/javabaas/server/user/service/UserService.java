@@ -4,6 +4,8 @@ import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.common.util.JSONUtil;
+import com.javabaas.server.config.entity.AppConfigEnum;
+import com.javabaas.server.config.service.AppConfigService;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.object.entity.BaasQuery;
 import com.javabaas.server.object.service.ObjectService;
@@ -37,6 +39,8 @@ public class UserService {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private ObjectService objectService;
+    @Autowired
+    private AppConfigService appConfigService;
     @Autowired
     private SmsService smsService;
     @Autowired
@@ -423,6 +427,12 @@ public class UserService {
      * @return 用户
      */
     public BaasUser loginWithPhone(String appId, String plat, BaasPhoneRegister register) {
+        //验证短信验证码
+        boolean verifyResult = smsService.verifySmsCode(appId, getRegisterTemplateId(appId), register.getPhone(), register.getCode());
+        if (!verifyResult) {
+            //验证码错误
+            SimpleError.e(SimpleCode.SMS_CODE_WRONG);
+        }
         //判断用户是否存在
         BaasQuery query = new BaasQuery();
         query.put("phone", register.getPhone());
@@ -451,9 +461,18 @@ public class UserService {
      *
      * @param phone 手机号
      */
-    public SimpleResult getSmsCode(String appId, String plat, String phone) {
+    public SimpleResult getRegisterSmsCode(String appId, String plat, String phone) {
         //发送短信验证码
-        return smsService.sendSmsCode(appId, plat, phone, 600, null);//短信验证码默认十分钟内有效
+        return smsService.sendSmsCode(appId, plat, getRegisterTemplateId(appId), phone, 600, null);//短信验证码默认十分钟内有效
+    }
+
+    private String getRegisterTemplateId(String appId) {
+        //获取登录注册短信验证码对应模版
+        String templateId = appConfigService.getString(appId, AppConfigEnum.SMS_REGISTER_TEMPLATE_ID);
+        if (StringUtils.isEmpty(templateId)) {
+            throw new SimpleError(SimpleCode.SMS_CODE_TEMPLATE);
+        }
+        return templateId;
     }
 
     private BaasUser trimUser(BaasObject object) {
