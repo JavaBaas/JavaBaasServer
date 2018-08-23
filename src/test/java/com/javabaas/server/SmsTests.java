@@ -47,7 +47,7 @@ public class SmsTests {
         app.setName("SmsTestApp");
         appService.insert(app);
         //配置短信发送器
-        appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_HANDLER, "mockSmsHandler");
+        appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_HANDLER, "mock");
         appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_SIGN_NAME, "JavaBaas");
         appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_CODE_TEMPLATE_ID, "JavaBaas");
     }
