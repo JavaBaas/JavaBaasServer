@@ -73,20 +73,25 @@ public class UserTests {
 
         Field nickName = new Field(FieldType.STRING, "nickName");
         fieldService.insert(app.getId(), "_User", nickName);
-
+        //注册用户1
         BaasUser user = new BaasUser();
         user.setUsername("u1");
         user.put("nickName", "u1");
         user.setPassword("bbbbbb");
         user.setPhone("13813813838");
         userService.register(app.getId(), "cloud", user);
-
+        //注册用户2
         user = new BaasUser();
         user.setUsername("u2");
         user.put("nickName", "u2");
         user.setPassword("bbbbbb");
         userService.register(app.getId(), "cloud", user);
-
+        //注册无手机号用户
+        user = new BaasUser();
+        user.setUsername("user_no_phone");
+        user.put("nickName", "user_no_phone");
+        user.setPassword("bbbbbb");
+        userService.register(app.getId(), "cloud", user);
         //配置短信发送器为测试发送器
         appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_HANDLER, "mock");
         appConfigService.setConfig(app.getId(), AppConfigEnum.SMS_SIGN_NAME, "JavaBaas");
@@ -135,13 +140,12 @@ public class UserTests {
         //测试普通权限无法读取保密字段
         List<BaasObject> users = objectService.find(app.getId(), "admin", UserService.USER_CLASS_NAME, null, null, null, null, 100, 0, null,
                 false);
-        Assert.assertThat(users.size(), equalTo(2));
+        Assert.assertThat(users.size(), equalTo(3));
 
         BaasUser user1 = new BaasUser(users.get(0));
         Assert.assertThat(user1.getSessionToken(), nullValue());
         Assert.assertThat(user1.getAuth(), nullValue());
         Assert.assertThat(user1.getPassword(), nullValue());
-        Assert.assertThat(user1.getUsername(), equalTo("u2"));
     }
 
     @Test
@@ -258,8 +262,16 @@ public class UserTests {
                 .andExpect(jsonPath("$.code", is(SimpleCode.SUCCESS.getCode())));
         String code = smsHandler.getSms("13800138000");
 
-        //使用验证码注册
+        //使用错误的验证码注册
         BaasPhoneRegister register = new BaasPhoneRegister();
+        register.setPhone("13800138000");
+        register.setCode("1");
+        mockClient.user(app, HttpMethod.POST, "/api/user/loginWithPhone", jsonUtil.writeValueAsString(register))
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("$.code", is(SimpleCode.SMS_CODE_WRONG.getCode())));
+
+        //使用验证码注册
+        register = new BaasPhoneRegister();
         register.setPhone("13800138000");
         register.setCode(code);
         mockClient.user(app, HttpMethod.POST, "/api/user/loginWithPhone", jsonUtil.writeValueAsString(register))
@@ -297,12 +309,8 @@ public class UserTests {
      */
     @Test
     public void testBindPhone() {
-        //注册无手机号用户
-        BaasUser user = new BaasUser();
-        user.setUsername("user_no_phone");
-        user.put("nickName", "user_no_phone");
-        user.setPassword("bbbbbb");
-        user = userService.register(app.getId(), "cloud", user);
+        //获取无手机号用户
+        BaasUser user = userService.get(app.getId(), "cloud", "user_no_phone", null, true);
         //获取验证码
         userService.getBindSmsCode(app.getId(), "cloud", "13800138001");
         String code = smsHandler.getSms("13800138001");
@@ -321,13 +329,41 @@ public class UserTests {
      */
     @Test
     public void testPhoneNumberAlreadyBind() {
-        //注册手机号为13800138002的用户
-        BaasUser user = new BaasUser();
-        user.setUsername("user02");
-        user.setPassword("bbbbbb");
-        user.setPhone("13800138002");
-        user = userService.register(app.getId(), "cloud", user);
+        //获取无手机号用户
+        BaasUser user = userService.get(app.getId(), "cloud", "user_no_phone", null, true);
+        //获取验证码
+        userService.getBindSmsCode(app.getId(), "cloud", "13813813838");
+        String code = smsHandler.getSms("13813813838");
+        //使用验证码绑定
+        BaasPhoneRegister register = new BaasPhoneRegister();
+        register.setPhone("13813813838");
+        register.setCode(code);
+        try {
+            userService.bindPhone(app.getId(), "cloud", user, register);
+            Assert.fail();
+        } catch (SimpleError error) {
+            Assert.assertThat(error.getCode(), equalTo(SimpleCode.USER_PHONE_BIND_ALREADY_EXIST.getCode()));
+        }
+    }
 
+    /**
+     * 测试手机号已绑定 禁止重复绑定
+     */
+    @Test
+    public void testPhoneExistBind() {
+        BaasUser user = userService.get(app.getId(), "cloud", "u1", null, true);
+        userService.getBindSmsCode(app.getId(), "cloud", "13800138000");
+        String code = smsHandler.getSms("13800138000");
+        //使用验证码绑定
+        BaasPhoneRegister register = new BaasPhoneRegister();
+        register.setPhone("13800138000");
+        register.setCode(code);
+        try {
+            userService.bindPhone(app.getId(), "cloud", user, register);
+            Assert.fail();
+        } catch (SimpleError error) {
+            Assert.assertThat(error.getCode(), equalTo(SimpleCode.USER_PHONE_BIND_ALREADY_BIND.getCode()));
+        }
     }
 
 }
