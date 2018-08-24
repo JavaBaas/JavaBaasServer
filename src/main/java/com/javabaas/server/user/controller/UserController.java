@@ -239,6 +239,34 @@ public class UserController {
     }
 
     /**
+     * 绑定手机号
+     *
+     * @return 请求结果
+     */
+    @RequestMapping(value = "/bindPhone", method = RequestMethod.POST)
+    @ResponseBody
+    public SimpleResult bindPhone(@RequestHeader(value = "JB-AppId") String appId,
+                                  @RequestHeader(value = "JB-Plat") String plat,
+                                  @Valid @RequestBody BaasPhoneRegister register) {
+        BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
+        return userService.bindPhone(appId, plat, currentUser, register);
+    }
+
+    /**
+     * 获取绑定用短信验证码
+     *
+     * @param phone 手机号码
+     * @return 请求结果
+     */
+    @RequestMapping(value = "/getBindCode/{phone}", method = RequestMethod.GET)
+    @ResponseBody
+    public SimpleResult getBindCode(@RequestHeader(value = "JB-AppId") String appId,
+                                    @RequestHeader(value = "JB-Plat") String plat,
+                                    @PathVariable String phone) {
+        return userService.getBindSmsCode(appId, plat, phone);
+    }
+
+    /**
      * 重置sessionToken
      *
      * @param appId 应用id

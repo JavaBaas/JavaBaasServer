@@ -1,7 +1,8 @@
 package com.javabaas.server.user.entity;
 
 import com.javabaas.server.object.entity.BaasObject;
-import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * 手机号注册对象

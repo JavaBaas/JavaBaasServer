@@ -1,6 +1,7 @@
 package com.javabaas.server.config.entity;
 
-import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * 应用配置

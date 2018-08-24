@@ -454,6 +454,39 @@ public class UserService {
         }
     }
 
+    public SimpleResult bindPhone(String appId, String plat, BaasUser currentUser, BaasPhoneRegister register) {
+        //验证短信验证码
+        boolean verifyResult = smsService.verifySmsCode(appId, getBindTemplateId(appId), register.getPhone(), register.getCode());
+        if (!verifyResult) {
+            //验证码错误
+            SimpleError.e(SimpleCode.SMS_CODE_WRONG);
+        }
+        //判断当前用户不为空
+
+        //判断当前用户未绑定手机号
+        if (!StringUtils.isEmpty(currentUser.getPhone())) {
+            SimpleError.e(SimpleCode.USER_PHONE_BIND_ALREADY_BIND);
+        }
+        //判断当前手机号未被其他用户绑定
+        BaasQuery query = new BaasQuery();
+        query.put("phone", register.getPhone());
+        List<BaasObject> users = objectService.find(appId, plat, USER_CLASS_NAME, query, null, null, null, 1, 0, null, true);
+        if (users.size() > 0) {
+            //已被其他用户绑定
+            SimpleError.e(SimpleCode.USER_PHONE_BIND_ALREADY_EXIST);
+        }
+        //绑定手机号
+        BaasObject object = objectService.get(appId, plat, USER_CLASS_NAME, currentUser.getId());
+        BaasUser user = new BaasUser(object);
+        String sessionToken = user.getSessionToken();
+        //更新用户信息
+        user.setPhone(register.getPhone());
+        objectService.update(appId, plat, UserService.USER_CLASS_NAME, currentUser.getId(), user, null, true);
+        //清除缓存的用户信息
+        deleteUserCache(appId, sessionToken);
+        return SimpleResult.success();
+    }
+
     /**
      * 获取短信验证码
      * 验证码会与手机号对应
@@ -466,9 +499,23 @@ public class UserService {
         return smsService.sendSmsCode(appId, plat, getRegisterTemplateId(appId), phone, 600, null);//短信验证码默认十分钟内有效
     }
 
+    public SimpleResult getBindSmsCode(String appId, String plat, String phone) {
+        //发送绑定手机号短信验证码
+        return smsService.sendSmsCode(appId, plat, getBindTemplateId(appId), phone, 600, null);//短信验证码默认十分钟内有效
+    }
+
     private String getRegisterTemplateId(String appId) {
         //获取登录注册短信验证码对应模版
         String templateId = appConfigService.getString(appId, AppConfigEnum.SMS_REGISTER_TEMPLATE_ID);
+        if (StringUtils.isEmpty(templateId)) {
+            throw new SimpleError(SimpleCode.SMS_CODE_TEMPLATE);
+        }
+        return templateId;
+    }
+
+    private String getBindTemplateId(String appId) {
+        //获取绑定手机号验证码对应模版
+        String templateId = appConfigService.getString(appId, AppConfigEnum.SMS_BIND_TEMPLATE_ID);
         if (StringUtils.isEmpty(templateId)) {
             throw new SimpleError(SimpleCode.SMS_CODE_TEMPLATE);
         }

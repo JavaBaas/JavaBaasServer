@@ -254,7 +254,7 @@ public class UserTests {
     public void testRegisterByPhone() throws Exception {
         //获取短信验证码
         mockClient.user(app, HttpMethod.GET, "/api/user/getSmsCode/13800138000", null)
-//                .andExpect(status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code", is(SimpleCode.SUCCESS.getCode())));
         String code = smsHandler.getSms("13800138000");
 
@@ -290,6 +290,44 @@ public class UserTests {
                 .andExpect(jsonPath("$.data.result.password").doesNotExist())
                 .andExpect(jsonPath("$.data.result.sessionToken", not(empty())))
                 .andExpect(jsonPath("$.data.result.username", not(empty())));
+    }
+
+    /**
+     * 测试绑定手机号流程
+     */
+    @Test
+    public void testBindPhone() {
+        //注册无手机号用户
+        BaasUser user = new BaasUser();
+        user.setUsername("user_no_phone");
+        user.put("nickName", "user_no_phone");
+        user.setPassword("bbbbbb");
+        user = userService.register(app.getId(), "cloud", user);
+        //获取验证码
+        userService.getBindSmsCode(app.getId(), "cloud", "13800138001");
+        String code = smsHandler.getSms("13800138001");
+        //使用验证码绑定
+        BaasPhoneRegister register = new BaasPhoneRegister();
+        register.setPhone("13800138001");
+        register.setCode(code);
+        userService.bindPhone(app.getId(), "cloud", user, register);
+        //验证手机号绑定成功
+        user = userService.get(app.getId(), "cloud", "user_no_phone", null, true);
+        Assert.assertThat(user.getPhone(), equalTo("13800138001"));
+    }
+
+    /**
+     * 测试手机号已经被别的用户绑定
+     */
+    @Test
+    public void testPhoneNumberAlreadyBind() {
+        //注册手机号为13800138002的用户
+        BaasUser user = new BaasUser();
+        user.setUsername("user02");
+        user.setPassword("bbbbbb");
+        user.setPhone("13800138002");
+        user = userService.register(app.getId(), "cloud", user);
+
     }
 
 }

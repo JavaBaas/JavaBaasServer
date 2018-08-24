@@ -58,6 +58,8 @@ public enum SimpleCode {
     USER_SESSION_TOKEN_ERROR(1310, "SessionToken已失效"),
     USER_INVALID_USERNAME(1311, "用户名非法 用户名只能包含数字字母 _ @ ."),
     USER_AUTH_PLATFORM_MISSING(1312, "第三方登录平台错误"),
+    USER_PHONE_BIND_ALREADY_EXIST(1321, "手机号已经被绑定"),
+    USER_PHONE_BIND_ALREADY_BIND(1322, "已绑定手机号 需解除后重新绑定"),
     //14XX 角色相关
     ROLE_NOT_EXIST(1401, "角色不存在"),
     ROLE_EMPTY_NAME(1402, "角色名不能为空"),
