@@ -76,7 +76,7 @@ public class AppConfigService {
         checkConfigKey(key);
         //获取缓存的配置
         String config = configMap.get(getName(appId, key));
-        if (config == null) {
+        if (StringUtils.isEmpty(config)) {
             //缓存中无配置 从数据库获取
             config = getConfigFromDB(appId, key);
             if (config == null) {
@@ -85,7 +85,7 @@ public class AppConfigService {
             }
         }
         //设置缓存
-        if (config != null) {
+        if (!StringUtils.isEmpty(config)) {
             setCache(appId, key, config);
         }
         return config;
