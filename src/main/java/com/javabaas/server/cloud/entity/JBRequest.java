@@ -6,8 +6,8 @@ import com.javabaas.server.user.entity.BaasUser;
  * Created by Codi on 2018/7/30.
  */
 public class JBRequest {
-    public static String REQUEST_CLOUD = "1";
-    public static String REQUEST_HOOK = "2";
+    public static final String REQUEST_CLOUD = "1";
+    public static final String REQUEST_HOOK = "2";
 
     private String name;
     private String appId;

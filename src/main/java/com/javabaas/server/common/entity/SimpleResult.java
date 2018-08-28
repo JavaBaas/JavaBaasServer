@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class SimpleResult extends HashMap<String, Object> {
 
-    public static int SUCCESS = 0;
+    public static final int SUCCESS = 0;
 
     public static SimpleResult success() {
         return new SimpleResult(SimpleCode.SUCCESS);
