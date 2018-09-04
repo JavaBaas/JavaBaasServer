@@ -123,6 +123,8 @@ public class SmsService {
             if (code.equals(rightCode)) {
                 //验证成功 删除缓存中的验证码
                 redisTemplate.delete(key);
+                //删除尝试次数
+                redisTemplate.delete(key + "_times");
                 return true;
             } else {
                 //尝试次数限制
