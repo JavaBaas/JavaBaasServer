@@ -97,6 +97,9 @@ public class SmsService {
         }
         //短信验证码参数固定为code
         params.put("code", code);
+        //删除尝试次数
+        String key = getKey(appId, templateId, phone);
+        redisTemplate.delete(key + "_times");
         return sendSms(appId, plat, phone, templateId, params);
     }
 
@@ -123,8 +126,6 @@ public class SmsService {
             if (code.equals(rightCode)) {
                 //验证成功 删除缓存中的验证码
                 redisTemplate.delete(key);
-                //删除尝试次数
-                redisTemplate.delete(key + "_times");
                 return true;
             } else {
                 //尝试次数限制
@@ -132,6 +133,7 @@ public class SmsService {
                 if (times > appConfigService.getLong(appId, AppConfigEnum.SMS_TRY_LIMIT)) {
                     //超过尝试次数限制 删除缓存中的验证码
                     redisTemplate.delete(key);
+                    SimpleError.e(SimpleCode.SMS_WRONG_TRY_LIMIT);
                 }
                 return false;
             }

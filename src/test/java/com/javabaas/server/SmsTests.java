@@ -3,6 +3,7 @@ package com.javabaas.server;
 import com.javabaas.server.admin.entity.App;
 import com.javabaas.server.admin.service.AppService;
 import com.javabaas.server.common.entity.SimpleCode;
+import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.entity.SimpleResult;
 import com.javabaas.server.config.entity.AppConfigEnum;
 import com.javabaas.server.config.service.AppConfigService;
@@ -123,12 +124,16 @@ public class SmsTests {
         SimpleResult result = smsService.sendSmsCode(app.getId(), "admin", PHONE_NUMBER, 10, null);
         Assert.assertThat(result.getCode(), equalTo(SimpleCode.SUCCESS.getCode()));
         String code = mockSmsHandler.getSms(PHONE_NUMBER);
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 5; i++) {
             boolean verifyResult = smsService.verifySmsCode(app.getId(), PHONE_NUMBER, "xxxx");
             Assert.assertThat(verifyResult, equalTo(false));
         }
-        boolean verifyResult = smsService.verifySmsCode(app.getId(), PHONE_NUMBER, code);
-        Assert.assertThat(verifyResult, equalTo(false));
+        try {
+            smsService.verifySmsCode(app.getId(), PHONE_NUMBER, code);
+        } catch (SimpleError error) {
+            Assert.assertThat(error.getCode(), equalTo(SimpleCode.SMS_WRONG_TRY_LIMIT));
+        }
+
     }
 
 }
