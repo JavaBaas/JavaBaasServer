@@ -13,6 +13,7 @@ public class Clazz {
     @DBRef
     private App app;
     private String name;
+    private String description;
     private ClazzAcl acl;
     private boolean internal;
     transient private long count;
@@ -46,6 +47,14 @@ public class Clazz {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public ClazzAcl getAcl() {
