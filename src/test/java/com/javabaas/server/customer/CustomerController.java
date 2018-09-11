@@ -154,6 +154,7 @@ public class CustomerController {
         if (request.getObject().get("title").equals("ThreeBody") || request.getObject().get("price").equals(1)) {
             //钩子中断
             response.setCode(HookResponseCode.ERROR);
+            response.setMessage("测试钩子中断");
         } else {
             response.setCode(HookResponseCode.SUCCESS);
         }

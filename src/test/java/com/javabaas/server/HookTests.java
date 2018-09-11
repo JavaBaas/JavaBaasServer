@@ -203,6 +203,7 @@ public class HookTests {
             Assert.fail();
         } catch (SimpleError error) {
             Assert.assertThat(error.getCode(), equalTo(SimpleCode.HOOK_INTERCEPTION.getCode()));
+            Assert.assertThat(error.getMessage(), equalTo("测试钩子中断"));
         }
     }
 

@@ -83,7 +83,7 @@ public class HookService {
                 if (response == null) {
                     throw new SimpleError(SimpleCode.HOOK_INTERCEPTION);
                 } else if (response.getCode() != 0) {
-                    throw new SimpleError(response.getCode(), response.getMessage());
+                    throw new SimpleError(SimpleCode.HOOK_INTERCEPTION.getCode(), response.getMessage());
                 } else {
                     //成功
                     if (response.getObject() != null) {
