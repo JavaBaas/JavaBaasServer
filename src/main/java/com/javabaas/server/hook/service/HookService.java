@@ -10,7 +10,6 @@ import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.hook.entity.HookEvent;
 import com.javabaas.server.hook.entity.HookRequest;
 import com.javabaas.server.hook.entity.HookResponse;
-import com.javabaas.server.hook.entity.HookResponseCode;
 import com.javabaas.server.object.entity.BaasObject;
 import com.javabaas.server.user.entity.BaasUser;
 import org.apache.commons.logging.Log;
@@ -81,9 +80,10 @@ public class HookService {
                 HookResponse response = rest.postForObject(app.getCloudSetting().getCustomerHost() + "?requestType={requestType}",
                         request, HookResponse.class, JBRequest.REQUEST_HOOK);
                 //执行成功
-                if (response.getCode() == HookResponseCode.ERROR) {
-                    //钩子中断
+                if (response == null) {
                     throw new SimpleError(SimpleCode.HOOK_INTERCEPTION);
+                } else if (response.getCode() != 0) {
+                    throw new SimpleError(response.getCode(), response.getMessage());
                 } else {
                     //成功
                     if (response.getObject() != null) {
