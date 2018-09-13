@@ -71,7 +71,7 @@
         <dependency>
             <groupId>com.qiniu</groupId>
             <artifactId>qiniu-java-sdk</artifactId>
-            <version>7.2.7</version>
+            <version>7.2.11</version>
         </dependency>
         <!--极光推送-->
         <dependency>
