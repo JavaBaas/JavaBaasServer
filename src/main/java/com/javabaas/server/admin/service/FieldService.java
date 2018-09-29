@@ -75,6 +75,7 @@ public class FieldService {
         Field exist = get(appId, clazzName, fieldName);
         exist.setSecurity(field.isSecurity());
         exist.setRequired(field.isRequired());
+        exist.setDescription(field.getDescription());
         fieldRepository.save(exist);
         deleteFieldsCache(appId, clazzName);
         log.info("App:" + appId + " Class:" + clazzName + " Field:" + fieldName + " 字段已更新 " + jsonUtil.writeValueAsString(exist));
