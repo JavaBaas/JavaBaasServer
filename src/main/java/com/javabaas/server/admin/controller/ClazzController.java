@@ -34,6 +34,13 @@ public class ClazzController {
         return SimpleResult.success();
     }
 
+    @RequestMapping(value = "/{name}", method = RequestMethod.PUT)
+    @ResponseBody
+    public SimpleResult update(@RequestHeader(value = "JB-AppId") String appId, @PathVariable String name, @RequestBody Clazz clazz) {
+        clazzService.update(appId, name, clazz);
+        return SimpleResult.success();
+    }
+
     @RequestMapping(value = "/{name}", method = RequestMethod.GET)
     @ResponseBody
     public SimpleResult get(@RequestHeader(value = "JB-AppId") String appId, @PathVariable String name) {

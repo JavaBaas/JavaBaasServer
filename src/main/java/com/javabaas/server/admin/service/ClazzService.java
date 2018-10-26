@@ -109,6 +109,15 @@ public class ClazzService {
         insert(appId, clazz, true);
     }
 
+    public void update(String appId, String name, Clazz clazz) {
+        Clazz now = get(appId, name);
+        now.setDescription(clazz.getDescription());
+        clazzRepository.save(clazz);
+        //删除缓存
+        deleteClazzCache(appId, name);
+        log.info("App:" + appId + " Class:" + name + " 更新成功");
+    }
+
     public void delete(String appId, String name, boolean force) {
         Clazz clazz = get(appId, name);
         if (clazz == null) {
