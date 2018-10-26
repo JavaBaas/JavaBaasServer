@@ -145,7 +145,7 @@ public class UserService {
                 registerUser = new BaasUser();
             }
             //生成默认用户名密码
-            registerUser.setUsername(snsType.getValue() + "_" + UUID.uuid());
+            registerUser.setUsername(getSnsUsername(snsType, auth));
             registerUser.setPassword(UUID.uuid());
             //当前授权信息为空 创建新的授权信息
             BaasObject authNow = new BaasObject();
@@ -157,6 +157,27 @@ public class UserService {
         }
         //返回用户信息
         return user;
+    }
+
+    private String getSnsUsername(BaasSnsType snsType, BaasAuth auth) {
+        String username;
+        switch (snsType) {
+            case WEIBO:
+                username = snsType.getValue() + "_" + auth.getUid();
+                break;
+            case QQ:
+            case WEIXIN:
+            case WEBAPP:
+                if (StringUtils.isEmpty(auth.getUnionId())) {
+                    username = snsType.getValue() + "_" + auth.getOpenId();
+                } else {
+                    username = snsType.getValue() + "_" + auth.getUnionId();
+                }
+                break;
+            default:
+                username = snsType.getValue() + "_" + UUID.uuid();
+        }
+        return username;
     }
 
     public void update(String appId, String plat, String id, BaasUser user, BaasUser currentUser, boolean isMaster) {
