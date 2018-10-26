@@ -163,21 +163,21 @@ public class UserService {
         String username;
         switch (snsType) {
             case WEIBO:
-                username = snsType.getValue() + "_" + auth.getUid();
+                username = auth.getUid();
                 break;
             case QQ:
             case WEIXIN:
             case WEBAPP:
                 if (StringUtils.isEmpty(auth.getUnionId())) {
-                    username = snsType.getValue() + "_" + auth.getOpenId();
+                    username = auth.getOpenId();
                 } else {
-                    username = snsType.getValue() + "_" + auth.getUnionId();
+                    username = auth.getUnionId();
                 }
                 break;
             default:
-                username = snsType.getValue() + "_" + UUID.uuid();
+                username = UUID.uuid();
         }
-        return username;
+        return snsType.getValue() + "_" + DigestUtils.md5DigestAsHex(username.getBytes());
     }
 
     public void update(String appId, String plat, String id, BaasUser user, BaasUser currentUser, boolean isMaster) {
