@@ -156,7 +156,7 @@ public class UserService {
             user = register(appId, plat, registerUser);
         }
         //返回用户信息
-        return user;
+        return trimUser(user);
     }
 
     private String getSnsUsername(BaasSnsType snsType, BaasAuth auth) {
