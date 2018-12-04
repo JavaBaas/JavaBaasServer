@@ -313,11 +313,11 @@ public class ObjectService {
 
         Object sortObject = sub.get("order");
         BaasSort sort = null;
-        if (sortObject != null ) {
+        if (sortObject != null) {
             if (!(sortObject instanceof Map)) {
                 throw new SimpleError(SimpleCode.OBJECT_SUB_QUERY_WRONG_SORT);
             } else {
-                sort = new BaasSort((Map)sortObject);
+                sort = new BaasSort((Map) sortObject);
             }
         }
         //子查询的类
@@ -480,6 +480,10 @@ public class ObjectService {
         handleSubQuery(appId, currentUser, isMaster, query);
         query = aclHandler.handleAcl(appId, query, currentUser, isMaster);
         return dao.count(appId, className, query);
+    }
+
+    public void createIndex(String appId, String className, String fieldName, IndexType indexType) {
+        dao.createIndex(appId, className, fieldName, indexType);
     }
 
     /**

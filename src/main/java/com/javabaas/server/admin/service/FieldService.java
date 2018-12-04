@@ -8,6 +8,7 @@ import com.javabaas.server.admin.repository.FieldRepository;
 import com.javabaas.server.common.entity.SimpleCode;
 import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.common.util.JSONUtil;
+import com.javabaas.server.object.entity.IndexType;
 import com.javabaas.server.object.service.ObjectService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,6 +68,10 @@ public class FieldService {
         }
         field.setId(null);
         fieldRepository.insert(field);
+        if (field.getType() == FieldType.GEOPOINT) {
+            //创建地理位置字段索引
+            objectService.createIndex(appId, clazzName, field.getName(), IndexType.GEO_2D_SPHERE);
+        }
         log.info("App:" + appId + " Class:" + clazzName + " Field:" + name + " 字段创建成功");
         deleteFieldsCache(appId, clazzName);
     }

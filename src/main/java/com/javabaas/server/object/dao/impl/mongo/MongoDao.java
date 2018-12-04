@@ -12,6 +12,7 @@ import com.mongodb.MongoException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.UpdateOptions;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -196,6 +197,16 @@ public class MongoDao implements IDao {
             count = c.count(queryObject);
         }
         return count;
+    }
+
+    @Override
+    public void createIndex(String appId, String className, String fieldName, IndexType indexType) {
+        MongoCollection c = getCollection(appId, className);
+        switch (indexType) {
+            case GEO_2D_SPHERE:
+                c.createIndex(Indexes.geo2dsphere(fieldName));
+                break;
+        }
     }
 
     private Document obj2dbo(BaasObject object) {

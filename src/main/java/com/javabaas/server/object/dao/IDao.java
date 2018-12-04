@@ -1,9 +1,6 @@
 package com.javabaas.server.object.dao;
 
-import com.javabaas.server.object.entity.BaasList;
-import com.javabaas.server.object.entity.BaasObject;
-import com.javabaas.server.object.entity.BaasQuery;
-import com.javabaas.server.object.entity.BaasSort;
+import com.javabaas.server.object.entity.*;
 
 import java.util.List;
 
@@ -32,5 +29,7 @@ public interface IDao {
     void removeField(String appId, String className, String fieldName);
 
     long count(String appId, String className, BaasQuery query);
+
+    void createIndex(String appId, String className, String fieldName, IndexType indexType);
 
 }
