@@ -38,11 +38,11 @@ docker:
     - docker tag ${DOCKER_REGISTER}/${PROJECT_NAME}:$TAG ${DOCKER_REGISTER}/${PROJECT_NAME}:latest
     - docker push ${DOCKER_REGISTER}/${PROJECT_NAME}:latest
 
-deploy:
-  stage: deploy
-  image: maven:alpine
-  script:
-    - curl -u ${CATTLE_ACCESS_KEY}:${CATTLE_SECRET_KEY} -X POST -H 'Accept:application/json' -H 'Content-Type:application/json' -d '{"inServiceStrategy":{"launchConfig":{"environment":{"spring_data_mongodb_host":"mongo","spring_redis_host":"redis"},"imageUuid":"docker:kerust.net:8088/javabaas","kind":"container","labels":{"io.rancher.container.pull_image":"always"},"networkMode":"managed","ports":["9000:8080/tcp"],"startOnCreate":true,"stdinOpen":true,"tty":true,"vcpu":1}}}' 'http://rancher.kerust.net:10084/v2-beta/projects/1a259/services/1s108/?action=upgrade'
-  environment:
-    name: JBDevelop
-    url: http://kerust.net:9000
+#deploy:
+#  stage: deploy
+#  image: maven:alpine
+#  script:
+#    - curl -u ${CATTLE_ACCESS_KEY}:${CATTLE_SECRET_KEY} -X POST -H 'Accept:application/json' -H 'Content-Type:application/json' -d '{"inServiceStrategy":{"launchConfig":{"environment":{"spring_data_mongodb_host":"mongo","spring_redis_host":"redis"},"imageUuid":"docker:kerust.net:8088/javabaas","kind":"container","labels":{"io.rancher.container.pull_image":"always"},"networkMode":"managed","ports":["9000:8080/tcp"],"startOnCreate":true,"stdinOpen":true,"tty":true,"vcpu":1}}}' 'http://rancher.kerust.net:10084/v2-beta/projects/1a259/services/1s108/?action=upgrade'
+#  environment:
+#    name: JBDevelop
+#    url: http://kerust.net:9000
