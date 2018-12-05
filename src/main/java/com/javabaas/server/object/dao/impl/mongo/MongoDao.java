@@ -5,15 +5,15 @@ import com.javabaas.server.common.entity.SimpleError;
 import com.javabaas.server.object.dao.IDao;
 import com.javabaas.server.object.entity.*;
 import com.javabaas.server.object.entity.error.DuplicateKeyError;
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DuplicateKeyException;
-import com.mongodb.MongoException;
+import com.javabaas.server.object.entity.error.ObjectInsertError;
+import com.mongodb.*;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.UpdateOptions;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.MongoDbFactory;
@@ -26,6 +26,9 @@ import java.util.*;
  */
 @Component
 public class MongoDao implements IDao {
+
+    private Log log = LogFactory.getLog(getClass());
+
     private MongoDbFactory mongo;
     private Map<String, MongoDatabase> dbMap;
 
@@ -68,6 +71,9 @@ public class MongoDao implements IDao {
         } catch (DuplicateKeyException e) {
             //唯一索引字段重复
             throw new DuplicateKeyError("");
+        } catch (MongoWriteException e) {
+            log.error(e);
+            throw new ObjectInsertError();
         }
         return null;
     }
