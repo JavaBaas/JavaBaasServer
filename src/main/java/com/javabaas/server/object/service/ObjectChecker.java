@@ -184,6 +184,15 @@ public class ObjectChecker {
                 }
                 return value;
             case FieldType.GEOPOINT:
+                if (!(value instanceof List) || ((List) value).size() != 2 || !(((List) value).get(0) instanceof Number) || !(((List)
+                        value).get(1) instanceof Number)) {
+                    throw new FieldTypeError("字段: " + key + " 类型错误。需要经纬度坐标对 [经度,纬度] ，实际为" + value.getClass().getSimpleName() + "。");
+                } else {
+                    List list = (List) value;
+                    if (Math.abs(Double.valueOf(list.get(0).toString())) > 180 || Math.abs(Double.valueOf(list.get(1).toString())) > 90) {
+                        throw new FieldTypeError("字段: " + key + " 数据错误。经度取值范围[-180,180],纬度取值范围[-90,90]");
+                    }
+                }
                 return value;
             default:
                 return value;

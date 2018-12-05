@@ -64,6 +64,7 @@ public class ObjectTests {
         Field fieldObject = new Field(FieldType.OBJECT, "object");
         Field fieldArray = new Field(FieldType.ARRAY, "array");
         Field fieldPointer = new Field(FieldType.POINTER, "p");
+        Field fieldGeo = new Field(FieldType.GEOPOINT, "geo");
         fieldService.insert(app.getId(), "ObjectTest", fieldString);
         fieldService.insert(app.getId(), "ObjectTest", fieldString2);
         fieldService.insert(app.getId(), "ObjectTest", fieldNumber);
@@ -72,6 +73,7 @@ public class ObjectTests {
         fieldService.insert(app.getId(), "ObjectTest", fieldObject);
         fieldService.insert(app.getId(), "ObjectTest", fieldArray);
         fieldService.insert(app.getId(), "ObjectTest", fieldPointer);
+        fieldService.insert(app.getId(), "ObjectTest", fieldGeo);
 
         //测试包含所需要的类
         clazz = new Clazz();
@@ -150,6 +152,10 @@ public class ObjectTests {
         list.add("1");
         list.add("2");
         t.put("array", list);
+        BaasList geo = new BaasList();
+        geo.add(116.4);
+        geo.add(39.9);
+        t.put("geo", geo);
         String id = objectService.insert(app.getId(), "cloud", "ObjectTest", t, null, false).getId();
 
         t = objectService.get(app.getId(), "admin", "ObjectTest", id);
@@ -164,6 +170,10 @@ public class ObjectTests {
         list = (BaasList) t.get("array");
         Assert.assertThat(list.get(0), equalTo("1"));
         Assert.assertThat(list.get(1), equalTo("2"));
+
+        list = (BaasList) t.get("geo");
+        Assert.assertThat(list.get(0), equalTo(116.4));
+        Assert.assertThat(list.get(1), equalTo(39.9));
 
         BaasObject p = new BaasObject();
         p.put("__type", "Pointer");
