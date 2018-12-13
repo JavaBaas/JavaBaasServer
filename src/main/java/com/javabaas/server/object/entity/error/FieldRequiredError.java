@@ -9,7 +9,7 @@ import com.javabaas.server.common.entity.SimpleError;
 public class FieldRequiredError extends SimpleError {
 
     public FieldRequiredError(String fieldName) {
-        super(SimpleCode.OBJECT_FIELD_REQUIRED.getCode(), "字段" + fieldName + "不能为空!");
+        super(SimpleCode.OBJECT_FIELD_NOTNULL.getCode(), "字段" + fieldName + "不能为空!");
     }
 
 }

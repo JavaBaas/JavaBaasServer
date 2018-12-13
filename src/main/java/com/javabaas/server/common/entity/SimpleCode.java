@@ -69,7 +69,7 @@ public enum SimpleCode {
     ROLE_INVALID_NAME(1406, "角色名只能包含数字、字母和下划线"),
     //2XXX 对象存储相关
     OBJECT_FIELD_TYPE_ERROR(2001, "字段类型错误"),
-    OBJECT_FIELD_REQUIRED(2002, "字段不能为空"),
+    OBJECT_FIELD_NOTNULL(2002, "字段不能为空"),
     OBJECT_INCLUDE_ERROR(2003, "包含字段格式错误"),
     OBJECT_QUERY_ERROR(2004, "查询条件格式错误"),
     OBJECT_ID_ERROR(2005, "id格式错误"),

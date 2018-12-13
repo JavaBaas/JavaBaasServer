@@ -61,12 +61,12 @@ public class FieldController {
         return SimpleResult.success();
     }
 
-    @RequestMapping(value = "/{clazzName}/field/{name}/required", method = RequestMethod.PUT)
-    public SimpleResult required(@RequestHeader(value = "JB-AppId") String appId,
+    @RequestMapping(value = "/{clazzName}/field/{name}/notnull", method = RequestMethod.PUT)
+    public SimpleResult notNull(@RequestHeader(value = "JB-AppId") String appId,
                                  @PathVariable String clazzName,
                                  @PathVariable String name,
-                                 @RequestParam boolean required) {
-        fieldService.setRequired(appId, clazzName, name, required);
+                                 @RequestParam boolean notNull) {
+        fieldService.setNotNull(appId, clazzName, name, notNull);
         return SimpleResult.success();
     }
 

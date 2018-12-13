@@ -87,9 +87,9 @@ public class FieldService {
         log.info("App:" + appId + " Class:" + clazzName + " Field:" + fieldName + " 字段已更新 " + jsonUtil.writeValueAsString(exist));
     }
 
-    public void setRequired(String appId, String clazzName, String fieldName, boolean required) {
+    public void setNotNull(String appId, String clazzName, String fieldName, boolean notNull) {
         Field exist = get(appId, clazzName, fieldName);
-        exist.setNotNUll(required);
+        exist.setNotNUll(notNull);
         fieldRepository.save(exist);
         deleteFieldsCache(appId, clazzName);
         log.info("App:" + appId + " Class:" + clazzName + " Field:" + fieldName + " 字段已更新 " + jsonUtil.writeValueAsString(exist));
