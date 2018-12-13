@@ -79,7 +79,7 @@ public class FieldService {
     public void update(String appId, String clazzName, String fieldName, Field field) {
         Field exist = get(appId, clazzName, fieldName);
         exist.setSecurity(field.isSecurity());
-        exist.setNotNUll(field.isNotNUll());
+        exist.setNotnull(field.isNotnull());
         exist.setReadonly(field.isReadonly());
         exist.setDescription(field.getDescription());
         fieldRepository.save(exist);
@@ -87,9 +87,9 @@ public class FieldService {
         log.info("App:" + appId + " Class:" + clazzName + " Field:" + fieldName + " 字段已更新 " + jsonUtil.writeValueAsString(exist));
     }
 
-    public void setNotNull(String appId, String clazzName, String fieldName, boolean notNull) {
+    public void setNotnull(String appId, String clazzName, String fieldName, boolean notnull) {
         Field exist = get(appId, clazzName, fieldName);
-        exist.setNotNUll(notNull);
+        exist.setNotnull(notnull);
         fieldRepository.save(exist);
         deleteFieldsCache(appId, clazzName);
         log.info("App:" + appId + " Class:" + clazzName + " Field:" + fieldName + " 字段已更新 " + jsonUtil.writeValueAsString(exist));

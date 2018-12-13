@@ -942,7 +942,7 @@ public class ObjectTests {
         clazz.setName("RequiredTest");
         clazzService.insert(app.getId(), clazz);
         Field fieldString = new Field(FieldType.STRING, "string");
-        fieldString.setNotNUll(true);
+        fieldString.setNotnull(true);
         fieldService.insert(app.getId(), "RequiredTest", fieldString);
 
         BaasObject t = new BaasObject();

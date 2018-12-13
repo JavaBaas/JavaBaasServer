@@ -68,7 +68,7 @@ public class ObjectChecker {
                 String key = field.getName();
                 int type = field.getType();
                 Object value = object.get(key);
-                if (field.isNotNUll()) {
+                if (field.isNotnull()) {
                     //非空字段 新建时不能为空
                     if (!isUpdate && StringUtils.isEmpty(value)) {
                         //新建时不能为空
