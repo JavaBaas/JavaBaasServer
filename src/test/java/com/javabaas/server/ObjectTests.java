@@ -951,7 +951,7 @@ public class ObjectTests {
             objectService.insert(app.getId(), "admin", "RequiredTest", t, null, false);
             Assert.fail();
         } catch (SimpleError error) {
-            Assert.assertThat(error.getCode(), equalTo(SimpleCode.OBJECT_FIELD_REQUIRED.getCode()));
+            Assert.assertThat(error.getCode(), equalTo(SimpleCode.OBJECT_FIELD_NOTNULL.getCode()));
         }
 
         t.put("string", "string");
