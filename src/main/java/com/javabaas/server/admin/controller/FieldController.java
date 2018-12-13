@@ -52,6 +52,15 @@ public class FieldController {
         return SimpleResult.success();
     }
 
+    @RequestMapping(value = "/{clazzName}/field/{name}/readonly", method = RequestMethod.PUT)
+    public SimpleResult readonly(@RequestHeader(value = "JB-AppId") String appId,
+                                 @PathVariable String clazzName,
+                                 @PathVariable String name,
+                                 @RequestParam boolean readonly) {
+        fieldService.readonly(appId, clazzName, name, readonly);
+        return SimpleResult.success();
+    }
+
     @RequestMapping(value = "/{clazzName}/field/{name}/required", method = RequestMethod.PUT)
     public SimpleResult required(@RequestHeader(value = "JB-AppId") String appId,
                                  @PathVariable String clazzName,

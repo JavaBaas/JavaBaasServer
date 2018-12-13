@@ -17,6 +17,7 @@ public class Field {
     private boolean internal;//系统内建字段 禁止修改删除
     private boolean security;//安全字段 必须使用管理权限操作
     private boolean required;//必填字段
+    private boolean readonly;//只读字段
     private String description;//字段描述
 
     public Field() {
@@ -81,6 +82,14 @@ public class Field {
 
     public void setRequired(boolean required) {
         this.required = required;
+    }
+
+    public boolean isReadonly() {
+        return readonly;
+    }
+
+    public void setReadonly(boolean readonly) {
+        this.readonly = readonly;
     }
 
     public String getDescription() {

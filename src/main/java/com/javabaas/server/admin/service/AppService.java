@@ -347,10 +347,12 @@ public class AppService {
         Field sessionToken = new Field(FieldType.STRING, "sessionToken");
         sessionToken.setInternal(true);
         sessionToken.setSecurity(true);
+        sessionToken.setReadonly(true);
         fieldService.insert(appId, UserService.USER_CLASS_NAME, sessionToken);
         Field auth = new Field(FieldType.OBJECT, "auth");
         auth.setInternal(true);
         auth.setSecurity(true);
+        auth.setReadonly(true);
         fieldService.insert(appId, UserService.USER_CLASS_NAME, auth);
         log.info("App:" + appId + " 用户类初始化成功.");
     }

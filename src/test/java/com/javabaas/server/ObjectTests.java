@@ -994,6 +994,43 @@ public class ObjectTests {
 
     }
 
+    @Test
+    public void testReadOnlyField() {
+        //测试只读字段
+        //创建测试用类
+        Clazz clazz = new Clazz();
+        clazz.setName("ReadOnlyTest");
+        clazzService.insert(app.getId(), clazz);
+        Field fieldString = new Field(FieldType.STRING, "string");
+        fieldString.setReadonly(true);
+        fieldService.insert(app.getId(), "ReadOnlyTest", fieldString);
+
+        BaasObject t = new BaasObject();
+        t.put("string", "string");
+        String objectId = objectService.insert(app.getId(), "admin", "ReadOnlyTest", t, null, true).getId();
+
+        //普通用户权限查询只读字段显示
+        BaasObject object = objectService.get(app.getId(), "admin", "ReadOnlyTest", objectId, null, null, null, false);
+        Assert.assertThat(object.get("string"), equalTo("string"));
+
+        object = objectService.find(app.getId(), "admin", "ReadOnlyTest", null, null, null, null, 100, 0, null, false).get(0);
+        Assert.assertThat(object.get("string"), equalTo("string"));
+
+        //普通用户权限修改只读字段
+        object.put("string", "modify");
+        objectService.update(app.getId(), "admin", "ReadOnlyTest", objectId, object,null, false);
+        object = objectService.get(app.getId(), "admin", "ReadOnlyTest", objectId, null, null, null, false);
+        Assert.assertThat(object.get("string"), equalTo("string"));
+
+        //管理权限可以修改只读字段
+        object.put("string", "modify");
+        objectService.update(app.getId(), "admin", "ReadOnlyTest", objectId, object,null, true);
+
+        object = objectService.get(app.getId(), "admin", "ReadOnlyTest", objectId, null, null, null, false);
+        Assert.assertThat(object.get("string"), equalTo("modify"));
+
+    }
+
     /**
      * 测试子查询
      */

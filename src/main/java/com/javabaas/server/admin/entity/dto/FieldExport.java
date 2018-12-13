@@ -11,6 +11,7 @@ public class FieldExport {
     private boolean internal;
     private boolean security;
     private boolean required;
+    private boolean readonly;
 
     public String getId() {
         return id;
@@ -50,6 +51,14 @@ public class FieldExport {
 
     public void setSecurity(boolean security) {
         this.security = security;
+    }
+
+    public boolean isReadonly() {
+        return readonly;
+    }
+
+    public void setReadonly(boolean readonly) {
+        this.readonly = readonly;
     }
 
     public boolean isRequired() {

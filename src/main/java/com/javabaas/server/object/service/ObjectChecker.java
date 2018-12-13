@@ -62,8 +62,9 @@ public class ObjectChecker {
         BaasObject verified = new BaasObject();
         for (Field field : fields) {
             //循环处理所有类中定义的字段
-            if (!field.isSecurity() || isMaster) {
-                //非保密字段或拥有管理权限
+            boolean permission = (!field.isSecurity() && !field.isReadonly()) || isMaster;
+            if (permission) {
+                //非保密字段且非只读字段或拥有管理权限
                 String key = field.getName();
                 int type = field.getType();
                 Object value = object.get(key);
