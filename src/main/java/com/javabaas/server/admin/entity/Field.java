@@ -16,7 +16,7 @@ public class Field {
     private int type;
     private boolean internal;//系统内建字段 禁止修改删除
     private boolean security;//安全字段 必须使用管理权限操作
-    private boolean required;//必填字段
+    private boolean notNUll;//必填字段
     private boolean readonly;//只读字段
     private String description;//字段描述
 
@@ -76,12 +76,12 @@ public class Field {
         this.security = security;
     }
 
-    public boolean isRequired() {
-        return required;
+    public boolean isNotNUll() {
+        return notNUll;
     }
 
-    public void setRequired(boolean required) {
-        this.required = required;
+    public void setNotNUll(boolean notNUll) {
+        this.notNUll = notNUll;
     }
 
     public boolean isReadonly() {

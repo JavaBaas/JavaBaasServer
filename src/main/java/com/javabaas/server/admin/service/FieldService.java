@@ -79,7 +79,7 @@ public class FieldService {
     public void update(String appId, String clazzName, String fieldName, Field field) {
         Field exist = get(appId, clazzName, fieldName);
         exist.setSecurity(field.isSecurity());
-        exist.setRequired(field.isRequired());
+        exist.setNotNUll(field.isNotNUll());
         exist.setReadonly(field.isReadonly());
         exist.setDescription(field.getDescription());
         fieldRepository.save(exist);
@@ -89,7 +89,7 @@ public class FieldService {
 
     public void setRequired(String appId, String clazzName, String fieldName, boolean required) {
         Field exist = get(appId, clazzName, fieldName);
-        exist.setRequired(required);
+        exist.setNotNUll(required);
         fieldRepository.save(exist);
         deleteFieldsCache(appId, clazzName);
         log.info("App:" + appId + " Class:" + clazzName + " Field:" + fieldName + " 字段已更新 " + jsonUtil.writeValueAsString(exist));
