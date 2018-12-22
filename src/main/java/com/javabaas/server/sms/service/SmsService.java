@@ -114,6 +114,11 @@ public class SmsService {
      * @param code  验证码
      */
     public boolean verifySmsCode(String appId, String templateId, String phone, String code) {
+        // 查看是否为万能验证码
+        String superCode = appConfigService.getString(appId, AppConfigEnum.SMS_REGISTER_SUPER_CODE);
+        if (superCode != null && superCode.equals(code)) {
+            return true;
+        }
         //获取已缓存的手机验证码
         String key = getKey(appId, templateId, phone);
         ValueOperations<String, String> ops = redisTemplate.opsForValue();

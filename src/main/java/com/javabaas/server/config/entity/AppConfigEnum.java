@@ -16,6 +16,7 @@ public enum AppConfigEnum {
     SMS_BIND_TEMPLATE_ID("baas.sms.bindTemplateId", "绑定手机号验证码模版id", ""),
     SMS_SIGN_NAME("baas.sms.signName", "短信签名", ""),
     SMS_SEND_INTERVAL("baas.sms.interval", "短信发送间隔", "60"),
+    SMS_REGISTER_SUPER_CODE("baas.sms.register.super.code", "登录注册万能验证码",""),
     // 推送相关
     PUSH_HANDLER("baas.push.handler", "推送处理", "jpush"),
     PUSH_HANDLER_JPUSH_KEY("baas.push.handler.jpush.key", "极光推送key", ""),
