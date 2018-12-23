@@ -23,7 +23,7 @@ public class PushLog extends BaasObject {
     }
 
     public BaasQuery getWhere() {
-        return (BaasQuery) get("where");
+        return new BaasQuery((Map<String, Object>) get("where"));
     }
 
     public void setTitle(String title) {

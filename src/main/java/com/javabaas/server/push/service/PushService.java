@@ -16,7 +16,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 推送
@@ -71,7 +74,7 @@ public class PushService {
                 pushLog.setParams(push.getMessage().getExtras());
             }
         }
-        pushLog.setPushTime(new Date().getTime());
+        pushLog.setPushTime(System.currentTimeMillis());
         if (query != null) {
             pushLog.setWhere(query);
         }
