@@ -10,7 +10,7 @@ public class FieldExport {
     private int type;
     private boolean internal;
     private boolean security;
-    private boolean notNull;
+    private boolean notnull;
     private boolean readonly;
 
     public String getId() {
@@ -61,11 +61,11 @@ public class FieldExport {
         this.readonly = readonly;
     }
 
-    public boolean isNotNull() {
-        return notNull;
+    public boolean isNotnull() {
+        return notnull;
     }
 
-    public void setNotNull(boolean notNull) {
-        this.notNull = notNull;
+    public void setNotnull(boolean notnull) {
+        this.notnull = notnull;
     }
 }

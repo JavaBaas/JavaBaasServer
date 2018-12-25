@@ -3,6 +3,7 @@ package com.javabaas.server.admin.controller;
 import com.javabaas.server.admin.entity.Field;
 import com.javabaas.server.admin.service.FieldService;
 import com.javabaas.server.common.entity.SimpleResult;
+import com.javabaas.server.common.util.JSONUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +18,9 @@ public class FieldController {
 
     @Autowired
     private FieldService fieldService;
+
+    @Autowired
+    private JSONUtil jsonUtil;
 
     @RequestMapping(value = "/{clazzName}/field", method = RequestMethod.POST)
     public SimpleResult insert(@RequestHeader(value = "JB-AppId") String appId,
@@ -65,8 +69,8 @@ public class FieldController {
     public SimpleResult notNull(@RequestHeader(value = "JB-AppId") String appId,
                                  @PathVariable String clazzName,
                                  @PathVariable String name,
-                                 @RequestParam boolean notNull) {
-        fieldService.setNotNull(appId, clazzName, name, notNull);
+                                 @RequestParam boolean notnull) {
+        fieldService.setNotnull(appId, clazzName, name, notnull);
         return SimpleResult.success();
     }
 
