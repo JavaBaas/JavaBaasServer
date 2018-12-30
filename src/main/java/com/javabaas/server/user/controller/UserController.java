@@ -46,7 +46,7 @@ public class UserController {
     public SimpleResult register(@RequestHeader(value = "JB-AppId") String appId,
                                  @RequestHeader(value = "JB-Plat") String plat,
                                  @RequestBody String body) {
-        BaasUser register = jsonUtil.readValue(body, BaasUser.class);
+        BaasUser register = jsonUtil.readBaas(body, BaasUser.class);
         BaasUser user = userService.register(appId, plat, register);
         SimpleResult result = SimpleResult.success();
         BaasObject object = new BaasObject();
@@ -81,7 +81,7 @@ public class UserController {
         //处理权限
         boolean isMaster = authChecker.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
-        BaasAuth auth = jsonUtil.readValue(authData, BaasAuth.class);
+        BaasAuth auth = jsonUtil.readBaas(authData, BaasAuth.class);
         userService.bindingSns(appId, plat, id, baasSnsType, auth, currentUser, isMaster);
         return SimpleResult.success();
     }
@@ -121,7 +121,7 @@ public class UserController {
                                @RequestHeader(value = "JB-Plat") String plat,
                                @RequestBody String body,
                                @PathVariable String id) {
-        BaasUser user = jsonUtil.readValue(body, BaasUser.class);
+        BaasUser user = jsonUtil.readBaas(body, BaasUser.class);
         //处理权限
         boolean isMaster = authChecker.isMaster(request);
         BaasUser currentUser = userService.getCurrentUser(appId, plat, request);
@@ -181,7 +181,7 @@ public class UserController {
         if (baasSnsType == null) {
             throw new SimpleError(SimpleCode.USER_AUTH_PLATFORM_MISSING);
         }
-        BaasAuth auth = jsonUtil.readValue(authData, BaasAuth.class);
+        BaasAuth auth = jsonUtil.readBaas(authData, BaasAuth.class);
         BaasUser user = userService.registerWithSns(appId, plat, baasSnsType, auth, null);
         SimpleResult result = SimpleResult.success();
         result.putData("result", user);
