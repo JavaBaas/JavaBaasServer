@@ -9,7 +9,7 @@
 
 技术讨论群：479167886
 
-完整文档参见：[www.javabaas.com](http://www.javabaas.com/)
+完整文档参见：[www.javabaas.com](http://www.javabaas.com/)（原域名备案出现问题，需要重新备案，目前在备案流程中，暂时可以使用[www.zangyilin.com](http://www.zangyilin.com/)访问）
 
 ## 主要功能
 * 结构化数据存储
